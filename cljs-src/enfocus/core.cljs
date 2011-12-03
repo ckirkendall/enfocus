@@ -8,6 +8,8 @@
 (def css-syms {'first-child " *:first-child" 
                'last-child " *:last-child"})
 
+(def hide-style (.strobj {"style" "display: none; width: 0px; height: 0px"}))
+
 (defn- create-sel-str [css-sel] 
   (apply str (map #(cond 
              (symbol? %) (css-syms %)
@@ -18,14 +20,13 @@
 (defn css-select [dom-node css-sel]  
   (let [sel (string/trim (string/replace (create-sel-str css-sel) " :" ":"))
         ret (dom/query sel dom-node)]
-    (js/alert ret )
     (js/alert sel)
     ret))
 
 (def tpl-cache (atom {}))
 
 (defn create-hidden-dom [child]
-  (let [div (dom/createDom "div" (.strobj {"style" "display: none; width: 0px; height: 0px"}))]
+  (let [div (dom/createDom "div" hide-style)]
     (. div (appendChild child))
     (dom/appendChild (.body (dom/getDocument)) div)
     div))
@@ -34,7 +35,6 @@
   (let [child (dom/getFirstElementChild div)]
     (dom/removeNode div)
     child))
-
 
 
 (defn load-remote-dom [uri]
@@ -46,6 +46,7 @@
                        (swap! tpl-cache assoc uri data )))]
       (events/listen req goog.net.EventType/COMPLETE #(callback req))
       (. req (send uri "GET")))))
+
 
 (defn get-cached-dom [uri]
   (let [nod (@tpl-cache uri)]
@@ -70,50 +71,40 @@
 (defn nodelist? [tst]
   (instance? js/NodeList tst))
 
-  
-
-
-(defn nodelist->coll [nl]
-    ;; The results are a nodelist, which looks like an array, but
-    ;; isn't one. We have to turn it into a collection that we can
-    ;; work with. ->this was pulled from ibdknox/pinot
-  (for [x (range 0 (.length nl))]
-    (aget nl x)))
+(defn nodes->coll [nl]
+  (cond
+    (node? nl) [nl]
+    (or (instance? js/Array nl) (coll? nl)) nl
+    (nodelist? nl) (for [x (range 0 (.length nl))]
+                    (aget nl x))))
 
 
 (defn- flatten-nodes-coll [values]
   (mapcat #(cond (string? %) [(dom/createTextNode %)]
-                 (coll? %) %
-                 (node? %) [%]
-                 (nodelist? %) (nodelist->coll %)
-                 :else nil) values))
+                 :else (nodes->coll %)) values))
+
+(defn multi-node-proc [func]
+  (fn [pnodes]
+    (let [pnod-col (nodes->coll pnodes)] 
+       (doall (map func pnod-col )))))
+
+
 
 (defn content [& values]
   (let [fnodes (flatten-nodes-coll values)]
-    (fn proc [pnodes] 
-      (cond (nodelist? pnodes) 
-              (doall (for[idx (range 0 (.length pnodes))]
-                       (let [pnod (aget pnodes idx)]
-                         (dom/removeChildren pnod)
-                         (doall (map #(.appendChild pnod %) fnodes)))))
-            (instance? js/Array pnodes)
-              (let [pnod (first pnodes)]
-                (do 
-                 (dom/removeChildren pnod)
-                  (doall (map #(.appendChild pnod %) fnodes))))
-            :else nil))))
+    (multi-node-proc 
+      (fn[pnod]
+        (dom/removeChildren pnod)
+        (doall (map #(.appendChild pnod %) fnodes))))))
+
 
 (defn set-attr [& values] 
+  (js/alert (str "values: " values))
   (let [at-lst (partition 2 values)]
-    (fn [pnodes]
-      (cond (nodelist? pnodes) 
-              (doall (for[idx (range 0 (.length pnodes))]
-                       (let [pnod (aget pnodes idx)]
-                         (doall (map #(. pnod (setAttribute (first %) (second %)) at-lst))))))
-            (instance? js/Array pnodes)
-              (let [pnod (first pnodes)]
-                (doall (map #(. pnod (setAttribute (first %) (second %))) at-lst)))
-            :else nil))))
+    (multi-node-proc 
+      (fn[pnod]
+        (doall (map #(. pnod (setAttribute (first %) (second %))) at-lst))))))
+
       
 (defn attr? [& kys] (apply str (mapcat #(str "[" (name %) "]") kys)))
 
