@@ -11157,60 +11157,9 @@ clojure.string.escape = function(a, b) {
   }
 };
 var enfocus = {core:{}};
+enfocus.core._STAR_id_scope_STAR_ = "";
 enfocus.core.css_syms = cljs.core.HashMap.fromArrays(["\ufdd1'first-child", "\ufdd1'last-child"], [" *:first-child", " *:last-child"]);
 enfocus.core.hide_style = cljs.core.ObjMap.fromObject(["style"], {style:"display: none; width: 0px; height: 0px"}).strobj;
-enfocus.core.create_sel_str = function create_sel_str(b) {
-  return cljs.core.apply.call(null, cljs.core.str, cljs.core.map.call(null, function(b) {
-    return cljs.core.truth_(cljs.core.symbol_QMARK_.call(null, b)) ? enfocus.core.css_syms.call(null, b) : cljs.core.truth_(cljs.core.keyword_QMARK_.call(null, b)) ? cljs.core.str.call(null, " ", cljs.core.name.call(null, b)) : cljs.core.truth_(cljs.core.vector_QMARK_.call(null, b)) ? create_sel_str.call(null, b) : cljs.core.truth_(cljs.core.str.call(null, b)) ? b : null
-  }, b))
-};
-enfocus.core.css_select = function(a, b) {
-  var c = clojure.string.trim.call(null, clojure.string.replace.call(null, enfocus.core.create_sel_str.call(null, b), " :", ":")), d = goog.dom.query.call(null, c, a);
-  alert.call(null, c);
-  return d
-};
-enfocus.core.tpl_cache = cljs.core.atom.call(null, cljs.core.ObjMap.fromObject([], {}));
-enfocus.core.create_hidden_dom = function(a) {
-  var b = goog.dom.createDom.call(null, "div", enfocus.core.hide_style);
-  b.appendChild(a);
-  goog.dom.appendChild.call(null, goog.dom.getDocument.call(null).body, b);
-  return b
-};
-enfocus.core.remove_node_return_child = function(a) {
-  var b = goog.dom.getFirstElementChild.call(null, a);
-  goog.dom.removeNode.call(null, a);
-  return b
-};
-enfocus.core.load_remote_dom = function(a) {
-  if(cljs.core.truth_(cljs.core.nil_QMARK_.call(null, cljs.core.deref.call(null, enfocus.core.tpl_cache).call(null, a)))) {
-    var b = new goog.net.XhrIo, c = function(b) {
-      b = b.getResponseText();
-      b = goog.dom.htmlToDocumentFragment.call(null, b);
-      return cljs.core.swap_BANG_.call(null, enfocus.core.tpl_cache, cljs.core.assoc, a, b)
-    };
-    goog.events.listen.call(null, b, goog.net.EventType.COMPLETE, function() {
-      return c.call(null, b)
-    });
-    return b.send(a, "GET")
-  }else {
-    return null
-  }
-};
-enfocus.core.get_cached_dom = function(a) {
-  a = cljs.core.deref.call(null, enfocus.core.tpl_cache).call(null, a);
-  return cljs.core.truth_(a) ? a.cloneNode(!0) : null
-};
-enfocus.core.get_cached_snippit = function(a, b) {
-  var c = enfocus.core.create_sel_str.call(null, b), d = cljs.core.deref.call(null, enfocus.core.tpl_cache).call(null, cljs.core.str.call(null, a.call(null, c)));
-  if(cljs.core.truth_(d)) {
-    return d.cloneNode(!0)
-  }else {
-    var d = enfocus.core.get_cached_dom.call(null, a), d = enfocus.core.create_hidden_dom.call(null, d), e = enfocus.core.css_select.call(null, d, c), e = cljs.core.truth_(cljs.core.instance_QMARK_.call(null, Array, e)) ? cljs.core.first.call(null, e) : e;
-    enfocus.core.remove_node_return_child.call(null, d);
-    cljs.core.assoc.call(null, cljs.core.deref.call(null, enfocus.core.tpl_cache), cljs.core.str.call(null, a, c), e);
-    return e
-  }
-};
 enfocus.core.node_QMARK_ = function(a) {
   return goog.dom.isNodeLike.call(null, a)
 };
@@ -11238,6 +11187,90 @@ enfocus.core.flatten_nodes_coll = function(a) {
   return cljs.core.mapcat.call(null, function(a) {
     return cljs.core.truth_(cljs.core.string_QMARK_.call(null, a)) ? cljs.core.Vector.fromArray([goog.dom.createTextNode.call(null, a)]) : cljs.core.truth_("\ufdd0'else") ? enfocus.core.nodes__GT_coll.call(null, a) : null
   }, a)
+};
+enfocus.core.create_sel_str = function() {
+  var a = null, b = function(b, d) {
+    return cljs.core.apply.call(null, cljs.core.str, cljs.core.map.call(null, function(d) {
+      return cljs.core.truth_(cljs.core.symbol_QMARK_.call(null, d)) ? enfocus.core.css_syms.call(null, d) : cljs.core.truth_(cljs.core.keyword_QMARK_.call(null, d)) ? cljs.core.str.call(null, " ", cljs.core.name.call(null, d).replace("#", cljs.core.str.call(null, "#", b))) : cljs.core.truth_(cljs.core.vector_QMARK_.call(null, d)) ? a.call(null, d) : cljs.core.truth_(cljs.core.string_QMARK_.call(null, d)) ? d.replace("#", cljs.core.str.call(null, "#", b)) : null
+    }, d))
+  };
+  return a = function(c, d) {
+    switch(arguments.length) {
+      case 1:
+        return a.call(null, "", c);
+      case 2:
+        return b.call(this, c, d)
+    }
+    throw"Invalid arity: " + arguments.length;
+  }
+}();
+enfocus.core.css_select = function() {
+  var a = null;
+  return a = function(b, c, d) {
+    switch(arguments.length) {
+      case 2:
+        return a.call(null, "", b, c);
+      case 3:
+        var e = clojure.string.trim.call(null, clojure.string.replace.call(null, enfocus.core.create_sel_str.call(null, b, d), " :", ":"));
+        return goog.dom.query.call(null, e, c)
+    }
+    throw"Invalid arity: " + arguments.length;
+  }
+}();
+enfocus.core.tpl_cache = cljs.core.atom.call(null, cljs.core.ObjMap.fromObject([], {}));
+enfocus.core.create_hidden_dom = function(a) {
+  var b = goog.dom.createDom.call(null, "div", enfocus.core.hide_style);
+  b.appendChild(a);
+  goog.dom.appendChild.call(null, goog.dom.getDocument.call(null).body, b);
+  return b
+};
+enfocus.core.remove_node_return_child = function(a) {
+  var b = goog.dom.getFirstElementChild.call(null, a);
+  goog.dom.removeNode.call(null, a);
+  return b
+};
+enfocus.core.replace_ids = function(a) {
+  var b = RegExp("(<.*?\\sid=['\"])(.*?)(['\"].*?>)", "g"), c = cljs.core.str.call(null, cljs.core.name.call(null, cljs.core.gensym.call(null, "id")), "_");
+  return cljs.core.Vector.fromArray([cljs.core.str.call(null, c), a.replace(b, function(a, b, f, g) {
+    return cljs.core.str.call(null, b, c, f, g)
+  })])
+};
+enfocus.core.reset_ids = function(a, b) {
+  var c = enfocus.core.css_select.call(null, b, "*[id]"), c = enfocus.core.nodes__GT_coll.call(null, c);
+  return cljs.core.doall.call(null, cljs.core.map.call(null, function(b) {
+    var c = b.getAttribute("id").replace(a, "");
+    alert.call(null, cljs.core.str.call(null, "node:", b));
+    return b.setAttribute("id", c)
+  }, c))
+};
+enfocus.core.load_remote_dom = function(a) {
+  if(cljs.core.truth_(cljs.core.nil_QMARK_.call(null, cljs.core.deref.call(null, enfocus.core.tpl_cache).call(null, a)))) {
+    var b = new goog.net.XhrIo, c = function(b) {
+      var b = b.getResponseText(), c = enfocus.core.replace_ids.call(null, b), b = cljs.core.nth.call(null, c, 0, null), c = cljs.core.nth.call(null, c, 1, null), c = goog.dom.htmlToDocumentFragment.call(null, c);
+      return cljs.core.swap_BANG_.call(null, enfocus.core.tpl_cache, cljs.core.assoc, a, cljs.core.Vector.fromArray([b, c]))
+    };
+    goog.events.listen.call(null, b, goog.net.EventType.COMPLETE, function() {
+      return c.call(null, b)
+    });
+    return b.send(a, "GET")
+  }else {
+    return null
+  }
+};
+enfocus.core.get_cached_dom = function(a) {
+  a = cljs.core.deref.call(null, enfocus.core.tpl_cache).call(null, a);
+  return cljs.core.truth_(a) ? cljs.core.Vector.fromArray([cljs.core.first.call(null, a), cljs.core.second.call(null, a).cloneNode(!0)]) : null
+};
+enfocus.core.get_cached_snippit = function(a, b) {
+  var c = enfocus.core.create_sel_str.call(null, b), d = cljs.core.deref.call(null, enfocus.core.tpl_cache).call(null, cljs.core.str.call(null, a.call(null, c)));
+  if(cljs.core.truth_(d)) {
+    return cljs.core.Vector.fromArray([cljs.core.first.call(null, d), cljs.core.second.call(null, d).cloneNode(!0)])
+  }else {
+    var e = enfocus.core.get_cached_dom.call(null, a), d = cljs.core.nth.call(null, e, 0, null), e = cljs.core.nth.call(null, e, 1, null), e = enfocus.core.create_hidden_dom.call(null, e), f = enfocus.core.css_select.call(null, e, c), f = cljs.core.truth_(cljs.core.instance_QMARK_.call(null, Array, f)) ? cljs.core.first.call(null, f) : f;
+    enfocus.core.remove_node_return_child.call(null, e);
+    cljs.core.assoc.call(null, cljs.core.deref.call(null, enfocus.core.tpl_cache), cljs.core.str.call(null, a, c), cljs.core.Vector.fromArray([d, f]));
+    return cljs.core.Vector.fromArray([d, f])
+  }
 };
 enfocus.core.multi_node_proc = function(a) {
   return function(b) {
@@ -11385,9 +11418,9 @@ enfocus.example.set_cool = function() {
   return enfocus.core.content.call(null, "this is a cool test of content").call(null, enfocus.core.css_select.call(null, document, cljs.core.Vector.fromArray(["\ufdd0'.cool", enfocus.core.attr_EQ_.call(null, "\ufdd0'foo", "true")])))
 };
 enfocus.example.funtimes = function(a) {
-  var b = cljs.core.truth_(cljs.core.fn_QMARK_.call(null, document)) ? document.call(null) : document, b = cljs.core.truth_(!1) ? enfocus.core.create_hidden_dom.call(null, b) : b;
-  enfocus.core.content.call(null, a).call(null, enfocus.core.css_select.call(null, b, cljs.core.Vector.fromArray(["\ufdd0'.cool", enfocus.core.attr_EQ_.call(null, "\ufdd0'foo", "true")])));
-  return cljs.core.truth_(!1) ? enfocus.core.remove_node_return_child.call(null, b) : b
+  var b = cljs.core.truth_(cljs.core.fn_QMARK_.call(null, document)) ? document.call(null) : cljs.core.Vector.fromArray(["", document]), c = cljs.core.nth.call(null, b, 0, null), b = cljs.core.nth.call(null, b, 1, null), b = cljs.core.truth_(!1) ? enfocus.core.create_hidden_dom.call(null, b) : b;
+  enfocus.core.content.call(null, a).call(null, enfocus.core.css_select.call(null, c, b, cljs.core.Vector.fromArray(["\ufdd0'.cool", enfocus.core.attr_EQ_.call(null, "\ufdd0'foo", "true")])));
+  return cljs.core.truth_(!1) ? (enfocus.core.reset_ids.call(null, c, b), enfocus.core.remove_node_return_child.call(null, b)) : b
 };
 enfocus.core.load_remote_dom.call(null, "templates/template1.html");
 enfocus.example.snippit1 = function(a, b) {
@@ -11395,12 +11428,12 @@ enfocus.example.snippit1 = function(a, b) {
     return enfocus.core.get_cached_snippit.call(null, "templates/template1.html", cljs.core.Vector.fromArray(["\ufdd0'tbody", "\ufdd0'>", "\ufdd1'first-child"]))
   })) ? function() {
     return enfocus.core.get_cached_snippit.call(null, "templates/template1.html", cljs.core.Vector.fromArray(["\ufdd0'tbody", "\ufdd0'>", "\ufdd1'first-child"]))
-  }.call(null) : function() {
+  }.call(null) : cljs.core.Vector.fromArray(["", function() {
     return enfocus.core.get_cached_snippit.call(null, "templates/template1.html", cljs.core.Vector.fromArray(["\ufdd0'tbody", "\ufdd0'>", "\ufdd1'first-child"]))
-  }, c = cljs.core.truth_(!0) ? enfocus.core.create_hidden_dom.call(null, c) : c;
-  enfocus.core.content.call(null, a).call(null, enfocus.core.css_select.call(null, c, cljs.core.Vector.fromArray(["\ufdd0'tr", "\ufdd0'>", "\ufdd1'first-child"])));
-  enfocus.core.content.call(null, cljs.core.str.call(null, b)).call(null, enfocus.core.css_select.call(null, c, cljs.core.Vector.fromArray(["\ufdd0'tr", "\ufdd0'>", "\ufdd1'last-child"])));
-  return cljs.core.truth_(!0) ? enfocus.core.remove_node_return_child.call(null, c) : c
+  }]), d = cljs.core.nth.call(null, c, 0, null), c = cljs.core.nth.call(null, c, 1, null), c = cljs.core.truth_(!0) ? enfocus.core.create_hidden_dom.call(null, c) : c;
+  enfocus.core.content.call(null, a).call(null, enfocus.core.css_select.call(null, d, c, cljs.core.Vector.fromArray(["\ufdd0'tr", "\ufdd0'>", "\ufdd1'first-child"])));
+  enfocus.core.content.call(null, cljs.core.str.call(null, b)).call(null, enfocus.core.css_select.call(null, d, c, cljs.core.Vector.fromArray(["\ufdd0'tr", "\ufdd0'>", "\ufdd1'last-child"])));
+  return cljs.core.truth_(!0) ? (enfocus.core.reset_ids.call(null, d, c), enfocus.core.remove_node_return_child.call(null, c)) : c
 };
 enfocus.core.load_remote_dom.call(null, "/templates/template1.html");
 enfocus.example.template1 = function(a) {
@@ -11408,20 +11441,20 @@ enfocus.example.template1 = function(a) {
     return enfocus.core.get_cached_dom.call(null, "/templates/template1.html")
   })) ? function() {
     return enfocus.core.get_cached_dom.call(null, "/templates/template1.html")
-  }.call(null) : function() {
+  }.call(null) : cljs.core.Vector.fromArray(["", function() {
     return enfocus.core.get_cached_dom.call(null, "/templates/template1.html")
-  }, b = cljs.core.truth_(!0) ? enfocus.core.create_hidden_dom.call(null, b) : b;
-  enfocus.core.content.call(null, "fruit").call(null, enfocus.core.css_select.call(null, b, cljs.core.Vector.fromArray(["\ufdd0'#heading1"])));
-  enfocus.core.content.call(null, "quantity").call(null, enfocus.core.css_select.call(null, b, cljs.core.Vector.fromArray(["\ufdd0'thead", "\ufdd0'tr", "\ufdd0'>", "\ufdd1'last-child"])));
+  }]), c = cljs.core.nth.call(null, b, 0, null), b = cljs.core.nth.call(null, b, 1, null), b = cljs.core.truth_(!0) ? enfocus.core.create_hidden_dom.call(null, b) : b;
+  enfocus.core.content.call(null, "fruit").call(null, enfocus.core.css_select.call(null, c, b, cljs.core.Vector.fromArray(["\ufdd0'#heading1"])));
+  enfocus.core.content.call(null, "quantity").call(null, enfocus.core.css_select.call(null, c, b, cljs.core.Vector.fromArray(["\ufdd0'thead", "\ufdd0'tr", "\ufdd0'>", "\ufdd1'last-child"])));
   enfocus.core.content.call(null, cljs.core.map.call(null, function(b) {
     return enfocus.example.snippit1.call(null, b, a.call(null, b))
-  }, cljs.core.keys.call(null, a))).call(null, enfocus.core.css_select.call(null, b, cljs.core.Vector.fromArray(["\ufdd0'tbody"])));
-  return cljs.core.truth_(!0) ? enfocus.core.remove_node_return_child.call(null, b) : b
+  }, cljs.core.keys.call(null, a))).call(null, enfocus.core.css_select.call(null, c, b, cljs.core.Vector.fromArray(["\ufdd0'tbody"])));
+  return cljs.core.truth_(!0) ? (enfocus.core.reset_ids.call(null, c, b), enfocus.core.remove_node_return_child.call(null, b)) : b
 };
 enfocus.example.action1 = function() {
-  var a = cljs.core.truth_(cljs.core.fn_QMARK_.call(null, document)) ? document.call(null) : document, a = cljs.core.truth_(!1) ? enfocus.core.create_hidden_dom.call(null, a) : a;
-  enfocus.core.content.call(null, enfocus.example.template1.call(null, cljs.core.ObjMap.fromObject(["apple", "pear"], {apple:5, pear:6}))).call(null, enfocus.core.css_select.call(null, a, cljs.core.Vector.fromArray(["\ufdd0'.cool", enfocus.core.attr_EQ_.call(null, "\ufdd0'foo", "false")])));
-  return cljs.core.truth_(!1) ? enfocus.core.remove_node_return_child.call(null, a) : a
+  var a = cljs.core.truth_(cljs.core.fn_QMARK_.call(null, document)) ? document.call(null) : cljs.core.Vector.fromArray(["", document]), b = cljs.core.nth.call(null, a, 0, null), a = cljs.core.nth.call(null, a, 1, null), a = cljs.core.truth_(!1) ? enfocus.core.create_hidden_dom.call(null, a) : a;
+  enfocus.core.content.call(null, enfocus.example.template1.call(null, cljs.core.ObjMap.fromObject(["apple", "pear"], {apple:5, pear:6}))).call(null, enfocus.core.css_select.call(null, b, a, cljs.core.Vector.fromArray(["\ufdd0'.cool", enfocus.core.attr_EQ_.call(null, "\ufdd0'foo", "false")])));
+  return cljs.core.truth_(!1) ? (enfocus.core.reset_ids.call(null, b, a), enfocus.core.remove_node_return_child.call(null, a)) : a
 };
 enfocus.core.load_remote_dom.call(null, "templates/template1.html");
 enfocus.example.snippit2 = function(a, b) {
@@ -11429,12 +11462,12 @@ enfocus.example.snippit2 = function(a, b) {
     return enfocus.core.get_cached_snippit.call(null, "templates/template1.html", cljs.core.Vector.fromArray(["tbody > *:first-child"]))
   })) ? function() {
     return enfocus.core.get_cached_snippit.call(null, "templates/template1.html", cljs.core.Vector.fromArray(["tbody > *:first-child"]))
-  }.call(null) : function() {
+  }.call(null) : cljs.core.Vector.fromArray(["", function() {
     return enfocus.core.get_cached_snippit.call(null, "templates/template1.html", cljs.core.Vector.fromArray(["tbody > *:first-child"]))
-  }, c = cljs.core.truth_(!0) ? enfocus.core.create_hidden_dom.call(null, c) : c;
-  enfocus.core.content.call(null, a).call(null, enfocus.core.css_select.call(null, c, cljs.core.Vector.fromArray(["tr > *:first-child"])));
-  enfocus.core.content.call(null, cljs.core.str.call(null, b)).call(null, enfocus.core.css_select.call(null, c, cljs.core.Vector.fromArray(["tr > *:last-child"])));
-  return cljs.core.truth_(!0) ? enfocus.core.remove_node_return_child.call(null, c) : c
+  }]), d = cljs.core.nth.call(null, c, 0, null), c = cljs.core.nth.call(null, c, 1, null), c = cljs.core.truth_(!0) ? enfocus.core.create_hidden_dom.call(null, c) : c;
+  enfocus.core.content.call(null, a).call(null, enfocus.core.css_select.call(null, d, c, cljs.core.Vector.fromArray(["tr > *:first-child"])));
+  enfocus.core.content.call(null, cljs.core.str.call(null, b)).call(null, enfocus.core.css_select.call(null, d, c, cljs.core.Vector.fromArray(["tr > *:last-child"])));
+  return cljs.core.truth_(!0) ? (enfocus.core.reset_ids.call(null, d, c), enfocus.core.remove_node_return_child.call(null, c)) : c
 };
 enfocus.core.load_remote_dom.call(null, "/templates/template1.html");
 enfocus.example.template2 = function(a) {
@@ -11442,19 +11475,19 @@ enfocus.example.template2 = function(a) {
     return enfocus.core.get_cached_dom.call(null, "/templates/template1.html")
   })) ? function() {
     return enfocus.core.get_cached_dom.call(null, "/templates/template1.html")
-  }.call(null) : function() {
+  }.call(null) : cljs.core.Vector.fromArray(["", function() {
     return enfocus.core.get_cached_dom.call(null, "/templates/template1.html")
-  }, b = cljs.core.truth_(!0) ? enfocus.core.create_hidden_dom.call(null, b) : b;
-  enfocus.core.content.call(null, "fruit").call(null, enfocus.core.css_select.call(null, b, cljs.core.Vector.fromArray(["#heading1"])));
-  enfocus.core.content.call(null, "quantity").call(null, enfocus.core.css_select.call(null, b, cljs.core.Vector.fromArray(["thead tr > *:last-child"])));
+  }]), c = cljs.core.nth.call(null, b, 0, null), b = cljs.core.nth.call(null, b, 1, null), b = cljs.core.truth_(!0) ? enfocus.core.create_hidden_dom.call(null, b) : b;
+  enfocus.core.content.call(null, "fruit").call(null, enfocus.core.css_select.call(null, c, b, cljs.core.Vector.fromArray(["#heading1"])));
+  enfocus.core.content.call(null, "quantity").call(null, enfocus.core.css_select.call(null, c, b, cljs.core.Vector.fromArray(["thead tr > *:last-child"])));
   enfocus.core.content.call(null, cljs.core.map.call(null, function(b) {
     return enfocus.example.snippit2.call(null, b, a.call(null, b))
-  }, cljs.core.keys.call(null, a))).call(null, enfocus.core.css_select.call(null, b, cljs.core.Vector.fromArray(["tbody"])));
-  return cljs.core.truth_(!0) ? enfocus.core.remove_node_return_child.call(null, b) : b
+  }, cljs.core.keys.call(null, a))).call(null, enfocus.core.css_select.call(null, c, b, cljs.core.Vector.fromArray(["tbody"])));
+  return cljs.core.truth_(!0) ? (enfocus.core.reset_ids.call(null, c, b), enfocus.core.remove_node_return_child.call(null, b)) : b
 };
 enfocus.example.action2 = function() {
-  var a = cljs.core.truth_(cljs.core.fn_QMARK_.call(null, document)) ? document.call(null) : document, a = cljs.core.truth_(!1) ? enfocus.core.create_hidden_dom.call(null, a) : a;
-  enfocus.core.content.call(null, enfocus.example.template1.call(null, cljs.core.ObjMap.fromObject(["bannan", "pineapple"], {bannan:5, pineapple:10}))).call(null, enfocus.core.css_select.call(null, a, cljs.core.Vector.fromArray([".cool[foo=false]"])));
-  enfocus.core.set_attr.call(null, "id", "new-heading1").call(null, enfocus.core.css_select.call(null, a, cljs.core.Vector.fromArray(["#heading1"])));
-  return cljs.core.truth_(!1) ? enfocus.core.remove_node_return_child.call(null, a) : a
+  var a = cljs.core.truth_(cljs.core.fn_QMARK_.call(null, document)) ? document.call(null) : cljs.core.Vector.fromArray(["", document]), b = cljs.core.nth.call(null, a, 0, null), a = cljs.core.nth.call(null, a, 1, null), a = cljs.core.truth_(!1) ? enfocus.core.create_hidden_dom.call(null, a) : a;
+  enfocus.core.content.call(null, enfocus.example.template2.call(null, cljs.core.ObjMap.fromObject(["bannan", "pineapple"], {bannan:5, pineapple:10}))).call(null, enfocus.core.css_select.call(null, b, a, cljs.core.Vector.fromArray([".cool[foo=false]"])));
+  enfocus.core.set_attr.call(null, "id", "new-heading1").call(null, enfocus.core.css_select.call(null, b, a, cljs.core.Vector.fromArray(["#heading1"])));
+  return cljs.core.truth_(!1) ? (enfocus.core.reset_ids.call(null, b, a), enfocus.core.remove_node_return_child.call(null, a)) : a
 };

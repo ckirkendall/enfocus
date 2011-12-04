@@ -2,15 +2,18 @@
 
 
 (defmacro create-dom-action [sym nod tmp-dom args & forms]
-  (let [pnode-sym (gensym "pnod")
-        new-form (map #(list (second %) (list 'enfocus.core/css-select pnode-sym (first %))) 
+  (let [id-sym (gensym "id-sym")
+        pnode-sym (gensym "pnod")
+        new-form (map #(list (second %) (list 'enfocus.core/css-select id-sym pnode-sym (first %))) 
                       (partition 2 forms))]   
   `(defn ~sym ~args 
-     (let [~pnode-sym (if (fn? ~nod) (~nod) ~nod)
+     (let [[~id-sym ~pnode-sym] (if (fn? ~nod) (~nod) ["" ~nod])
            ~pnode-sym (if ~tmp-dom (~(symbol "enfocus.core/create-hidden-dom") ~pnode-sym) ~pnode-sym)]
        ~@new-form
        (if ~tmp-dom 
-         (~(symbol "enfocus.core/remove-node-return-child") ~pnode-sym)
+         (do
+           (~(symbol "enfocus.core/reset-ids") ~id-sym ~pnode-sym)
+           (~(symbol "enfocus.core/remove-node-return-child") ~pnode-sym))
          ~pnode-sym)))))
 
 (defmacro deftemplate [sym uri args & forms]

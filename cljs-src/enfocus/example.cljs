@@ -1,7 +1,7 @@
 (ns enfocus.example
   (:require [enfocus.core :as ef])
   (:require-macros [enfocus.macros :as em]))
-
+  
 (defn set-cool [] 
   ((ef/content "this is a cool test of content") 
     (ef/css-select js/document [:.cool (ef/attr= :foo "true")])))
@@ -11,11 +11,11 @@
   funtimes js/document false
   [msg]
   [:.cool (ef/attr= :foo "true")] (ef/content msg))   
-
-
+ 
+  
 
 (em/defsnippit snippit1 "templates/template1.html" [:tbody :> 'first-child] 
-               [fruit quantity] 
+               [fruit quantity]   
                [:tr :> 'first-child] (ef/content fruit)
                [:tr :> 'last-child] (ef/content (str quantity)))
   
@@ -28,7 +28,7 @@
 (em/defaction action1 [] 
              [:.cool (ef/attr= :foo "false")] (ef/content (template1 {"apple" 5 "pear" 6}))) 
 
-
+  
 
 (em/defsnippit snippit2 "templates/template1.html" ["tbody > *:first-child"] 
                [fruit quantity] 
@@ -42,5 +42,5 @@
                            (map #(snippit2 % (fruit-data %)) (keys fruit-data))))
 
 (em/defaction action2 [] 
-             [".cool[foo=false]"] (ef/content (template1 {"bannan" 5 "pineapple" 10}))
+             [".cool[foo=false]"] (ef/content (template2 {"bannan" 5 "pineapple" 10}))
              ["#heading1"] (ef/set-attr "id" "new-heading1")) 
