@@ -11282,10 +11282,12 @@ enfocus.core.content = function() {
   var a = function(a) {
     var b = enfocus.core.flatten_nodes_coll.call(null, a);
     return enfocus.core.multi_node_proc.call(null, function(a) {
+      var c = document.createDocumentFragment();
+      cljs.core.doall.call(null, cljs.core.map.call(null, function(a) {
+        return c.appendChild(a)
+      }, b));
       goog.dom.removeChildren.call(null, a);
-      return cljs.core.doall.call(null, cljs.core.map.call(null, function(b) {
-        return a.appendChild(b)
-      }, b))
+      return a.appendChild(c)
     })
   }, b = function(b) {
     var d = null;

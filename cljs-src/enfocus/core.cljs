@@ -117,8 +117,10 @@
   (let [fnodes (flatten-nodes-coll values)]
     (multi-node-proc 
       (fn[pnod]
-        (dom/removeChildren pnod)
-        (doall (map #(.appendChild pnod %) fnodes))))))
+        (let [frag (. js/document (createDocumentFragment))]
+          (doall (map #(. frag (appendChild %)) fnodes))
+          (dom/removeChildren pnod)
+          (. pnod (appendChild frag)))))))
 
 
 (defn set-attr [& values] 
