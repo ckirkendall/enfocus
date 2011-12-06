@@ -11,6 +11,7 @@
 ;    defsnippit
 ;    deftemplate
 ;    defaction
+;    at
 ;    content
 ;    set-attr
 ;    remove-attr
@@ -52,9 +53,13 @@
   
 
 (defmacro defaction [sym args & forms]
-  `(enfocus.macros/create-dom-action ~sym js/document false ~args ~@forms))
+  `(defn ~sym ~args (enfocus.macros/at js/document ~@forms)))
 
-
+(defmacro at [nod & forms]
+  (let [pnode-sym (gensym "pnod")
+        new-form (map #(list (second %) (list 'enfocus.core/css-select pnode-sym (first %))) 
+                      (partition 2 forms))]
+        `((fn [~pnode-sym] ~@new-form ~pnode-sym) ~nod)))  
 
 (defmacro content [& forms]
   '(~(symbol "enfocus.core/content") ~@forms))

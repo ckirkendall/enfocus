@@ -6,11 +6,10 @@
   ((ef/content "this is a cool test of content") 
     (ef/css-select js/document [:.cool (ef/attr= :foo "true")])))
 
-
-(em/create-dom-action 
-  funtimes js/document false
-  [msg]
-  [:.cool (ef/attr= :foo "true")] (ef/content msg))   
+    
+(defn funtimes [msg]  
+  (em/at js/document
+      [:.cool (ef/attr= :foo "true")] (ef/content msg)))   
  
   
 

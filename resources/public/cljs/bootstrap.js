@@ -11501,9 +11501,10 @@ enfocus.example.set_cool = function() {
   return enfocus.core.content.call(null, "this is a cool test of content").call(null, enfocus.core.css_select.call(null, document, cljs.core.Vector.fromArray(["\ufdd0'.cool", enfocus.core.attr_EQ_.call(null, "\ufdd0'foo", "true")])))
 };
 enfocus.example.funtimes = function(a) {
-  var b = cljs.core.truth_(cljs.core.fn_QMARK_.call(null, document)) ? document.call(null) : cljs.core.Vector.fromArray(["", document]), c = cljs.core.nth.call(null, b, 0, null), b = cljs.core.nth.call(null, b, 1, null), b = cljs.core.truth_(!1) ? enfocus.core.create_hidden_dom.call(null, b) : b;
-  enfocus.core.content.call(null, a).call(null, enfocus.core.css_select.call(null, c, b, cljs.core.Vector.fromArray(["\ufdd0'.cool", enfocus.core.attr_EQ_.call(null, "\ufdd0'foo", "true")])));
-  return cljs.core.truth_(!1) ? (enfocus.core.reset_ids.call(null, c, b), enfocus.core.remove_node_return_child.call(null, b)) : b
+  return function(b) {
+    enfocus.core.content.call(null, a).call(null, enfocus.core.css_select.call(null, b, cljs.core.Vector.fromArray(["\ufdd0'.cool", enfocus.core.attr_EQ_.call(null, "\ufdd0'foo", "true")])));
+    return b
+  }.call(null, document)
 };
 enfocus.core.load_remote_dom.call(null, "templates/template1.html");
 enfocus.example.snippit1 = function(a, b) {
@@ -11535,9 +11536,10 @@ enfocus.example.template1 = function(a) {
   return cljs.core.truth_(!0) ? (enfocus.core.reset_ids.call(null, c, b), enfocus.core.remove_node_return_child.call(null, b)) : b
 };
 enfocus.example.action1 = function() {
-  var a = cljs.core.truth_(cljs.core.fn_QMARK_.call(null, document)) ? document.call(null) : cljs.core.Vector.fromArray(["", document]), b = cljs.core.nth.call(null, a, 0, null), a = cljs.core.nth.call(null, a, 1, null), a = cljs.core.truth_(!1) ? enfocus.core.create_hidden_dom.call(null, a) : a;
-  enfocus.core.content.call(null, enfocus.example.template1.call(null, cljs.core.ObjMap.fromObject(["apple", "pear"], {apple:5, pear:6}))).call(null, enfocus.core.css_select.call(null, b, a, cljs.core.Vector.fromArray(["\ufdd0'.cool", enfocus.core.attr_EQ_.call(null, "\ufdd0'foo", "false")])));
-  return cljs.core.truth_(!1) ? (enfocus.core.reset_ids.call(null, b, a), enfocus.core.remove_node_return_child.call(null, a)) : a
+  return function(a) {
+    enfocus.core.content.call(null, enfocus.example.template1.call(null, cljs.core.ObjMap.fromObject(["apple", "pear"], {apple:5, pear:6}))).call(null, enfocus.core.css_select.call(null, a, cljs.core.Vector.fromArray(["\ufdd0'.cool", enfocus.core.attr_EQ_.call(null, "\ufdd0'foo", "false")])));
+    return a
+  }.call(null, document)
 };
 enfocus.core.load_remote_dom.call(null, "templates/template1.html");
 enfocus.example.snippit2 = function(a, b) {
@@ -11569,12 +11571,13 @@ enfocus.example.template2 = function(a) {
   return cljs.core.truth_(!0) ? (enfocus.core.reset_ids.call(null, c, b), enfocus.core.remove_node_return_child.call(null, b)) : b
 };
 enfocus.example.action2 = function() {
-  var a = cljs.core.truth_(cljs.core.fn_QMARK_.call(null, document)) ? document.call(null) : cljs.core.Vector.fromArray(["", document]), b = cljs.core.nth.call(null, a, 0, null), a = cljs.core.nth.call(null, a, 1, null), a = cljs.core.truth_(!1) ? enfocus.core.create_hidden_dom.call(null, a) : a;
-  enfocus.core.content.call(null, enfocus.example.template2.call(null, cljs.core.ObjMap.fromObject(["bannan", "pineapple"], {bannan:5, pineapple:10}))).call(null, enfocus.core.css_select.call(null, b, a, cljs.core.Vector.fromArray([".cool[foo=false]"])));
-  enfocus.core.set_attr.call(null, "\ufdd0'id", "new-heading1").call(null, enfocus.core.css_select.call(null, b, a, cljs.core.Vector.fromArray(["#heading1"])));
-  enfocus.core.remove_attr.call(null, "\ufdd0'id").call(null, enfocus.core.css_select.call(null, b, a, cljs.core.Vector.fromArray(["#heading2"])));
-  enfocus.core.add_class.call(null, "cool").call(null, enfocus.core.css_select.call(null, b, a, cljs.core.Vector.fromArray(["#new-heading1"])));
-  enfocus.core.remove_class.call(null, "wow").call(null, enfocus.core.css_select.call(null, b, a, cljs.core.Vector.fromArray(["table"])));
-  enfocus.core.do__GT_.call(null, enfocus.core.content.call(null, "test"), enfocus.core.set_attr.call(null, "\ufdd0'attr1", "cool1", "\ufdd0'attr2", "cool2")).call(null, enfocus.core.css_select.call(null, b, a, cljs.core.Vector.fromArray([".multi[bar]"])));
-  return cljs.core.truth_(!1) ? (enfocus.core.reset_ids.call(null, b, a), enfocus.core.remove_node_return_child.call(null, a)) : a
+  return function(a) {
+    enfocus.core.content.call(null, enfocus.example.template2.call(null, cljs.core.ObjMap.fromObject(["bannan", "pineapple"], {bannan:5, pineapple:10}))).call(null, enfocus.core.css_select.call(null, a, cljs.core.Vector.fromArray([".cool[foo=false]"])));
+    enfocus.core.set_attr.call(null, "\ufdd0'id", "new-heading1").call(null, enfocus.core.css_select.call(null, a, cljs.core.Vector.fromArray(["#heading1"])));
+    enfocus.core.remove_attr.call(null, "\ufdd0'id").call(null, enfocus.core.css_select.call(null, a, cljs.core.Vector.fromArray(["#heading2"])));
+    enfocus.core.add_class.call(null, "cool").call(null, enfocus.core.css_select.call(null, a, cljs.core.Vector.fromArray(["#new-heading1"])));
+    enfocus.core.remove_class.call(null, "wow").call(null, enfocus.core.css_select.call(null, a, cljs.core.Vector.fromArray(["table"])));
+    enfocus.core.do__GT_.call(null, enfocus.core.content.call(null, "test"), enfocus.core.set_attr.call(null, "\ufdd0'attr1", "cool1", "\ufdd0'attr2", "cool2")).call(null, enfocus.core.css_select.call(null, a, cljs.core.Vector.fromArray([".multi[bar]"])));
+    return a
+  }.call(null, document)
 };
