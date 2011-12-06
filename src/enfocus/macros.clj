@@ -1,5 +1,23 @@
 (ns enfocus.macros)
 
+;##############################################
+; All main transformations and functions are 
+; represented here in order to give a single 
+; entry point to the main protocol.  Many of
+; these are just pass throughs but some 
+; transforms require a macro.
+;
+; macros include:                            
+;    defsnippit
+;    deftemplate
+;    defaction
+;    content
+;    set-attr
+;    remove-attr
+;    add-class
+;    remove-class
+;    do->
+;##############################################
 
 (defmacro create-dom-action [sym nod tmp-dom args & forms]
   (let [id-sym (gensym "id-sym")
@@ -36,3 +54,26 @@
 (defmacro defaction [sym args & forms]
   `(enfocus.macros/create-dom-action ~sym js/document false ~args ~@forms))
 
+
+
+(defmacro content [& forms]
+  '(~(symbol "enfocus.core/content") ~@forms))
+
+(defmacro set-attr [& forms] 
+  '(~(symbol "enfocus.core/set-attr") ~@forms))
+
+
+(defmacro remove-attr [& forms] 
+  '(~(symbol "enfocus.core/remove-attr") ~@forms))
+
+
+(defmacro add-class [& forms]
+  '(~(symbol "enfocus.core/add-class") ~@forms))
+
+
+(defmacro remove-class [& forms]
+  '(~(symbol "enfocus.core/remove-class") ~@forms))
+
+(defmacro do-> [& forms]
+  '(~(symbol "enfocus.core/do->") ~@forms))
+  

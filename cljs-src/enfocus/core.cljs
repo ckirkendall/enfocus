@@ -71,7 +71,6 @@
         nod-col (nodes->coll id-nodes)]
     (doall (map #(let [id (. % (getAttribute "id"))
                        rid (. id (replace sym ""))]
-                   (js/alert (str "node:" %))
                    (. % (setAttribute "id" rid))) nod-col))))  
     
 
@@ -112,25 +111,59 @@
        (doall (map func pnod-col )))))
 
 
-
 (defn content [& values]
   (let [fnodes (flatten-nodes-coll values)]
     (multi-node-proc 
       (fn[pnod]
         (let [frag (. js/document (createDocumentFragment))]
-          (doall (map #(. frag (appendChild %)) fnodes))
+          (doall (map #(dom/appendChild frag (. % (cloneNode true))) fnodes))
           (dom/removeChildren pnod)
-          (. pnod (appendChild frag)))))))
+          (dom/appendChild pnod frag))))))
 
 
 (defn set-attr [& values] 
-  (js/alert (str "values: " values))
   (let [at-lst (partition 2 values)]
     (multi-node-proc 
       (fn[pnod]
-        (doall (map #(. pnod (setAttribute (first %) (second %))) at-lst))))))
+        (doall (map (fn [[a v]] (. pnod (setAttribute (name a) v))) at-lst))))))
 
+
+(defn remove-attr [& values] 
+  (multi-node-proc 
+    (fn[pnod]
+      (doall (map #(. pnod (removeAttribute (name %))) values)))))
+
+
+(defn- has-class [el cls]
+  (let [regex (js/RegExp. (str "(\\s|^)" cls "(\\s|$)"))
+        cur-cls (.className el)]
+    (. cur-cls (match regex))))
+
+
+(defn add-class [ & values]
+  (multi-node-proc 
+    (fn [pnod]
+      (let [cur-cls (.className pnod)]
+        (doall (map #(if (not (has-class pnod %))
+                       (set! (.className pnod) (str cur-cls " " %)))
+                       values))))))
+
+
+(defn remove-class [ & values]
+  (multi-node-proc 
+    (fn [pnod]
+      (let [cur (.className pnod)]
+        (doall (map #(if (has-class pnod %)
+                       (let [regex (js/RegExp. (str "(\\s|^)" % "(\\s|$)"))]
+                         (set! (.className pnod) (. cur (replace regex " ")))))
+                         values))))))
+
+(defn do-> [ & forms]
+  (multi-node-proc 
+    (fn [pnod]
+      (doall (map #(% pnod) forms)))))
       
+
 (defn attr? [& kys] (apply str (mapcat #(str "[" (name %) "]") kys)))
 
 (defn attr= ([] "")

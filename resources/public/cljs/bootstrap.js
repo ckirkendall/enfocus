@@ -11239,7 +11239,6 @@ enfocus.core.reset_ids = function(a, b) {
   var c = enfocus.core.css_select.call(null, b, "*[id]"), c = enfocus.core.nodes__GT_coll.call(null, c);
   return cljs.core.doall.call(null, cljs.core.map.call(null, function(b) {
     var c = b.getAttribute("id").replace(a, "");
-    alert.call(null, cljs.core.str.call(null, "node:", b));
     return b.setAttribute("id", c)
   }, c))
 };
@@ -11284,10 +11283,10 @@ enfocus.core.content = function() {
     return enfocus.core.multi_node_proc.call(null, function(a) {
       var c = document.createDocumentFragment();
       cljs.core.doall.call(null, cljs.core.map.call(null, function(a) {
-        return c.appendChild(a)
+        return goog.dom.appendChild.call(null, c, a.cloneNode(!0))
       }, b));
       goog.dom.removeChildren.call(null, a);
-      return a.appendChild(c)
+      return goog.dom.appendChild.call(null, a, c)
     })
   }, b = function(b) {
     var d = null;
@@ -11303,12 +11302,94 @@ enfocus.core.content = function() {
 }();
 enfocus.core.set_attr = function() {
   var a = function(a) {
-    alert.call(null, cljs.core.str.call(null, "values: ", a));
     var b = cljs.core.partition.call(null, 2, a);
     return enfocus.core.multi_node_proc.call(null, function(a) {
       return cljs.core.doall.call(null, cljs.core.map.call(null, function(b) {
-        return a.setAttribute(cljs.core.first.call(null, b), cljs.core.second.call(null, b))
+        var c = cljs.core.nth.call(null, b, 0, null), b = cljs.core.nth.call(null, b, 1, null);
+        return a.setAttribute(cljs.core.name.call(null, c), b)
       }, b))
+    })
+  }, b = function(b) {
+    var d = null;
+    goog.isDef(b) && (d = cljs.core.array_seq(Array.prototype.slice.call(arguments, 0), 0));
+    return a.call(this, d)
+  };
+  b.cljs$lang$maxFixedArity = 0;
+  b.cljs$lang$applyTo = function(b) {
+    b = cljs.core.seq(b);
+    return a.call(this, b)
+  };
+  return b
+}();
+enfocus.core.remove_attr = function() {
+  var a = function(a) {
+    return enfocus.core.multi_node_proc.call(null, function(b) {
+      return cljs.core.doall.call(null, cljs.core.map.call(null, function(a) {
+        return b.removeAttribute(cljs.core.name.call(null, a))
+      }, a))
+    })
+  }, b = function(b) {
+    var d = null;
+    goog.isDef(b) && (d = cljs.core.array_seq(Array.prototype.slice.call(arguments, 0), 0));
+    return a.call(this, d)
+  };
+  b.cljs$lang$maxFixedArity = 0;
+  b.cljs$lang$applyTo = function(b) {
+    b = cljs.core.seq(b);
+    return a.call(this, b)
+  };
+  return b
+}();
+enfocus.core.has_class = function(a, b) {
+  var c = RegExp(cljs.core.str.call(null, "(\\s|^)", b, "(\\s|$)"));
+  return a.className.match(c)
+};
+enfocus.core.add_class = function() {
+  var a = function(a) {
+    return enfocus.core.multi_node_proc.call(null, function(b) {
+      var e = b.className;
+      return cljs.core.doall.call(null, cljs.core.map.call(null, function(a) {
+        return cljs.core.truth_(cljs.core.not.call(null, enfocus.core.has_class.call(null, b, a))) ? b.className = cljs.core.str.call(null, e, " ", a) : null
+      }, a))
+    })
+  }, b = function(b) {
+    var d = null;
+    goog.isDef(b) && (d = cljs.core.array_seq(Array.prototype.slice.call(arguments, 0), 0));
+    return a.call(this, d)
+  };
+  b.cljs$lang$maxFixedArity = 0;
+  b.cljs$lang$applyTo = function(b) {
+    b = cljs.core.seq(b);
+    return a.call(this, b)
+  };
+  return b
+}();
+enfocus.core.remove_class = function() {
+  var a = function(a) {
+    return enfocus.core.multi_node_proc.call(null, function(b) {
+      var e = b.className;
+      return cljs.core.doall.call(null, cljs.core.map.call(null, function(a) {
+        return cljs.core.truth_(enfocus.core.has_class.call(null, b, a)) ? (a = RegExp(cljs.core.str.call(null, "(\\s|^)", a, "(\\s|$)")), b.className = e.replace(a, " ")) : null
+      }, a))
+    })
+  }, b = function(b) {
+    var d = null;
+    goog.isDef(b) && (d = cljs.core.array_seq(Array.prototype.slice.call(arguments, 0), 0));
+    return a.call(this, d)
+  };
+  b.cljs$lang$maxFixedArity = 0;
+  b.cljs$lang$applyTo = function(b) {
+    b = cljs.core.seq(b);
+    return a.call(this, b)
+  };
+  return b
+}();
+enfocus.core.do__GT_ = function() {
+  var a = function(a) {
+    return enfocus.core.multi_node_proc.call(null, function(b) {
+      return cljs.core.doall.call(null, cljs.core.map.call(null, function(a) {
+        return a.call(null, b)
+      }, a))
     })
   }, b = function(b) {
     var d = null;
@@ -11490,6 +11571,10 @@ enfocus.example.template2 = function(a) {
 enfocus.example.action2 = function() {
   var a = cljs.core.truth_(cljs.core.fn_QMARK_.call(null, document)) ? document.call(null) : cljs.core.Vector.fromArray(["", document]), b = cljs.core.nth.call(null, a, 0, null), a = cljs.core.nth.call(null, a, 1, null), a = cljs.core.truth_(!1) ? enfocus.core.create_hidden_dom.call(null, a) : a;
   enfocus.core.content.call(null, enfocus.example.template2.call(null, cljs.core.ObjMap.fromObject(["bannan", "pineapple"], {bannan:5, pineapple:10}))).call(null, enfocus.core.css_select.call(null, b, a, cljs.core.Vector.fromArray([".cool[foo=false]"])));
-  enfocus.core.set_attr.call(null, "id", "new-heading1").call(null, enfocus.core.css_select.call(null, b, a, cljs.core.Vector.fromArray(["#heading1"])));
+  enfocus.core.set_attr.call(null, "\ufdd0'id", "new-heading1").call(null, enfocus.core.css_select.call(null, b, a, cljs.core.Vector.fromArray(["#heading1"])));
+  enfocus.core.remove_attr.call(null, "\ufdd0'id").call(null, enfocus.core.css_select.call(null, b, a, cljs.core.Vector.fromArray(["#heading2"])));
+  enfocus.core.add_class.call(null, "cool").call(null, enfocus.core.css_select.call(null, b, a, cljs.core.Vector.fromArray(["#new-heading1"])));
+  enfocus.core.remove_class.call(null, "wow").call(null, enfocus.core.css_select.call(null, b, a, cljs.core.Vector.fromArray(["table"])));
+  enfocus.core.do__GT_.call(null, enfocus.core.content.call(null, "test"), enfocus.core.set_attr.call(null, "\ufdd0'attr1", "cool1", "\ufdd0'attr2", "cool2")).call(null, enfocus.core.css_select.call(null, b, a, cljs.core.Vector.fromArray([".multi[bar]"])));
   return cljs.core.truth_(!1) ? (enfocus.core.reset_ids.call(null, b, a), enfocus.core.remove_node_return_child.call(null, a)) : a
 };

@@ -43,4 +43,11 @@
 
 (em/defaction action2 [] 
              [".cool[foo=false]"] (ef/content (template2 {"bannan" 5 "pineapple" 10}))
-             ["#heading1"] (ef/set-attr "id" "new-heading1")) 
+             ["#heading1"] (ef/set-attr :id "new-heading1")
+             ["#heading2"] (ef/remove-attr :id) 
+             ["#new-heading1"] (ef/add-class "cool")
+             ["table"] (ef/remove-class "wow")
+             [".multi[bar]"] (ef/do-> 
+                               (ef/content "test")
+                               (ef/set-attr :attr1 "cool1" :attr2 "cool2")))
+                              
