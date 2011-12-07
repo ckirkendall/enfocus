@@ -11157,7 +11157,6 @@ clojure.string.escape = function(a, b) {
   }
 };
 var enfocus = {core:{}};
-enfocus.core._STAR_id_scope_STAR_ = "";
 enfocus.core.css_syms = cljs.core.HashMap.fromArrays(["\ufdd1'first-child", "\ufdd1'last-child"], [" *:first-child", " *:last-child"]);
 enfocus.core.hide_style = cljs.core.ObjMap.fromObject(["style"], {style:"display: none; width: 0px; height: 0px"}).strobj;
 enfocus.core.node_QMARK_ = function(a) {
@@ -11217,6 +11216,7 @@ enfocus.core.css_select = function() {
     throw"Invalid arity: " + arguments.length;
   }
 }();
+enfocus.core.tpl_load_cnt = cljs.core.atom.call(null, 0);
 enfocus.core.tpl_cache = cljs.core.atom.call(null, cljs.core.ObjMap.fromObject([], {}));
 enfocus.core.create_hidden_dom = function(a) {
   var b = goog.dom.createDom.call(null, "div", enfocus.core.hide_style);
@@ -11244,12 +11244,14 @@ enfocus.core.reset_ids = function(a, b) {
 };
 enfocus.core.load_remote_dom = function(a) {
   if(cljs.core.truth_(cljs.core.nil_QMARK_.call(null, cljs.core.deref.call(null, enfocus.core.tpl_cache).call(null, a)))) {
+    cljs.core.swap_BANG_.call(null, enfocus.core.tpl_load_cnt, cljs.core.inc);
     var b = new goog.net.XhrIo, c = function(b) {
       var b = b.getResponseText(), c = enfocus.core.replace_ids.call(null, b), b = cljs.core.nth.call(null, c, 0, null), c = cljs.core.nth.call(null, c, 1, null), c = goog.dom.htmlToDocumentFragment.call(null, c);
       return cljs.core.swap_BANG_.call(null, enfocus.core.tpl_cache, cljs.core.assoc, a, cljs.core.Vector.fromArray([b, c]))
     };
     goog.events.listen.call(null, b, goog.net.EventType.COMPLETE, function() {
-      return c.call(null, b)
+      c.call(null, b);
+      return cljs.core.swap_BANG_.call(null, enfocus.core.tpl_load_cnt, cljs.core.dec)
     });
     return b.send(a, "GET")
   }else {
@@ -11497,15 +11499,6 @@ enfocus.core.nth_last_of_type = function() {
   }
 }();
 enfocus.example = {};
-enfocus.example.set_cool = function() {
-  return enfocus.core.content.call(null, "this is a cool test of content").call(null, enfocus.core.css_select.call(null, document, cljs.core.Vector.fromArray(["\ufdd0'.cool", enfocus.core.attr_EQ_.call(null, "\ufdd0'foo", "true")])))
-};
-enfocus.example.funtimes = function(a) {
-  return function(b) {
-    enfocus.core.content.call(null, a).call(null, enfocus.core.css_select.call(null, b, cljs.core.Vector.fromArray(["\ufdd0'.cool", enfocus.core.attr_EQ_.call(null, "\ufdd0'foo", "true")])));
-    return b
-  }.call(null, document)
-};
 enfocus.core.load_remote_dom.call(null, "templates/template1.html");
 enfocus.example.snippit1 = function(a, b) {
   var c = cljs.core.truth_(cljs.core.fn_QMARK_.call(null, function() {
@@ -11580,4 +11573,17 @@ enfocus.example.action2 = function() {
     enfocus.core.do__GT_.call(null, enfocus.core.content.call(null, "test"), enfocus.core.set_attr.call(null, "\ufdd0'attr1", "cool1", "\ufdd0'attr2", "cool2")).call(null, enfocus.core.css_select.call(null, a, cljs.core.Vector.fromArray([".multi[bar]"])));
     return a
   }.call(null, document)
+};
+enfocus.example.funtimes = function(a) {
+  (function(b) {
+    enfocus.core.content.call(null, a).call(null, enfocus.core.css_select.call(null, b, cljs.core.Vector.fromArray(["\ufdd0'.cool", enfocus.core.attr_EQ_.call(null, "\ufdd0'foo", "true")])));
+    return b
+  }).call(null, document);
+  return setTimeout.call(null, function c() {
+    cljs.core.truth_(cljs.core.zero_QMARK_.call(null, cljs.core.deref.call(null, enfocus.core.tpl_load_cnt)));
+    enfocus.example.action2.call(null);
+    return setTimeout.call(null, function() {
+      return c.call(null)
+    }, 100)
+  }, 0)
 };

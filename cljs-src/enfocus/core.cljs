@@ -5,8 +5,7 @@
             [goog.events :as events]
             [clojure.string :as string]))
 
-  
-(def *id-scope* "")
+
 
 (def css-syms {'first-child " *:first-child" 
                'last-child " *:last-child"})
@@ -47,6 +46,11 @@
           ret (dom/query sel dom-node)]
       ret)))
 
+
+(def tpl-load-cnt (atom 0))
+
+     
+
 (def tpl-cache (atom {}))
 
 (defn create-hidden-dom [child]
@@ -76,13 +80,17 @@
 
 (defn load-remote-dom [uri]
   (when (nil? (@tpl-cache uri))
+    (swap! tpl-load-cnt inc)
     (let [req (new goog.net.XhrIo)
           callback (fn [req] 
                      (let [text (. req (getResponseText))
                            [sym txt] (replace-ids text)
                            data (dom/htmlToDocumentFragment txt)]
                        (swap! tpl-cache assoc uri [sym data] )))]
-      (events/listen req goog.net.EventType/COMPLETE #(callback req))
+      (events/listen req goog.net.EventType/COMPLETE 
+                     #(do 
+                        (callback req) 
+                        (swap! tpl-load-cnt dec)))
       (. req (send uri "GET")))))
 
 
