@@ -11580,9 +11580,7 @@ enfocus.example.funtimes = function(a) {
     return b
   }).call(null, document);
   return setTimeout.call(null, function c() {
-    cljs.core.truth_(cljs.core.zero_QMARK_.call(null, cljs.core.deref.call(null, enfocus.core.tpl_load_cnt)));
-    enfocus.example.action2.call(null);
-    return setTimeout.call(null, function() {
+    return cljs.core.truth_(cljs.core.zero_QMARK_.call(null, cljs.core.deref.call(null, enfocus.core.tpl_load_cnt))) ? enfocus.example.action2.call(null) : setTimeout.call(null, function() {
       return c.call(null)
     }, 100)
   }, 0)

@@ -66,9 +66,9 @@
   
 (defmacro wait-for-load [& forms]
 	`(js/setTimeout (fn ~(symbol "check") []
-	                   (if (zero? (deref ~(symbol "enfocus.core/tpl-load-cnt"))))
+	                   (if (zero? (deref ~(symbol "enfocus.core/tpl-load-cnt")))
                       (do ~@forms)
-                      (js/setTimeout #(~(symbol "check")) 100)) 0))   
+                      (js/setTimeout #(~(symbol "check")) 100))) 0))   
   
 
 (defmacro content [& forms]

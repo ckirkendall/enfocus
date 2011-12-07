@@ -42,7 +42,7 @@
                                (em/set-attr :attr1 "cool1" :attr2 "cool2")))
  
     
-      
+
 (defn funtimes [msg]  
   (em/at js/document
       [:.cool (ef/attr= :foo "true")] (em/content msg))
