@@ -4,12 +4,13 @@
             [goog.dom :as dom]
             [goog.events :as events]
             [clojure.string :as string]))
+(declare css-syms select create-sel-str)
 
 
-(def css-syms {'first-child " *:first-child" 
-               'last-child " *:last-child"})
 
-(def hide-style (.strobj {"style" "display: none; width: 0px; height: 0px"}))
+;####################################################
+; Utility functions
+;####################################################
 
 (defn node? [tst]  
   (dom/isNodeLike tst))
@@ -17,7 +18,9 @@
 (defn nodelist? [tst]
   (instance? js/NodeList tst))
 
-(defn nodes->coll [nl]
+(defn nodes->coll 
+  "coverts a nodelist, node into a collection"
+  [nl]
   (cond
     (node? nl) [nl]
     (or (instance? js/Array nl) (coll? nl)) nl
@@ -26,49 +29,66 @@
 
 
 (defn- flatten-nodes-coll [values]
+  "takes a set of nodes and nodelists and flattens them"
   (mapcat #(cond (string? %) [(dom/createTextNode %)]
                  :else (nodes->coll %)) values))
 
-  
-(defn- create-sel-str ([css-sel] (create-sel-str "" css-sel))
-  ([sym css-sel]
-    (apply str (map #(cond 
-                       (symbol? %) (css-syms %)
-                       (keyword? %) (str " " (. (name %) (replace "#" (str "#" sym))))
-                       (vector? %) (create-sel-str %)
-                       (string? %) (.replace %  "#" (str "#" sym))) 
-                    css-sel))))
-
-(defn select ([dom-node css-sel] (select "" dom-node css-sel))
-  ([sym dom-node css-sel]
-    (let [sel (string/trim (string/replace (create-sel-str sym css-sel) " :" ":"))
-          ret (dom/query sel dom-node)]
-      ret)))
 
 
-(def tpl-load-cnt (atom 0))
+;####################################################
+; The following functions are used to transform
+; the dom structure
+;####################################################
+
+(def tpl-load-cnt 
+  "this is incremented everytime a remote template is
+   loaded and decremented when it is added to the dom
+   cache"
+  (atom 0))
      
 
-(def tpl-cache (atom {}))
+(def tpl-cache 
+  "cache for the remote templates"
+  (atom {}))
 
-(defn create-hidden-dom [child]
+(def hide-style (.strobj {"style" "display: none; width: 0px; height: 0px"}))
+
+(defn create-hidden-dom 
+  "Add a hidden div to hold the dom as we are transforming it this
+   has to be done because css selectors do not work unless we have
+   it in the main dom"
+  [child]
   (let [div (dom/createDom "div" hide-style)]
     (. div (appendChild child))
     (dom/appendChild (.body (dom/getDocument)) div)
     div)) 
     
-(defn remove-node-return-child [div]
-  (let [child (dom/getFirstElementChild div)]
+(defn remove-node-return-child 
+  "removes the hidden div and returns the children"
+  [div]
+  (let [child (.childNodes div)
+        frag (. js/document (createDocumentFragment))
+        fnodes (nodes->coll child)]
+    (doall (map #(dom/appendChild frag %) fnodes))
     (dom/removeNode div)
-    child))
+    frag))
 
   
-(defn replace-ids [text]
+(defn replace-ids 
+  "replaces all the ids in a string html fragement/template
+   with a generated symbol appended on to a existing id
+   this is done to make sure we don't have id colisions
+   during the transformation process"
+  [text]
   (let [re (js/RegExp. "(<.*?\\sid=['\"])(.*?)(['\"].*?>)" "g")
         sym (str (name (gensym "id")) "_")]
     [(str sym) (.replace text re (fn [a b c d] (str b sym c d)))]))
 
-(defn reset-ids [sym nod]
+
+(defn reset-ids 
+  "before adding the transformed dom back into the live dom we 
+   reset the ids back to their original values"
+  [sym nod]
   (let [id-nodes (select nod "*[id]")
         nod-col (nodes->coll id-nodes)]
     (doall (map #(let [id (. % (getAttribute "id"))
@@ -76,7 +96,10 @@
                    (. % (setAttribute "id" rid))) nod-col))))  
     
 
-(defn load-remote-dom [uri]
+(defn load-remote-dom 
+  "loads a remote file into the cache, before adding to the
+   cache we replace the ids to avoid collisions"
+  [uri]
   (when (nil? (@tpl-cache uri))
     (swap! tpl-load-cnt inc)
     (let [req (new goog.net.XhrIo)
@@ -92,11 +115,16 @@
       (. req (send uri "GET")))))
 
 
-(defn get-cached-dom [uri]
+(defn get-cached-dom 
+  "returns and dom from the cache and symbol used to scope the ids"
+  [uri]
   (let [nod (@tpl-cache uri)]   
      (when nod [(first nod) (. (second nod) (cloneNode true))]))) 
 
-(defn get-cached-snippit [uri sel]  
+(defn get-cached-snippit 
+  "returns the cached snippit or creates one and adds it to the
+   cache if needed"
+  [uri sel]  
   (let [sel-str  (create-sel-str sel)
         cache (@tpl-cache (str (uri sel-str)))]
     (if cache [(first cache) (. (second cache) (cloneNode true))]
@@ -110,43 +138,60 @@
  
   
 
+;####################################################
+; The following functions are used to transform
+; the dom structure
+;####################################################
 
-(defn multi-node-proc [func]
+(defn multi-node-proc 
+  "takes a function an returns a function that
+   applys a given function on all nodes returned
+   by a given selector"
+  [func]
   (fn [pnodes]
     (let [pnod-col (nodes->coll pnodes)] 
        (doall (map func pnod-col )))))
 
-
-(defn content [& values]
+(defn content 
+  "Replaces the content of the element. Values can be nodes or collection of nodes."
+  [& values]
   (let [fnodes (flatten-nodes-coll values)]
     (multi-node-proc 
-      (fn[pnod]
+      (fn [pnod]
         (let [frag (. js/document (createDocumentFragment))]
           (doall (map #(dom/appendChild frag (. % (cloneNode true))) fnodes))
           (dom/removeChildren pnod)
           (dom/appendChild pnod frag))))))
 
 
-(defn set-attr [& values] 
+(defn set-attr 
+  "Assocs attributes and values on the selected element."
+  [& values] 
   (let [at-lst (partition 2 values)]
     (multi-node-proc 
       (fn[pnod]
         (doall (map (fn [[a v]] (. pnod (setAttribute (name a) v))) at-lst))))))
 
 
-(defn remove-attr [& values] 
+(defn remove-attr 
+  "Dissocs attributes on the selected element."
+  [& values] 
   (multi-node-proc 
     (fn[pnod]
       (doall (map #(. pnod (removeAttribute (name %))) values)))))
 
 
-(defn- has-class [el cls]
+(defn- has-class 
+  "returns true if the element has a given class"
+  [el cls]
   (let [regex (js/RegExp. (str "(\\s|^)" cls "(\\s|$)"))
         cur-cls (.className el)]
     (. cur-cls (match regex))))
 
 
-(defn add-class [ & values]
+(defn add-class 
+  "Adds the specified classes to the selected element." 
+  [ & values]
   (multi-node-proc 
     (fn [pnod]
       (let [cur-cls (.className pnod)]
@@ -155,7 +200,9 @@
                        values))))))
 
 
-(defn remove-class [ & values]
+(defn remove-class 
+  "Removes the specified classes from the selected element." 
+  [ & values]
   (multi-node-proc  
     (fn [pnod]
       (let [cur (.className pnod)]
@@ -165,29 +212,87 @@
                          values))))))
 
 (defn do-> [ & forms]
+  "Chains (composes) several transformations. Applies functions from left to right."
   (multi-node-proc 
     (fn [pnod]
       (doall (map #(% pnod) forms)))))
+
+
+;##################################################################
+; functions involved in processing the selectors
+;##################################################################
+  
+(defn- create-sel-str 
+  "converts keywords, symbols and strings used in the enlive selector 
+   syntax to a string representing a standard css selector.  It also
+   takes a string to append to all ids so they do not conflict with 
+   existing ids in the live dom"
+  ([css-sel] (create-sel-str "" css-sel))
+  ([id-scope-sym css-sel]
+    (apply str (map #(cond 
+                       (symbol? %) (css-syms %)
+                       (keyword? %) (str " " (. (name %) (replace "#" (str "#" id-scope-sym))))
+                       (vector? %) (create-sel-str %)
+                       (string? %) (.replace %  "#" (str "#" id-scope-sym))) 
+                    css-sel))))
+
+(defn select 
+  "takes either an enlive selector or a css3 selector and
+   returns a set of nodes that match the selector"
+  ([dom-node css-sel] (select "" dom-node css-sel))
+  ([id-scope-sym dom-node css-sel]
+    (let [sel (string/trim (string/replace (create-sel-str id-scope-sym css-sel) " :" ":"))
+          ret (dom/query sel dom-node)]
+      ret)))
+
+
+;##################################################################
+; The following functions are used to support the enlive selector
+; syntax. They simply translate to the string representation to
+; the standard css3 selector standard
+;##################################################################
+
+(def css-syms {'first-child " *:first-child" 
+               'last-child " *:last-child"})
       
+(defn  attr?
+  "Matches any E element that contains att attribute: 
+   css -> E[att][att2]..."
+  [& kys] (apply str (mapcat #(str "[" (name %) "]") kys)))
 
-(defn attr? [& kys] (apply str (mapcat #(str "[" (name %) "]") kys)))
-
-(defn attr= ([] "")
+(defn attr= 
+  "Matches any E element whose att attribute value equals 'val':  
+   css -> E[att=val][att2=val2]..."
+  ([] "")
   ([ky txt & forms] 
     (str "[" (name ky) "='" txt "']"   
          (apply attr= forms))))
 
   
-(defn nth-child ([x] (str ":nth-child(" x ")"))
+(defn nth-child 
+  "Matches any E element that is the n-th child of its parent:
+   css -> E:nth-child(x) or E:nth-child(xn+y)" 
+  ([x] (str ":nth-child(" x ")"))
   ([x y]  (str ":nth-child(" x "n+" y ")")))
 
-(defn nth-of-type ([x] (str ":nth-of-type(" x ")"))
+(defn nth-of-type 
+  "Matches any E element that is the n-th sibling of its type: 
+   css -> E:nth-of-type(x) or E:nth-of-type(xn+y)" 
+  ([x] (str ":nth-of-type(" x ")"))
   ([x y]  (str ":nth-of-type(" x "n+" y ")")))
 
-(defn nth-last-child ([x] (str ":nth-last-child(" x ")"))
+(defn nth-last-child 
+  "Matches any E element that is the n-th child of its parent, 
+   counting from the last child. 
+   css -> E:nth-last-child(x) or E:nth-last-child(xn+y)"
+  ([x] (str ":nth-last-child(" x ")"))
   ([x y]  (str ":nth-last-child(" x "n+" y ")")))
 
-(defn nth-last-of-type ([x] (str ":nth-last-of-type(" x ")"))
+(defn nth-last-of-type 
+  "Matches any E element that is the n-th sibling of its type
+   counting from the last child: 
+   css -> E:nth-last-of-type(x) or E:nth-last-of-type(xn+y)"
+  ([x] (str ":nth-last-of-type(" x ")"))
   ([x y]  (str ":nth-last-of-type(" x "n+" y ")")))
    
 
