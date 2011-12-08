@@ -21,10 +21,10 @@
 ;    do->
 ;##############################################
 
-(defmacro create-dom-action [sym nod tmp-dom args & forms]
+(defmacro create-dom-action [sym nod tmp-dom args & forms]  
   (let [id-sym (gensym "id-sym")
         pnode-sym (gensym "pnod")
-        new-form (map #(list (second %) (list 'enfocus.core/css-select id-sym pnode-sym (first %))) 
+        new-form (map #(list (second %) (list 'enfocus.core/select id-sym pnode-sym (first %))) 
                       (partition 2 forms))]   
   `(defn ~sym ~args 
      (let [[~id-sym ~pnode-sym] (if (fn? ~nod) (~nod) ["" ~nod])
@@ -52,14 +52,14 @@
        #(~(symbol "enfocus.core/get-cached-snippit") ~uri ~sel) 
        true ~args ~@forms)))
   
-
+ 
 (defmacro defaction [sym args & forms]
   `(defn ~sym ~args (enfocus.macros/at js/document ~@forms)))
 
 
 (defmacro at [nod & forms]
   (let [pnode-sym (gensym "pnod")
-        new-form (map #(list (second %) (list 'enfocus.core/css-select pnode-sym (first %))) 
+        new-form (map #(list (second %) (list 'enfocus.core/select pnode-sym (first %))) 
                       (partition 2 forms))]
         `((fn [~pnode-sym] ~@new-form ~pnode-sym) ~nod)))  
 
@@ -68,7 +68,7 @@
 	`(js/setTimeout (fn ~(symbol "check") []
 	                   (if (zero? (deref ~(symbol "enfocus.core/tpl-load-cnt")))
                       (do ~@forms)
-                      (js/setTimeout #(~(symbol "check")) 100))) 0))   
+                      (js/setTimeout #(~(symbol "check")) 10))) 0))   
   
 
 (defmacro content [& forms]

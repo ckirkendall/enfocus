@@ -14,7 +14,7 @@
                 [:thead :tr :> 'last-child] (em/content "quantity")
                 [:tbody] (em/content
                            (map #(snippit1 % (fruit-data %)) (keys fruit-data))))
-
+   
 (em/defaction action1 [] 
              [:.cool (ef/attr= :foo "false")] (em/content (template1 {"apple" 5 "pear" 6}))) 
 
@@ -42,7 +42,6 @@
                                (em/set-attr :attr1 "cool1" :attr2 "cool2")))
  
     
-
 (defn funtimes [msg]  
   (em/at js/document
       [:.cool (ef/attr= :foo "true")] (em/content msg))

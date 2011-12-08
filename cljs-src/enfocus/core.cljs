@@ -6,7 +6,6 @@
             [clojure.string :as string]))
 
 
-
 (def css-syms {'first-child " *:first-child" 
                'last-child " *:last-child"})
 
@@ -40,7 +39,7 @@
                        (string? %) (.replace %  "#" (str "#" sym))) 
                     css-sel))))
 
-(defn css-select ([dom-node css-sel] (css-select "" dom-node css-sel))
+(defn select ([dom-node css-sel] (select "" dom-node css-sel))
   ([sym dom-node css-sel]
     (let [sel (string/trim (string/replace (create-sel-str sym css-sel) " :" ":"))
           ret (dom/query sel dom-node)]
@@ -48,7 +47,6 @@
 
 
 (def tpl-load-cnt (atom 0))
-
      
 
 (def tpl-cache (atom {}))
@@ -71,7 +69,7 @@
     [(str sym) (.replace text re (fn [a b c d] (str b sym c d)))]))
 
 (defn reset-ids [sym nod]
-  (let [id-nodes (css-select nod "*[id]")
+  (let [id-nodes (select nod "*[id]")
         nod-col (nodes->coll id-nodes)]
     (doall (map #(let [id (. % (getAttribute "id"))
                        rid (. id (replace sym ""))]
@@ -95,7 +93,7 @@
 
 
 (defn get-cached-dom [uri]
-  (let [nod (@tpl-cache uri)]
+  (let [nod (@tpl-cache uri)]   
      (when nod [(first nod) (. (second nod) (cloneNode true))]))) 
 
 (defn get-cached-snippit [uri sel]  
@@ -104,7 +102,7 @@
     (if cache [(first cache) (. (second cache) (cloneNode true))]
 		  (let [[sym tdom] (get-cached-dom uri)
 		        dom (create-hidden-dom tdom)
-		        tsnip (css-select dom sel-str)
+		        tsnip (select dom sel-str)
             snip (if (instance? js/Array tsnip) (first tsnip) tsnip)]
 		    (remove-node-return-child dom)
 	      (assoc @tpl-cache (str uri sel-str) [sym snip])
@@ -158,7 +156,7 @@
 
 
 (defn remove-class [ & values]
-  (multi-node-proc 
+  (multi-node-proc  
     (fn [pnod]
       (let [cur (.className pnod)]
         (doall (map #(if (has-class pnod %)
