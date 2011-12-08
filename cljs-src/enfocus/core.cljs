@@ -139,8 +139,9 @@
   
 
 ;####################################################
-; The following functions are used to transform
-; the dom structure
+; The following functions are used to transform the
+; dom structure. each function returns a function
+; taking the a set of nodes from a selector
 ;####################################################
 
 (defn multi-node-proc 
@@ -216,6 +217,27 @@
   (multi-node-proc 
     (fn [pnod]
       (doall (map #(% pnod) forms)))))
+
+(defn append
+  "Appends the content of the element. Values can be nodes or collection of nodes."
+  [& values]
+  (let [fnodes (flatten-nodes-coll values)]
+    (multi-node-proc 
+      (fn [pnod]
+        (let [frag (. js/document (createDocumentFragment))]
+          (doall (map #(dom/appendChild frag (. % (cloneNode true))) fnodes))
+          (dom/appendChild pnod frag))))))
+
+(defn prepend
+  "Prepends the content of the element. Values can be nodes or collection of nodes."
+  [& values]
+  (let [fnodes (flatten-nodes-coll values)]
+    (multi-node-proc 
+      (fn [pnod]
+        (let [frag (. js/document (createDocumentFragment))
+              nod (.firstChild pnod)]
+          (doall (map #(dom/appendChild frag (. % (cloneNode true))) fnodes))
+          (. pnod (insertBefore frag nod)))))))
 
 
 ;##################################################################
