@@ -260,6 +260,16 @@
           (dom/insertSiblingAfter frag pnod))))))
 
 
+(defn substitute
+  "substitutes the content for the selected node.  Values can be nodes or collection of nodes"
+  [& values]
+  (let [fnodes (flatten-nodes-coll values)]
+    (multi-node-proc 
+      (fn [pnod]
+        (let [frag (. js/document (createDocumentFragment))]
+          (doall (map #(dom/appendChild frag (. % (cloneNode true))) fnodes))
+          (dom/replaceNode frag pnod))))))
+
 ;##################################################################
 ; functions involved in processing the selectors
 ;##################################################################

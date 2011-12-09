@@ -45,7 +45,8 @@
                                     (em/prepend "even better "))
              [".cool[foo=false]"] (em/do->
                                     (em/after " testing-after")
-                                    (em/before "testing-before ")))
+                                    (em/before "testing-before "))
+             ["#sub"] (ef/substitute "I substituted here"))
   
     
 (defn funtimes [msg]  
