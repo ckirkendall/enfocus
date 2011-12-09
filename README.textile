@@ -48,7 +48,7 @@ defnition of a an action.
 
 h2. The @at@ form
 
-The @at@ form is the most important form in Enlive. There are implicit @at@ 
+The @at@ form is a very important form in Enfocus and in Enlive. There are implicit @at@ 
 forms in @action@, @snippet@ and @template@.  
 
 <pre>
