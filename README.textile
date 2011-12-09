@@ -74,8 +74,6 @@ Enfocus defines several helper functions:
 <pre>
   content            (content "xyz" a-node "abc")             
   html-content       (html-content "<blink>please no</blink>")
-  wrap               (wrap :div) or (wrap :div {:class "foo"}) 
-  unwrap             unwrap
   set-attr           (set-attr :attr1 "val1" :attr2 "val2")
   remove-attr        (remove-attr :attr1 :attr2) 
   add-class          (add-class "foo" "bar")
@@ -89,9 +87,11 @@ Enfocus defines several helper functions:
   
 </pre>
 
-Currently there are three transformation that are supported by Enlive but not Enfocus. (Patches very welcome!!)
+Currently there are several transformation that are supported by Enlive but not Enfocus. (Patches very welcome!!)
 
 <pre>
+  wrap               (wrap :div) or (wrap :div {:class "foo"}) 
+  unwrap             unwrap
   html-content       (html-content "<blink>please no</blink>")
   clone-for          (clone-for [item items] transformation)
                      or (clone-for [item items] 
