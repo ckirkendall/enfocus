@@ -39,8 +39,14 @@
              ["table"] (em/remove-class "wow")
              [".multi[bar]"] (em/do-> 
                                (em/content "test")
-                               (em/set-attr :attr1 "cool1" :attr2 "cool2")))
- 
+                               (em/set-attr :attr1 "cool1" :attr2 "cool2"))
+             [".cool[foo=true]"] (em/do->
+                                    (em/append " very cool")
+                                    (em/prepend "even better "))
+             [".cool[foo=false]"] (em/do->
+                                    (em/after " testing-after")
+                                    (em/before "testing-before ")))
+  
     
 (defn funtimes [msg]  
   (em/at js/document

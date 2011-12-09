@@ -239,6 +239,26 @@
           (doall (map #(dom/appendChild frag (. % (cloneNode true))) fnodes))
           (. pnod (insertBefore frag nod)))))))
 
+(defn before
+  "inserts the content before the selected node.  Values can be nodes or collection of nodes"
+  [& values]
+  (let [fnodes (flatten-nodes-coll values)]
+    (multi-node-proc 
+      (fn [pnod]
+        (let [frag (. js/document (createDocumentFragment))]
+          (doall (map #(dom/appendChild frag (. % (cloneNode true))) fnodes))
+          (dom/insertSiblingBefore frag pnod))))))
+
+(defn after
+  "inserts the content after the selected node.  Values can be nodes or collection of nodes"
+  [& values]
+  (let [fnodes (flatten-nodes-coll values)]
+    (multi-node-proc 
+      (fn [pnod]
+        (let [frag (. js/document (createDocumentFragment))]
+          (doall (map #(dom/appendChild frag (. % (cloneNode true))) fnodes))
+          (dom/insertSiblingAfter frag pnod))))))
+
 
 ;##################################################################
 ; functions involved in processing the selectors

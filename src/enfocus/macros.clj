@@ -91,4 +91,17 @@
 
 (defmacro do-> [& forms]
   `(~(symbol "enfocus.core/do->") ~@forms))
+
+(defmacro append [& forms]
+  `(~(symbol "enfocus.core/append") ~@forms))
+
+(defmacro prepend [& forms]
+  `(~(symbol "enfocus.core/prepend") ~@forms))
+
+(defmacro after [& forms]
+  `(~(symbol "enfocus.core/after") ~@forms))
+
+(defmacro before [& forms]
+  `(~(symbol "enfocus.core/before") ~@forms))
+
   
