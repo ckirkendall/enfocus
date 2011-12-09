@@ -1,0 +1,109 @@
+h1. Enfocus
+
+Enfocus is a selector-based (à la CSS) templating library for ClojureScript.  It is a port/re-implementation of Christophe Grand's "Enlive":http://github/cgrand/enlive
+
+If you are unfamilure with enlive it is sugested you take a look at the following tutorials.
+
+David Nolen wrote a "nice tutorial":http://github.com/swannodette/enlive-tutorial/
+Another "tutorial":https://github.com/cgrand/enlive/wiki/Table-and-Layout-Tutorial,-Part-1:-The-Goal by Brian Marick.
+
+h2. Where do I get support?
+
+"On the group":http://groups.google.com/group/enlive-clj
+
+
+h2. Actions, templates and snippets
+
+A snippet is a function that returns a seq of nodes, it can be used as a
+building block for more complex templates or actions.  
+
+You define a snippit by providing a remote resource, a selector and series of transformations.  
+The snippit definition below selects a table body from the remote resource 
+templates/template1.html and grabs the first row.  It then fills the content of the row.
+
+<pre>
+  (em/defsnippit snippit2 "templates/template1.html" ["tbody > *:first-child"] 
+               [fruit quantity] 
+               ["tr > *:first-child"] (em/content fruit)
+               ["tr > *:last-child"] (em/content (str quantity)))
+</pre>
+
+
+A template is very similar to a snippit except it does not require a selector to 
+grap a sub section of the remote resource.
+
+<pre>
+  (em/deftemplate template2 "/templates/template1.html" [fruit-data] 
+                ["#heading1"] (em/content "fruit")  
+                ["thead tr > *:last-child"] (em/content "quantity")
+                ["tbody"] (em/content
+                           (map #(snippit2 % (fruit-data %)) (keys fruit-data))))
+</pre>
+
+An action is a set of transforms that take place on the live dom.  below is a 
+defnition of a an action.
+
+<pre>
+(em/defaction action2 [] 
+             [".cool[foo=false]"] (em/content (template2 {"bannan" 5 "pineapple" 10}))
+             ["#heading1"] (em/set-attr :id "new-heading1"))
+</pre>
+
+
+h2. The @at@ form
+
+The @at@ form is the most important form in Enlive. There are implicit @at@ 
+forms in @action@, @snippet@ and @template@.  
+
+<pre>
+  (at a-node
+    [:a :selector] a-transformation
+    [:another :selector] another-transformation
+    ...)
+</pre>
+
+
+Transformations are closures which take one arg (the selected node) and return
+nil, another node or an arbitrarily nested collection of nodes.
+
+Rules are applied top-down: the first rule transforms the whole tree and the
+resulting tree is passed to the next rules.
+
+
+h2. Transformations
+
+A transformation is a function that returns either a node or collection of node.
+
+Enfocus defines several helper functions:
+<pre>
+  content            (content "xyz" a-node "abc")             
+  html-content       (html-content "<blink>please no</blink>")
+  wrap               (wrap :div) or (wrap :div {:class "foo"}) 
+  unwrap             unwrap
+  set-attr           (set-attr :attr1 "val1" :attr2 "val2")
+  remove-attr        (remove-attr :attr1 :attr2) 
+  add-class          (add-class "foo" "bar")
+  remove-class       (remove-class "foo" "bar")
+  do->               (do-> transformation1 transformation2) 
+  append             (append "xyz" a-node "abc")
+  prepend            (prepend "xyz" a-node "abc")
+  after              (after "xyz" a-node "abc")
+  before             (before "xyz" a-node "abc")
+  substitute         (substitute "xyz" a-node "abc")
+  
+</pre>
+
+Currently there are three transformation that are supported by Enlive but not Enfocus. (Patches very welcome!!)
+
+<pre>
+  html-content       (html-content "<blink>please no</blink>")
+  clone-for          (clone-for [item items] transformation)
+                     or (clone-for [item items] 
+                          selector1 transformation1
+                          selector2 transformation2)
+  move               (move [:.footnote] [:#footnotes] content)
+</pre>
+
+h2. Special Thanks!
+
+Christophe Grand for creating enlive and building a simple api for dom manipulation.  
