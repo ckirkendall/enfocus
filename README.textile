@@ -7,10 +7,6 @@ If you are unfamilure with enlive it is sugested you take a look at the followin
 David Nolen wrote a "nice tutorial":http://github.com/swannodette/enlive-tutorial/
 Another "tutorial":https://github.com/cgrand/enlive/wiki/Table-and-Layout-Tutorial,-Part-1:-The-Goal by Brian Marick.
 
-h2. Where do I get support?
-
-"On the group":http://groups.google.com/group/enlive-clj
-
 
 h2. Actions, templates and snippets
 
