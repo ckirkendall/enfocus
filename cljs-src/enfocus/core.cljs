@@ -67,9 +67,8 @@
   "removes the hidden div and returns the children"
   [div]
   (let [child (.childNodes div)
-        frag (. js/document (createDocumentFragment))
-        fnodes (nodes->coll child)]
-    (doall (map #(dom/appendChild frag %) fnodes))
+        frag (. js/document (createDocumentFragment))]
+    (dom/append frag child)
     (dom/removeNode div)
     frag))
 
@@ -106,8 +105,14 @@
           callback (fn [req] 
                      (let [text (. req (getResponseText))
                            [sym txt] (replace-ids text)
-                           data (dom/htmlToDocumentFragment txt)]
-                       (swap! tpl-cache assoc uri [sym data] )))]
+                           data (dom/htmlToDocumentFragment txt)
+                           body (first (nodes->coll (select data "body")))]
+                       (if body
+                         (let [frag (. js/document (createDocumentFragment))
+                               childs (.childNodes frag)]
+                           (dom/append frag childs)
+                           (swap! tpl-cache assoc uri [sym frag]))
+                         (swap! tpl-cache assoc uri [sym data] ))))]
       (events/listen req goog.net.EventType/COMPLETE 
                      #(do 
                         (callback req) 
