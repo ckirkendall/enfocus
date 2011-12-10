@@ -153,16 +153,28 @@
     (let [pnod-col (nodes->coll pnodes)] 
        (doall (map func pnod-col )))))
 
-(defn content 
-  "Replaces the content of the element. Values can be nodes or collection of nodes."
-  [& values]
+
+(defn content-based-trans 
+  "HOF to remove the duplicate code in transformation that
+   handle creating a fragment and applying it in some way
+   to the selected node"
+  [values func]
   (let [fnodes (flatten-nodes-coll values)]
     (multi-node-proc 
       (fn [pnod]
         (let [frag (. js/document (createDocumentFragment))]
           (doall (map #(dom/appendChild frag (. % (cloneNode true))) fnodes))
-          (dom/removeChildren pnod)
-          (dom/appendChild pnod frag))))))
+          (func pnod frag))))))
+    
+
+(defn content 
+  "Replaces the content of the element. Values can be nodes or collection of nodes."
+  [& values]
+  (content-based-trans
+    values
+    (fn [pnod frag]
+      (dom/removeChildren pnod)
+      (dom/appendChild pnod frag))))
 
 
 (defn set-attr 
@@ -221,54 +233,49 @@
 (defn append
   "Appends the content of the element. Values can be nodes or collection of nodes."
   [& values]
-  (let [fnodes (flatten-nodes-coll values)]
-    (multi-node-proc 
-      (fn [pnod]
-        (let [frag (. js/document (createDocumentFragment))]
-          (doall (map #(dom/appendChild frag (. % (cloneNode true))) fnodes))
-          (dom/appendChild pnod frag))))))
+  (content-based-trans
+    values
+    (fn [pnod frag]
+      (dom/appendChild pnod frag))))
+  
 
 (defn prepend
   "Prepends the content of the element. Values can be nodes or collection of nodes."
   [& values]
-  (let [fnodes (flatten-nodes-coll values)]
-    (multi-node-proc 
-      (fn [pnod]
-        (let [frag (. js/document (createDocumentFragment))
-              nod (.firstChild pnod)]
-          (doall (map #(dom/appendChild frag (. % (cloneNode true))) fnodes))
-          (. pnod (insertBefore frag nod)))))))
+  (content-based-trans
+    values
+    (fn [pnod frag]
+      (let [nod (.firstChild pnod)]
+        (. pnod (insertBefore frag nod))))))
+
 
 (defn before
   "inserts the content before the selected node.  Values can be nodes or collection of nodes"
   [& values]
-  (let [fnodes (flatten-nodes-coll values)]
-    (multi-node-proc 
-      (fn [pnod]
-        (let [frag (. js/document (createDocumentFragment))]
-          (doall (map #(dom/appendChild frag (. % (cloneNode true))) fnodes))
-          (dom/insertSiblingBefore frag pnod))))))
+  (content-based-trans
+    values
+    (fn [pnod frag]
+      (dom/insertSiblingBefore frag pnod))))
+  
 
 (defn after
   "inserts the content after the selected node.  Values can be nodes or collection of nodes"
   [& values]
-  (let [fnodes (flatten-nodes-coll values)]
-    (multi-node-proc 
-      (fn [pnod]
-        (let [frag (. js/document (createDocumentFragment))]
-          (doall (map #(dom/appendChild frag (. % (cloneNode true))) fnodes))
-          (dom/insertSiblingAfter frag pnod))))))
+  (content-based-trans
+    values
+    (fn [pnod frag]
+      (dom/insertSiblingAfter frag pnod))))
+
 
 
 (defn substitute
   "substitutes the content for the selected node.  Values can be nodes or collection of nodes"
   [& values]
-  (let [fnodes (flatten-nodes-coll values)]
-    (multi-node-proc 
-      (fn [pnod]
-        (let [frag (. js/document (createDocumentFragment))]
-          (doall (map #(dom/appendChild frag (. % (cloneNode true))) fnodes))
-          (dom/replaceNode frag pnod))))))
+  (content-based-trans
+    values
+    (fn [pnod frag]
+      (dom/replaceNode frag pnod))))
+
 
 ;##################################################################
 ; functions involved in processing the selectors
