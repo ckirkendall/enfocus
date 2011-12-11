@@ -181,6 +181,16 @@
       (dom/removeChildren pnod)
       (dom/appendChild pnod frag))))
 
+(defn html-content
+  "Replaces the content of the element with the dom structure
+   represented by the html string passed"
+  [txt]
+  (multi-node-proc
+    (fn [pnod] 
+      (let [frag (dom/htmlToDocumentFragment txt)]
+        (dom/removeChildren pnod)
+        (dom/append pnod frag)))))
+
 
 (defn set-attr 
   "Assocs attributes and values on the selected element."

@@ -46,7 +46,8 @@
              [".cool[foo=false]"] (em/do->
                                     (em/after " testing-after")
                                     (em/before "testing-before "))
-             ["#sub"] (ef/substitute "I substituted here"))
+             ["#sub"] (ef/substitute "I substituted here")
+             ["#html-content"] (ef/html-content "this is built from an <b>html</b> string."))
   
     
 (defn funtimes [msg]  
