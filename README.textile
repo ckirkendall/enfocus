@@ -94,7 +94,6 @@ Currently there are several transformation that are supported by Enlive but not 
 <pre>
   wrap               (wrap :div) or (wrap :div {:class "foo"}) 
   unwrap             unwrap
-  html-content       (html-content "<blink>please no</blink>")
   clone-for          (clone-for [item items] transformation)
                      or (clone-for [item items] 
                           selector1 transformation1
