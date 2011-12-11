@@ -291,6 +291,13 @@
     (fn [pnod frag]
       (dom/replaceNode frag pnod))))
 
+(defn remove-all
+  "removes the selected nodes from the dom"
+  [& values]
+  (multi-node-proc 
+    (fn [pnod]
+      (dom/removeNode pnod))))
+
 
 ;##################################################################
 ; functions involved in processing the selectors

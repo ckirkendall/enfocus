@@ -17,8 +17,8 @@
    
 (em/defaction action1 [] 
              [:.cool (ef/attr= :foo "false")] (em/content (template1 {"apple" 5 "pear" 6}))) 
-
-
+ 
+    
 
 (em/defsnippit snippit2 "templates/template1.html" ["tbody > *:first-child"] 
                [fruit quantity] 
@@ -30,7 +30,7 @@
                 ["thead tr > *:last-child"] (em/content "quantity")
                 ["tbody"] (em/content
                            (map #(snippit2 % (fruit-data %)) (keys fruit-data))))
-
+ 
 (em/defaction action2 [] 
              [".cool[foo=false]"] (em/content (template2 {"bannan" 5 "pineapple" 10}))
              ["#heading1"] (em/set-attr :id "new-heading1")
@@ -46,8 +46,8 @@
              [".cool[foo=false]"] (em/do->
                                     (em/after " testing-after")
                                     (em/before "testing-before "))
-             ["#sub"] (ef/substitute "I substituted here")
-             ["#html-content"] (ef/html-content "this is built from an <b>html</b> string."))
+             ["#sub"] (em/substitute "I substituted here")
+             ["#html-content"] (em/html-content "this is built from an <b>html</b> string."))
   
     
 (defn funtimes [msg]  
