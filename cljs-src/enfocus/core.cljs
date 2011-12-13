@@ -22,6 +22,7 @@
   "coverts a nodelist, node into a collection"
   [nl]
   (cond
+    (nil? nl) []
     (node? nl) [nl]
     (or (instance? js/Array nl) (coll? nl)) nl
     (nodelist? nl) (for [x (range 0 (.length nl))]

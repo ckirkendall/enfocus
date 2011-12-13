@@ -4,16 +4,18 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <script language="javascript" src="cljs/bootstrap.js"></script>
 <script language="javascript" src="cljs/enfocus/example.js"></script>
+<link type="text/css" rel="stylesheet" media="all" href="css/test.css" />
+
+
 <title>Insert title here</title>
 </head>
-<body onload="enfocus.example.funtimes('this is a test');">
-<div class="cool" foo="true">this should change</div>
-<div class="cool1">this should not change</div>
-<div class="cool" foo="false">this should change</div>
-<div class="multi" bar="true">this should change</div>
-<div class="multi" bar="false">this should change</div>
-<div class="multi">this should not change</div>
-<div id="sub">this should be sub out</div>
-<div id="html-content">this should be be replaced</div>
+<body>
+<div id="content">
+<div class="heading" foo="true">this should change</div>
+<p>The tests will show <span class="success">success</span> or <span class="fail">fail</span></p>
+<div id="test-content"></div>
+<div id="test-content2"></div>
+<div id="test-content3"></div>
+</div>
 </body>
 </html>

@@ -1,0 +1,77 @@
+<html>
+<head>
+<title>Test grid for enfocus</title>
+
+<link type="text/css" rel="stylesheet" media="all" href="../css/test.css" />
+</head>
+<body>
+<div id="content">
+<table>
+<thead>
+	<tr>
+		<th>Test</th>
+		<th>Result</th>
+	</tr>
+</thead>
+<tbody>
+	<tr id="test1">
+		<td>loading a remote template</td>
+		<td><span class="success">success</span></td>
+	</tr>
+	<tr id="test2">
+		<td>Adding a template to live dom</td>
+		<td><span class="success">success</span></td>
+	</tr>
+	<tr id="test3">
+		<td>Bring in a content with a snippit</td>
+		<td><span class="fail">fail</span></td>
+	</tr>
+	<tr id="test4">
+		<td>Replacing content using <b>content</b></td>
+		<td><span class="fail">fail</span></td>
+	</tr>
+	<tr id="test5">
+		<td>Replacing content using <b>html-content</b></td>
+		<td><span class="fail">fail</span></td>
+	</tr>
+	<tr id="test6">
+		<td>Setting attribute</td>
+		<td><span class="fail">fail</span></td>
+	</tr>
+	<tr id="test7" foo="fail">
+		<td>Remove attribute</td>
+		<td></td>
+	</tr>
+	<tr id="test8" >
+		<td>Add class</td>
+		<td></td>
+	</tr>
+	<tr id="test9" class="bad">
+		<td>Remove class</td>
+		<td></td>
+	</tr>
+	<tr id="test10">
+		<td>do-> remove and after</td>
+		<td><span class="fail">fail</span></td>
+	</tr>
+	<tr id="test11">
+		<td>do-> remove and before</td>
+		<td><span class="fail">fail</span></td>
+	</tr>
+	<tr id="test12">
+		<td>substitute</td>
+		<td><span class="fail">fail</span></td>
+	</tr>
+	<tr id="test13">
+		<td>do-> content append</td>
+		<td><span class="fail">fail</span></td>
+	</tr>
+	<tr id="test14">
+		<td>do-> content prepend</td>
+		<td><span class="fail">fail</span></td>
+	</tr>
+</tbody>
+</table>
+</div>
+</body>
+</html>
