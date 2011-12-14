@@ -67,3 +67,18 @@ th{
 	width: 100%;
 }
 
+#test-content4 {
+	width: 200px;
+	margin-top: 20px;
+	margin-left: 20px;	
+}
+
+#test-content5 {
+	width: 200px;
+	margin-top: 20px;
+	margin-left: 20px;
+}
+
+.highlight {
+	background-color: #00cc00;	
+}

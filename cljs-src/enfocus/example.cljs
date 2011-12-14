@@ -37,7 +37,7 @@
            ["tr > *:first-child"] (em/content test-desc)
            ["tr > *:last-child > span"] (em/content value))
 
-
+   
 (em/deftemplate test-cases "templates/test-grid.html" []
                 ["#test3 > *:last-child"] (em/content (success)) 
                 ["#test4 > *:last-child"] (em/content (success))
@@ -54,28 +54,37 @@
                 [".bad > *:last-child"] (em/html-content "<span class='fail'>fail</span>") ;should do nothing
                 ["#test10 td span"] (em/do->
                                          (em/after (success))
-                                         (em/remove-all))
+                                         (em/remove-node))
                 ["#test11 td span"] (em/do->
-                                         (em/before (success))
-                                         (em/remove-all))
-                ["#test12 td span"] (em/substitute(success))
-                ["#test13 > *:last-child"] (em/do->
+                                         (em/before (success)) 
+                                         (em/remove-node))
+                ["#test12 td span"] (em/substitute(success)) 
+                ["#test13 > *:last-child"] (em/do-> 
                                              (em/content "a:")
                                              (em/append (success)))
                 ["#test14 > *:last-child"] (em/do->
                                              (em/content ":p")
-                                             (em/prepend (success))))
-
-(em/defaction test-grid []
+                                             (em/prepend (success)))) 
+ 
+(em/defaction test-grid []   
               ["#test-content"] (em/content (test-cases))
               ["#test-content tbody tr:nth-of-type(even)"] (em/add-class "even")
+              ["#test-content tbody tr"] (em/add-event 
+                                           :mouseover 
+                                           #((em/at (em/add-class "highlight")) (.currentTarget %)))
+              ["#test-content tbody tr"] (em/add-event 
+                                           :mouseout 
+                                           #((em/at (em/remove-class "highlight")) (.currentTarget %)))
               ["#test-content2"] (em/content (template2 {"bannan" 5 "pineapple" 10}))
               ["#heading1"] (em/set-attr :id "new-heading1")
               ["#heading2"] (em/set-attr :id "new-heading2")
               ["#test-content2 tfoot tr > *:last-child"] (em/content (str 15))
               [:#test-content3] (em/content (template1 {"apple" 5 "pear" 6}))
               [:#test-content3 :tfoot :tr :> 'last-child] (em/content (str 11))
-              )
+              ["#test-content4"] (em/set-style :background "#00dd00" :font-size "10px")
+              ["#test-content5"] (em/set-style :background "#dd0000" :font-size "10px")
+              ["#test-content5"] (em/remove-style :background :font-size)
+              )  
 
 ;(em/defaction test-suite [])
               

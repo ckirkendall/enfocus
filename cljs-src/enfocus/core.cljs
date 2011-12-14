@@ -1,10 +1,12 @@
 (ns enfocus.core
   (:require [goog.net.XhrIo :as xhr]
             [goog.dom.query :as query]
+            [goog.style :as style]
+            [goog.events :as events]
             [goog.dom :as dom]
             [goog.events :as events]
             [clojure.string :as string]))
-(declare css-syms select create-sel-str)
+(declare css-syms css-select create-sel-str)
 
 
 
@@ -33,6 +35,15 @@
   "takes a set of nodes and nodelists and flattens them"
   (mapcat #(cond (string? %) [(dom/createTextNode %)]
                  :else (nodes->coll %)) values))
+
+
+(defn- style-set
+  "Sets property name to a value on a javascript object
+	Returns the original object (js-set obj :attr value) "
+  ([obj values]
+    (do (doseq [[attr value] (apply hash-map values)]
+          (style/setStyle obj (name attr) value))
+      obj)))
 
 
 
@@ -89,7 +100,7 @@
   "before adding the transformed dom back into the live dom we 
    reset the ids back to their original values"
   [sym nod]
-  (let [id-nodes (select nod "*[id]")
+  (let [id-nodes (css-select nod "*[id]")
         nod-col (nodes->coll id-nodes)]
     (doall (map #(let [id (. % (getAttribute "id"))
                        rid (. id (replace sym ""))]
@@ -107,7 +118,7 @@
                      (let [text (. req (getResponseText))
                            [sym txt] (replace-ids text)
                            data (dom/htmlToDocumentFragment txt)
-                           body (first (nodes->coll (select data "body")))]
+                           body (first (nodes->coll (css-select data "body")))]
                        (if body
                          (let [frag (. js/document (createDocumentFragment))
                                childs (.childNodes frag)]
@@ -134,9 +145,9 @@
   (let [sel-str  (create-sel-str sel)
         cache (@tpl-cache (str (uri sel-str)))]
     (if cache [(first cache) (. (second cache) (cloneNode true))]
-		  (let [[sym tdom] (get-cached-dom uri)
+		  (let [[sym tdom] (get-cached-dom uri)  
 		        dom (create-hidden-dom tdom)
-		        tsnip (select dom sel-str)
+		        tsnip (css-select dom sel-str)
             snip (if (instance? js/Array tsnip) (first tsnip) tsnip)]
 		    (remove-node-return-child dom)
 	      (assoc @tpl-cache (str uri sel-str) [sym snip])
@@ -173,7 +184,7 @@
           (func pnod frag))))))
     
 
-(defn content 
+(defn en-content 
   "Replaces the content of the element. Values can be nodes or collection of nodes."
   [& values]
   (content-based-trans
@@ -182,7 +193,7 @@
       (dom/removeChildren pnod)
       (dom/appendChild pnod frag))))
 
-(defn html-content
+(defn en-html-content
   "Replaces the content of the element with the dom structure
    represented by the html string passed"
   [txt]
@@ -193,7 +204,7 @@
         (dom/append pnod frag)))))
 
 
-(defn set-attr 
+(defn en-set-attr 
   "Assocs attributes and values on the selected element."
   [& values] 
   (let [at-lst (partition 2 values)]
@@ -202,7 +213,7 @@
         (doall (map (fn [[a v]] (. pnod (setAttribute (name a) v))) at-lst))))))
 
 
-(defn remove-attr 
+(defn en-remove-attr 
   "Dissocs attributes on the selected element."
   [& values] 
   (multi-node-proc 
@@ -218,7 +229,7 @@
     (. cur-cls (match regex))))
 
 
-(defn add-class 
+(defn en-add-class 
   "Adds the specified classes to the selected element." 
   [ & values]
   (multi-node-proc 
@@ -229,7 +240,7 @@
                        values))))))
 
 
-(defn remove-class 
+(defn en-remove-class 
   "Removes the specified classes from the selected element." 
   [ & values]
   (multi-node-proc  
@@ -240,13 +251,13 @@
                          (set! (.className pnod) (. cur (replace regex " ")))))
                          values))))))
 
-(defn do-> [ & forms]
+(defn en-do-> [ & forms]
   "Chains (composes) several transformations. Applies functions from left to right."
   (multi-node-proc 
     (fn [pnod]
       (doall (map #(% pnod) forms)))))
 
-(defn append
+(defn en-append
   "Appends the content of the element. Values can be nodes or collection of nodes."
   [& values]
   (content-based-trans
@@ -255,7 +266,7 @@
       (dom/appendChild pnod frag))))
   
 
-(defn prepend
+(defn en-prepend
   "Prepends the content of the element. Values can be nodes or collection of nodes."
   [& values]
   (content-based-trans
@@ -265,7 +276,7 @@
         (. pnod (insertBefore frag nod))))))
 
 
-(defn before
+(defn en-before
   "inserts the content before the selected node.  Values can be nodes or collection of nodes"
   [& values]
   (content-based-trans
@@ -274,7 +285,7 @@
       (dom/insertSiblingBefore frag pnod))))
   
 
-(defn after
+(defn en-after
   "inserts the content after the selected node.  Values can be nodes or collection of nodes"
   [& values]
   (content-based-trans
@@ -283,8 +294,7 @@
       (dom/insertSiblingAfter frag pnod))))
 
 
-
-(defn substitute
+(defn en-substitute
   "substitutes the content for the selected node.  Values can be nodes or collection of nodes"
   [& values]
   (content-based-trans
@@ -292,13 +302,44 @@
     (fn [pnod frag]
       (dom/replaceNode frag pnod))))
 
-(defn remove-all
-  "removes the selected nodes from the dom"
+(defn en-remove-node 
+  "removes the selected nodes from the dom" 
   [& values]
   (multi-node-proc 
     (fn [pnod]
       (dom/removeNode pnod))))
 
+(defn en-set-style 
+  "set a list of style elements from the selected nodes"
+  [& values]
+  (multi-node-proc 
+    (fn [pnod]
+      (style-set pnod values))))
+
+(defn en-remove-style 
+  "remove a list style elements from the selected nodes
+   note: you can only remove styles that are inline styles
+   set in css need to overridden through set-style"
+  [& values]
+  (multi-node-proc 
+    (fn [pnod]
+      (doall 
+        (map #(. (.style pnod) (removeProperty (name %))) values)))))
+
+(defn en-add-event 
+  "adding an event to the selected nodes"
+  [event func]
+  (multi-node-proc 
+    (fn [pnod]
+      (events/listen pnod (name event) func))))
+  
+(defn en-remove-event 
+  "adding an event to the selected nodes"
+  [& event-list]
+  (multi-node-proc 
+    (fn [pnod]
+      (doall (map #(events/removeAll pnod (name %)) event-list)))))
+  
 
 ;##################################################################
 ; functions involved in processing the selectors
@@ -318,10 +359,10 @@
                        (string? %) (.replace %  "#" (str "#" id-scope-sym))) 
                     css-sel))))
 
-(defn select 
+(defn css-select 
   "takes either an enlive selector or a css3 selector and
    returns a set of nodes that match the selector"
-  ([dom-node css-sel] (select "" dom-node css-sel))
+  ([dom-node css-sel] (css-select "" dom-node css-sel))
   ([id-scope-sym dom-node css-sel]
     (let [sel (string/trim (string/replace (create-sel-str id-scope-sym css-sel) " :" ":"))
           ret (dom/query sel dom-node)]
