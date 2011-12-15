@@ -147,11 +147,17 @@
   `(enfocus.core/en-remove-event ~@forms))
 
 (defmacro effect [ttime num-steps & forms]
-  (let [incr (int (/ ttime num-steps))]
   `(enfocus.core/multi-node-proc
     (fn [pnod#]
-      (let [eff# (fn run# [tm#] 
+      (let [incr# (~(symbol "Math/ceil") (/ ~ttime ~num-steps))
+            eff# (fn run# [tm#] 
                   (when (<= tm# ~ttime) 
                     (enfocus.macros/at pnod# ~@forms)
-                    (js/setTimeout #(run# (+ tm# ~incr)) ~incr)))]
-        (eff# 0))))))
+                    (js/setTimeout #(run# (+ tm# incr#)) incr#)))]
+        (eff# 0)))))
+
+(defmacro fade-out [ttime num-steps]
+  `(enfocus.core/en-fade-out ~ttime ~num-steps))  
+
+(defmacro fade-in [ttime num-steps]
+  `(enfocus.core/en-fade-out ~ttime ~num-steps)) 

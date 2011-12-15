@@ -5,7 +5,8 @@
             [goog.events :as events]
             [goog.dom :as dom]
             [goog.events :as events]
-            [clojure.string :as string]))
+            [clojure.string :as string])
+  (:require-macros [enfocus.macros :as em]))
 (declare css-syms css-select create-sel-str)
 
 
@@ -341,6 +342,28 @@
       (doall (map #(events/removeAll pnod (name %)) event-list)))))
   
 
+(defn en-fade-out 
+  "fade the selected nodes over a set of steps"
+  [ttime steps]
+  (let [incr (Math/ceil (/ 100 steps))]
+    (em/effect  ttime steps
+             (fn [pnod]
+               (let [op (style/getOpacity pnod)]
+                 (cond
+                   (= "" op) (style/setOpacity pnod (- 1 incr))
+                   (<= 0 op) (sytle/setOpacity pnod (- op incr))))))))
+
+(defn en-fade-in 
+  "fade the selected nodes over a set of steps"
+  [ttime steps]
+  (let [incr (Math/ceil (/ 100 steps))]
+    (em/effect  ttime steps
+             (fn [pnod]
+               (let [op (style/getOpacity pnod)]
+                 (cond
+                   (= "" op) (style/setOpacity pnod incr)
+                   (>= 1 op) (sytle/setOpacity pnod (+ op incr))))))))
+  
 ;##################################################################
 ; functions involved in processing the selectors
 ;##################################################################

@@ -28,7 +28,7 @@
                 ["tbody"] (em/content
                            (map #(snippet2 % (fruit-data %)) (keys fruit-data))))
  
- 
+  
  
 (em/defsnippet success "templates/test-grid.html"  ["tbody > *:first-child > td span"] [] )
 
@@ -84,8 +84,14 @@
               ["#test-content4"] (em/set-style :background "#00dd00" :font-size "10px")
               ["#test-content5"] (em/set-style :background "#dd0000" :font-size "10px")
               ["#test-content5"] (em/remove-style :background :font-size)
+              ["#test-content6"] (em/add-event
+                                   :mouseover 
+                                   #((em/at (em/fade-out 500 20)) (.currentTarget %)))
+              ["#test-content6"] (em/add-event
+                                   :mouseout
+                                   #((em/at (em/fade-in 500 20)) (.currentTarget %)))
               )  
-
+  
 ;(em/defaction test-suite [])
  
   
