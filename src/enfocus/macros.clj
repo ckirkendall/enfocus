@@ -151,8 +151,8 @@
     (fn [pnod#]
       (let [incr# (~(symbol "Math/ceil") (/ ~ttime ~num-steps))
             eff# (fn run# [tm#] 
-                  (when (<= tm# ~ttime) 
-                    (enfocus.macros/at pnod# ~@forms)
+                   (when (<= tm# ~ttime) 
+                    ((enfocus.macros/at ~@forms) pnod#)
                     (js/setTimeout #(run# (+ tm# incr#)) incr#)))]
         (eff# 0)))))
 
@@ -160,4 +160,4 @@
   `(enfocus.core/en-fade-out ~ttime ~num-steps))  
 
 (defmacro fade-in [ttime num-steps]
-  `(enfocus.core/en-fade-out ~ttime ~num-steps)) 
+  `(enfocus.core/en-fade-in ~ttime ~num-steps)) 

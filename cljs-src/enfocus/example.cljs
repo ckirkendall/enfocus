@@ -29,7 +29,7 @@
                            (map #(snippet2 % (fruit-data %)) (keys fruit-data))))
  
   
- 
+  
 (em/defsnippet success "templates/test-grid.html"  ["tbody > *:first-child > td span"] [] )
 
 (em/defsnippet row "templates/test-grid.html"  ["tbody > *:first-child"] 
@@ -95,7 +95,7 @@
 ;(em/defaction test-suite [])
  
   
-   
+  
 (defn funtimes [msg]   
   (em/at js/document
       [:.heading (ef/attr= :foo "true")] (em/content msg))
