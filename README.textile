@@ -96,6 +96,8 @@ New Transformations
   remove-style	     (remove-style :font-size :background)
   add-event	     (add-event :mouseover (fn [event] ...))
   remove-event	     (remove-event :mouseover :mouseout)
+  fade-in	     (fade-in time num-steps)
+  fade-out           (fade-out time num-steps)
 </pre>
 
 Currently there are several transformation that are supported by Enlive but not Enfocus. (Patches very welcome!!)
