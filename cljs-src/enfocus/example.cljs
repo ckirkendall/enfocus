@@ -4,7 +4,7 @@
   
 
 
-(em/defsnippit snippit1 "templates/template1.html" [:tbody :> 'first-child] 
+(em/defsnippet snippet1 "templates/template1.html" [:tbody :> 'first-child] 
                [fruit quantity]   
                [:tr :> 'first-child] (em/content fruit)
                [:tr :> 'last-child] (em/content (str quantity)))
@@ -13,11 +13,11 @@
                 [:#heading1] (em/content "fruit")  
                 [:thead :tr :> 'last-child] (em/content "quantity")
                 [:tbody] (em/content
-                           (map #(snippit1 % (fruit-data %)) (keys fruit-data))))
+                           (map #(snippet1 % (fruit-data %)) (keys fruit-data))))
     
     
 
-(em/defsnippit snippit2 "templates/template1.html" ["tbody > *:first-child"] 
+(em/defsnippet snippet2 "templates/template1.html" ["tbody > *:first-child"] 
                [fruit quantity] 
                ["tr > *:first-child"] (em/content fruit)
                ["tr > *:last-child"] (em/content (str quantity)))
@@ -26,13 +26,13 @@
                 ["#heading1"] (em/content "fruit")  
                 ["thead tr > *:last-child"] (em/content "quantity")
                 ["tbody"] (em/content
-                           (map #(snippit2 % (fruit-data %)) (keys fruit-data))))
+                           (map #(snippet2 % (fruit-data %)) (keys fruit-data))))
  
-
  
-(em/defsnippit success "templates/test-grid.html"  ["tbody > *:first-child > td span"] [] )
+ 
+(em/defsnippet success "templates/test-grid.html"  ["tbody > *:first-child > td span"] [] )
 
-(em/defsnippit row "templates/test-grid.html"  ["tbody > *:first-child"] 
+(em/defsnippet row "templates/test-grid.html"  ["tbody > *:first-child"] 
            [test-desc value]
            ["tr > *:first-child"] (em/content test-desc)
            ["tr > *:last-child > span"] (em/content value))

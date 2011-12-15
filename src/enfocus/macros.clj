@@ -50,7 +50,7 @@
        #(~(symbol "enfocus.core/get-cached-dom") ~uri) 
        true ~args ~@forms)))
 
-(defmacro defsnippit [sym uri sel args & forms]
+(defmacro defsnippet [sym uri sel args & forms]
   `(do 
      (~(symbol "enfocus.core/load-remote-dom") ~uri)
      (enfocus.macros/create-dom-action 

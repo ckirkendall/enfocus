@@ -1,8 +1,8 @@
 h1. Enfocus
 
-Enfocus is a selector-based (à la CSS) templating library for ClojureScript.  It is a port/re-implementation of Christophe Grand's "Enlive":http://github/cgrand/enlive
+Enfocus is a @DOM@ manipulation and templating library for ClojureScript. Inspired by Christophe Grand's "Enlive":http://github/cgrand/enlive, Enfocus' primary purpose is providing a base for building rich interfaces in ClojureScript.
 
-If you are unfamilure with enlive it is sugested you take a look at the following tutorials.
+If you are unfamiliar with enlive it is suggested you take a look at the following tutorials before diving into Enfocus.
 
 David Nolen wrote a "nice tutorial":http://github.com/swannodette/enlive-tutorial/
 Another "tutorial":https://github.com/cgrand/enlive/wiki/Table-and-Layout-Tutorial,-Part-1:-The-Goal by Brian Marick.
@@ -13,12 +13,12 @@ h2. Actions, templates and snippets
 A snippet is a function that returns a seq of nodes, it can be used as a
 building block for more complex templates or actions.  
 
-You define a snippit by providing a remote resource, a selector and series of transformations.  
-The snippit definition below selects a table body from the remote resource 
+You define a snippet by providing a remote resource, a selector and series of transformations.  
+The snippet definition below selects a table body from the remote resource 
 templates/template1.html and grabs the first row.  It then fills the content of the row.
 
 <pre>
-  (em/defsnippit snippit2 "templates/template1.html" ["tbody > *:first-child"] 
+  (em/defsnippet snippet2 "templates/template1.html" ["tbody > *:first-child"] 
                [fruit quantity] 
                ["tr > *:first-child"] (em/content fruit)
                ["tr > *:last-child"] (em/content (str quantity)))
@@ -39,7 +39,7 @@ brought into the template.
 </pre>
 
 An action is a set of transforms that take place on the live dom.  below is a 
-defnition of a an action.
+definition of a an action.
 
 <pre>
 (em/defaction action2 [] 
