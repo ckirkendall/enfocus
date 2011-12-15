@@ -8,12 +8,12 @@ text-align: center;
 }
 
 #content {
-width: 100%;
-padding: 10px;
 text-align: left;
 background-color: #fff;
 overflow: auto;
+padding: 10px;
 }
+
 
 .heading {
 font-size: 18px;
@@ -23,7 +23,6 @@ margin-bottom: 10px;
 
 #test-content {
 	width: 400px;
-	padding-left: 20px;	
 }
 #test-content table {
 	width: 100%;
@@ -49,8 +48,7 @@ th{
 
 #test-content2 {
 	width: 200px;
-	margin-top: 20px;
-	padding-left: 20px;	
+	margin-top: 20px;	
 }
 
 #test-content2 table {
@@ -59,8 +57,7 @@ th{
 
 #test-content3 {
 	width: 200px;
-	margin-top: 20px;
-	padding-left: 20px;	
+	margin-top: 20px;	
 }
 
 #test-content3 table {
@@ -69,14 +66,12 @@ th{
 
 #test-content4 {
 	width: 200px;
-	margin-top: 20px;
-	margin-left: 20px;	
+	margin-top: 20px;	
 }
 
 #test-content5 {
 	width: 200px;
 	margin-top: 20px;
-	margin-left: 20px;
 }
 
 .highlight {
@@ -84,5 +79,10 @@ th{
 }
 
 #test-content6 {
-	background-color: #009900;	
+	background-color: #009900;
+	font-size: 18px;
+	color: white;
+	height: 50px;	
+	width: 200px;
+	margin-top: 20px;
 }
