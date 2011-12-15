@@ -73,7 +73,8 @@ h2. Transformations
 A transformation is a function that returns either a node or collection of node.
 
 h3. Enfocus defines several helper functions:
-Supported Enlive Transformations
+
+Supported Enlive Transformations 
 <pre>
   content            (content "xyz" a-node "abc")             
   html-content       (html-content "<blink>please no</blink>")
