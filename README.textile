@@ -90,7 +90,7 @@ Supported Enlive Transformations
   substitute         (substitute "xyz" a-node "abc")
 </pre>
 
-New Tranformations
+New Transformations
 <pre>
   set-style	     (set-style :font-size "10px" :background "#fff")
   remove-style	     (remove-style :font-size :background)
