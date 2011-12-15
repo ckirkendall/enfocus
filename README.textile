@@ -72,7 +72,8 @@ h2. Transformations
 
 A transformation is a function that returns either a node or collection of node.
 
-Enfocus defines several helper functions:
+h3. Enfocus defines several helper functions:
+Supported Enlive Transformations
 <pre>
   content            (content "xyz" a-node "abc")             
   html-content       (html-content "<blink>please no</blink>")
@@ -86,11 +87,17 @@ Enfocus defines several helper functions:
   after              (after "xyz" a-node "abc")
   before             (before "xyz" a-node "abc")
   substitute         (substitute "xyz" a-node "abc")
-  
+</pre>
+
+New Tranformations
+<pre>
+  set-style	     (set-style :font-size "10px" :background "#fff")
+  remove-style	     (remove-style :font-size :background)
+  add-event	     (add-event :mouseover (fn [event] ...))
+  remove-event	     (remove-event :mouseover :mouseout)
 </pre>
 
 Currently there are several transformation that are supported by Enlive but not Enfocus. (Patches very welcome!!)
-
 <pre>
   wrap               (wrap :div) or (wrap :div {:class "foo"}) 
   unwrap             unwrap
