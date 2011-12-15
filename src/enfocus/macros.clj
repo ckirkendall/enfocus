@@ -19,6 +19,17 @@
 ;    add-class
 ;    remove-class
 ;    do->
+;    append
+;    prepend
+;    after 
+;    before
+;    substitute
+;    remove-node
+;    set-style
+;    remove-style
+;    add-event
+;    remove-event
+;    effect
 ;##############################################
 
 (defn- create-transform-call [id-sym pnod-sym forms]
@@ -34,28 +45,28 @@
         new-form (create-transform-call id-sym pnode-sym forms)]   
   `(defn ~sym ~args 
      (let [[~id-sym ~pnode-sym] (if (fn? ~nod) (~nod) ["" ~nod])
-           ~pnode-sym (if ~tmp-dom (~(symbol "enfocus.core/create-hidden-dom") ~pnode-sym) ~pnode-sym)]
+           ~pnode-sym (if ~tmp-dom (enfocus.core/create-hidden-dom ~pnode-sym) ~pnode-sym)]
        ~@new-form
        (if ~tmp-dom 
          (do
-           (~(symbol "enfocus.core/reset-ids") ~id-sym ~pnode-sym)
-           (~(symbol "enfocus.core/remove-node-return-child") ~pnode-sym))
+           (enfocus.core/reset-ids ~id-sym ~pnode-sym)
+           (enfocus.core/remove-node-return-child ~pnode-sym))
          ~pnode-sym)))))
 
 (defmacro deftemplate [sym uri args & forms]
   `(do 
-     (~(symbol "enfocus.core/load-remote-dom") ~uri)
+     (enfocus.core/load-remote-dom ~uri)
      (enfocus.macros/create-dom-action 
        ~sym
-       #(~(symbol "enfocus.core/get-cached-dom") ~uri) 
+       #(enfocus.core/get-cached-dom ~uri) 
        true ~args ~@forms)))
 
 (defmacro defsnippet [sym uri sel args & forms]
   `(do 
-     (~(symbol "enfocus.core/load-remote-dom") ~uri)
+     (enfocus.core/load-remote-dom ~uri)
      (enfocus.macros/create-dom-action 
        ~sym
-       #(~(symbol "enfocus.core/get-cached-snippit") ~uri ~sel) 
+       #(enfocus.core/get-cached-snippet ~uri ~sel) 
        true ~args ~@forms)))
   
   
@@ -72,68 +83,75 @@
 
   
 (defmacro wait-for-load [& forms]
-	`(js/setTimeout (fn ~(symbol "check") []
-	                   (if (zero? (deref ~(symbol "enfocus.core/tpl-load-cnt")))
+	`(js/setTimeout (fn check# []
+	                   (if (zero? (deref enfocus.core/tpl-load-cnt))
                       (do ~@forms)
-                      (js/setTimeout #(~(symbol "check")) 10))) 0))   
+                      (js/setTimeout #(check#) 10))) 0))   
   
 
 (defmacro select [& forms]
-  `(~(symbol "enfocus.core/css-select") ~@forms))
+  `(enfocus.core/css-select ~@forms))
 
 (defmacro content [& forms]
-  `(~(symbol "enfocus.core/en-content") ~@forms))
+  `(enfocus.core/en-content ~@forms))
 
 (defmacro html-content [& forms]
-  `(~(symbol "enfocus.core/en-html-content") ~@forms))
+  `(enfocus.core/en-html-content ~@forms))
 
 (defmacro set-attr [& forms] 
-  `(~(symbol "enfocus.core/en-set-attr") ~@forms))
+  `(enfocus.core/en-set-attr ~@forms))
 
 
 (defmacro remove-attr [& forms] 
-  `(~(symbol "enfocus.core/en-remove-attr") ~@forms))
+  `(enfocus.core/en-remove-attr ~@forms))
 
 
 (defmacro add-class [& forms]
-  `(~(symbol "enfocus.core/en-add-class") ~@forms))
+  `(enfocus.core/en-add-class ~@forms))
 
 
 (defmacro remove-class [& forms]
-  `(~(symbol "enfocus.core/en-remove-class") ~@forms))
+  `(enfocus.core/en-remove-class ~@forms))
 
 (defmacro do-> [& forms]
-  `(~(symbol "enfocus.core/en-do->") ~@forms))
+  `(enfocus.core/en-do-> ~@forms))
 
 (defmacro append [& forms]
-  `(~(symbol "enfocus.core/en-append") ~@forms))
+  `(enfocus.core/en-append ~@forms))
 
 (defmacro prepend [& forms]
-  `(~(symbol "enfocus.core/en-prepend") ~@forms))
+  `(enfocus.core/en-prepend ~@forms))
 
 (defmacro after [& forms]
-  `(~(symbol "enfocus.core/en-after") ~@forms))
+  `(enfocus.core/en-after ~@forms))
 
 (defmacro before [& forms]
-  `(~(symbol "enfocus.core/en-before") ~@forms))
+  `(enfocus.core/en-before ~@forms))
 
 (defmacro substitute [& forms]
-  `(~(symbol "enfocus.core/en-substitute") ~@forms))
+  `(enfocus.core/en-substitute ~@forms))
 
 (defmacro remove-node [& forms]
-  `(~(symbol "enfocus.core/en-remove-node") ~@forms))
+  `(enfocus.core/en-remove-node ~@forms))
 
 (defmacro set-style [& forms]
-  `(~(symbol "enfocus.core/en-set-style") ~@forms))
+  `(enfocus.core/en-set-style ~@forms))
 
 (defmacro remove-style [& forms]
-  `(~(symbol "enfocus.core/en-remove-style") ~@forms))
+  `(enfocus.core/en-remove-style ~@forms))
 
 (defmacro add-event [& forms]
-  `(~(symbol "enfocus.core/en-add-event") ~@forms))
-
+  `(enfocus.core/en-add-event ~@forms))
 
 (defmacro remove-event [& forms]
-  `(~(symbol "enfocus.core/en-remove-event") ~@forms))
+  `(enfocus.core/en-remove-event ~@forms))
 
-              
+(defmacro effect [ttime num-steps & forms]
+  (let [incr (int (/ ttime num-steps))]
+  `(enfocus.core/multi-node-proc
+    (fn [pnod#]
+      (let [eff# (fn run# [tm#] 
+                  (when (<= tm# ~ttime) 
+                    (enfocus.macros/at pnod# ~@forms)
+                    (js/setTimeout #(run# (+ tm# ~incr)) ~incr)))]
+        (eff# 0))))))

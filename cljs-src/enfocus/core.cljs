@@ -138,8 +138,8 @@
   (let [nod (@tpl-cache uri)]   
      (when nod [(first nod) (. (second nod) (cloneNode true))]))) 
 
-(defn get-cached-snippit 
-  "returns the cached snippit or creates one and adds it to the
+(defn get-cached-snippet 
+  "returns the cached snippet or creates one and adds it to the
    cache if needed"
   [uri sel]  
   (let [sel-str  (create-sel-str sel)
