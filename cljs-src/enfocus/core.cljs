@@ -409,9 +409,10 @@
 (defn en-resize 
   "resizes the selected elements to a width and height in px
    optional time series data"
-  ([wth hgt] (en-resize wth hgt 0 1))
+  ([wth hgt] (en-resize wth hgt 0 0))
   ([wth hgt ttime step]
-    (let [orig-sym (gensym "orig-size")]
+    (let [orig-sym (gensym "orig-size")
+          steps (if (or (zero? ttime) (zero? step) (<= ttime step)) 1 (/ ttime step))]
       (em/effect step :resize [:resize] 
                  (fn [pnod etime] true
                    (let [csize (style/getSize pnod)
@@ -419,8 +420,8 @@
                          osize (if osize osize (aset pnod (name orig-sym) csize))
                          wth (if (= :curwidth wth) (.width osize) wth)
                          hgt (if (= :curheight hgt) (.height osize) hgt)
-                         wstep (/ (- wth (.width osize)) (/ ttime step))
-                         hstep (/ (- hgt (.height osize)) (/ ttime step))]
+                         wstep (/ (- wth (.width osize)) steps)
+                         hstep (/ (- hgt (.height osize)) steps)]
                      (if (and
                            (or 
                              (zero? wstep)
@@ -442,8 +443,8 @@
                          osize (if osize osize (aset pnod (name orig-sym) csize))
                          wth (if (= :curwidth wth) (.width osize) wth)
                          hgt (if (= :curheight hgt) (.height osize) hgt)
-                         wstep (/ (- wth (.width osize)) (/ ttime step))
-                         hstep (/ (- hgt (.height osize)) (/ ttime step))
+                         wstep (/ (- wth (.width osize)) steps)
+                         hstep (/ (- hgt (.height osize)) steps)
                          wstep (if (neg? wstep) (Math/floor wstep) (Math/ceil wstep))
                          hstep (if (neg? hstep) (Math/floor hstep) (Math/ceil hstep))]
                      (when (or 
