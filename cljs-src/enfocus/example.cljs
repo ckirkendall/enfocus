@@ -65,16 +65,16 @@
                 ["#test14 > *:last-child"] (em/do->
                                              (em/content ":p")
                                              (em/prepend (success)))) 
- 
-(em/defaction test-grid []   
+  
+(em/defaction test-grid []  
               ["#test-content"] (em/content (test-cases))
               ["#test-content tbody tr:nth-of-type(even)"] (em/add-class "even")
               ["#test-content tbody tr"] (em/add-event 
                                            :mouseover 
-                                           #((em/at (em/add-class "highlight")) (.currentTarget %)))
+                                           #((em/add-class "highlight") (.currentTarget %)))
               ["#test-content tbody tr"] (em/add-event 
                                            :mouseout 
-                                           #((em/at (em/remove-class "highlight")) (.currentTarget %)))
+                                           #((em/remove-class "highlight") (.currentTarget %)))
               ["#test-content2"] (em/content (template2 {"bannan" 5 "pineapple" 10}))
               ["#heading1"] (em/set-attr :id "new-heading1")
               ["#heading2"] (em/set-attr :id "new-heading2")
@@ -86,12 +86,16 @@
               ["#test-content5"] (em/remove-style :background :font-size)
               ["#test-content6"] (em/add-event
                                    :mouseover 
-                                   #((em/at (em/fade-out 500 20)) (.currentTarget %)))
+                                   #((em/fade-out 500 20) (.currentTarget %)))
               ["#test-content6"] (em/add-event
-                                   :mouseout
-                                   #((em/at (em/fade-in 500 20)) (.currentTarget %)))
-              )  
-  
+                                   :mouseout 
+                                   #((em/fade-in 500 20) (.currentTarget %)))
+              ["#click"] (em/add-event
+                          :click 
+                          #(em/at js/document
+                               ["#sz-tst"] (em/do-> (em/resize 2 30 500 20)
+                                                    (em/delay 520 (em/resize 200 30 500 20))))))
+    
 ;(em/defaction test-suite [])
  
   

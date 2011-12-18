@@ -4,11 +4,12 @@
             [goog.style :as style]
             [goog.events :as events]
             [goog.dom :as dom]
+            [goog.debug :as debug]
+            [goog.debug.Logger :as glog]
             [goog.events :as events]
             [clojure.string :as string])
   (:require-macros [enfocus.macros :as em]))
 (declare css-syms css-select create-sel-str)
-
 
 
 ;####################################################
@@ -46,7 +47,10 @@
           (style/setStyle obj (name attr) value))
       obj)))
 
+(defn get-eff-prop-name [etype]
+  (str "__ef_effect_" etype))
 
+(defn get-mills [] (. (js/Date.) (getMilliseconds)))
 
 ;####################################################
 ; The following functions are used to transform
@@ -340,29 +344,120 @@
   (multi-node-proc 
     (fn [pnod]
       (doall (map #(events/removeAll pnod (name %)) event-list)))))
-  
+
+
+;####################################################
+; these functions have to do with effects
+;#################################################### 
+
+
+(defn start-effect [pnod etype]
+  (.log js/console (str "start-effect" pnod ":" etype))
+  (let [effs (aget pnod (get-eff-prop-name etype))
+        eff-id (gensym "efid_")]
+    (if effs 
+      (do (swap! effs conj eff-id) eff-id)
+      (do (aset pnod (get-eff-prop-name etype) (atom #{eff-id})) eff-id))))
+
+(defn check-effect [pnod etype sym]
+  (let [effs (aget pnod (get-eff-prop-name etype))]
+    ;(.log js/console (pr-str "check-effect" pnod ":" etype ":" sym ":" effs ":" (get-eff-prop-name etype)))
+    (if (and effs (contains? @effs sym)) true false)))
+
+(defn finish-effect [pnod etype sym]
+  (.log js/console (str "finish-effect" pnod ":" etype ":" sym))
+  (let [effs (aget pnod (get-eff-prop-name etype))]
+    (when effs (swap! effs disj sym))))
+ 
+
+;####################################################
+; effect based transforms
+;####################################################
+
+(defn en-stop-effect [& etypes]
+  (fn [pnod]
+    (.log js/console (pr-str "stop-effect" pnod ":" etypes))
+    (doall (map #(aset pnod (get-eff-prop-name %) (atom #{})) etypes)))) 
+
 
 (defn en-fade-out 
   "fade the selected nodes over a set of steps"
-  [ttime steps]
-  (let [incr (/ 1 steps)]
-    (em/effect  ttime steps
-             (fn [pnod]
-               (let [op (style/getOpacity pnod)]
-                 (cond
-                   (= "" op) (style/setOpacity pnod (- 1 incr))
-                   (< 0 op) (style/setOpacity pnod (- op incr))))))))
- 
+  [ttime step]
+  (let [incr (/ 1 (/ ttime step))]
+    (em/effect step :fade-out [:fade-in]
+               (fn [pnod etime] 
+                 (let [op (style/getOpacity pnod)] (<= op 0)))
+               (fn [pnod]
+                 (let [op (style/getOpacity pnod)]
+                   (cond
+                     (= "" op) (style/setOpacity pnod (- 1 incr))
+                     (< 0 op) (style/setOpacity pnod (- op incr))))))))
+
 (defn en-fade-in  
   "fade the selected nodes over a set of steps"
-  [ttime steps]
-  (let [incr  (/ 1 steps)]
-    (em/effect  ttime steps
-             (fn [pnod]
-               (let [op (style/getOpacity pnod)] 
-                 (cond
-                   (= "" op) (style/setOpacity pnod incr)
-                   (> 1 op) (style/setOpacity pnod (+ op incr))))))))
+  [ttime step]
+  (let [incr (/ 1 (/ ttime step))]
+    (em/effect step :fade-in [:fade-out]
+               (fn [pnod etime] 
+                 (let [op (style/getOpacity pnod)] (>= op 1)))
+               (fn [pnod]
+                 (let [op (style/getOpacity pnod)]  
+                   (cond
+                     (= "" op) (style/setOpacity pnod incr)
+                     (> 1 op) (style/setOpacity pnod (+ op incr))))))))
+
+(defn en-resize 
+  "resizes the selected elements to a width and height in px
+   optional time series data"
+  ([wth hgt] (en-resize wth hgt 0 1))
+  ([wth hgt ttime step]
+    (let [orig-sym (gensym "orig-size")]
+      (em/effect step :resize [:resize] 
+                 (fn [pnod etime] true
+                   (let [csize (style/getSize pnod)
+                         osize (aget pnod (name orig-sym))
+                         osize (if osize osize (aset pnod (name orig-sym) csize))
+                         wth (if (= :curwidth wth) (.width osize) wth)
+                         hgt (if (= :curheight hgt) (.height osize) hgt)
+                         wstep (/ (- wth (.width osize)) (/ ttime step))
+                         hstep (/ (- hgt (.height osize)) (/ ttime step))]
+                     (if (and
+                           (or 
+                             (zero? wstep)
+                             (and (neg? wstep) (>= wth (.width csize)))
+                             (and (pos? wstep) (<= wth (.width csize))))
+                           (or 
+                             (zero? hstep)
+                             (and (neg? hstep) (>= hgt (.height csize)))
+                             (and (pos? hstep) (<= hgt (.height csize)))))
+                       (do 
+                         (aset pnod (name orig-sym) nil) 
+                         (style/setWidth pnod wth)
+                         (style/setHeight pnod hgt)
+                         true)
+                       false)))
+                 (fn [pnod]
+                   (let [csize (style/getSize pnod)
+                         osize (aget pnod (name orig-sym))
+                         osize (if osize osize (aset pnod (name orig-sym) csize))
+                         wth (if (= :curwidth wth) (.width osize) wth)
+                         hgt (if (= :curheight hgt) (.height osize) hgt)
+                         wstep (/ (- wth (.width osize)) (/ ttime step))
+                         hstep (/ (- hgt (.height osize)) (/ ttime step))
+                         wstep (if (neg? wstep) (Math/floor wstep) (Math/ceil wstep))
+                         hstep (if (neg? hstep) (Math/floor hstep) (Math/ceil hstep))]
+                     (when (or 
+                             (and (neg? wstep) (< wth (.width csize)))
+                             (and (pos? wstep) (> wth (.width csize))))
+                       (style/setWidth pnod (+ (.width csize) wstep)))
+                     (when (or 
+                             (and (neg? hstep) (< hgt (.height csize)))
+                             (and (pos? hstep) (> hgt (.height csize))))
+                       (style/setHeight pnod (+ (.height csize) hstep)))))))))
+
+
+                   
+                   
  
 ;##################################################################
 ; functions involved in processing the selectors

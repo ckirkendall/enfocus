@@ -86,3 +86,10 @@ th{
 	width: 200px;
 	margin-top: 20px;
 }
+
+#sz-tst {
+	width: 10px;
+	height: 10px;
+	overflow: hidden;
+	background-color: #009900;
+}

@@ -146,7 +146,7 @@
 (defmacro remove-event [& forms]
   `(enfocus.core/en-remove-event ~@forms))
 
-(defmacro effect [ttime num-steps & forms]
+(defmacro timed-effect [ttime num-steps & forms]
   `(enfocus.core/multi-node-proc
     (fn [pnod#]
       (let [incr# (~(symbol "Math/ceil") (/ ~ttime ~num-steps))
@@ -154,10 +154,38 @@
                    (when (<= tm# ~ttime) 
                     ((enfocus.macros/at ~@forms) pnod#)
                     (js/setTimeout #(run# (+ tm# incr#)) incr#)))]
-        (eff# 0)))))
+        (eff# 0))))) 
+ 
+(defmacro effect [step etype bad-etypes test-func & forms]
+  `(enfocus.core/multi-node-proc
+    (fn [pnod#]
+      ((enfocus.macros/stop-effect ~@bad-etypes) pnod#)
+      (let [start# (enfocus.core/get-mills)
+            eff-id# (enfocus.core/start-effect pnod# ~etype) 
+            eff# (fn run# [] 
+                   (if (and
+                         (enfocus.core/check-effect pnod# ~etype eff-id#)
+                         (not (~test-func pnod# (-  (enfocus.core/get-mills) start#)) ))
+                     (do
+                       ((enfocus.macros/at ~@forms) pnod#)
+                       (js/setTimeout #(run#) ~step))
+                     (enfocus.core/finish-effect pnod# ~etype eff-id#)
+                     ))]
+        (eff# 0)))))  
 
+(defmacro stop-effect [& etypes]
+  `(enfocus.core/en-stop-effect ~@etypes))  
+      
 (defmacro fade-out [ttime num-steps]
   `(enfocus.core/en-fade-out ~ttime ~num-steps))  
 
 (defmacro fade-in [ttime num-steps]
   `(enfocus.core/en-fade-in ~ttime ~num-steps)) 
+
+(defmacro delay [ttime & forms]
+  `(enfocus.core/multi-node-proc
+    (fn [pnod#] 
+      (js/setTimeout #((enfocus.macros/at ~@forms) pnod#) ~ttime))))
+
+(defmacro resize [width height ttime step]
+  `(enfocus.core/en-resize ~width ~height ~ttime ~step)) 
