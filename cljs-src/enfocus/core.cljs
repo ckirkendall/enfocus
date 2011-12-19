@@ -498,8 +498,6 @@
                          ypos (if (= :cury ypos) (.y opos) ypos)
                          xstep (/ (- xpos (.x opos)) steps)
                          ystep (/ (- ypos (.y opos)) steps)
-                         xstep (if (neg? xstep) (Math/floor xstep) (Math/ceil xstep))
-                         ystep (if (neg? ystep) (Math/floor ystep) (Math/ceil ystep))
                          clone (.clone cpos)]
                      (when (or 
                              (and (neg? xstep) (< xpos (.x cpos)))
