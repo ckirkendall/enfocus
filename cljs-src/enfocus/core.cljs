@@ -444,9 +444,7 @@
                          wth (if (= :curwidth wth) (.width osize) wth)
                          hgt (if (= :curheight hgt) (.height osize) hgt)
                          wstep (/ (- wth (.width osize)) steps)
-                         hstep (/ (- hgt (.height osize)) steps)
-                         wstep (if (neg? wstep) (Math/floor wstep) (Math/ceil wstep))
-                         hstep (if (neg? hstep) (Math/floor hstep) (Math/ceil hstep))]
+                         hstep (/ (- hgt (.height osize)) steps)]
                      (when (or 
                              (and (neg? wstep) (< wth (.width csize)))
                              (and (pos? wstep) (> wth (.width csize))))
