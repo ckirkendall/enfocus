@@ -455,9 +455,61 @@
                              (and (neg? hstep) (< hgt (.height csize)))
                              (and (pos? hstep) (> hgt (.height csize))))
                        (style/setHeight pnod (+ (.height csize) hstep)))))))))
+ 
 
-
-                   
+(defn en-move
+  "moves the selected elements to a x and y in px
+   optional time series data "
+  ([xpos ypos] (en-move xpos ypos 0 0))
+  ([xpos ypos ttime step]
+    (let [orig-sym (gensym "orig-pos")
+          steps (if (or (zero? ttime) (zero? step) (<= ttime step)) 1 (/ ttime step))]
+      (em/effect step :move [:move] 
+                 (fn [pnod etime] true
+                   (let [cpos (style/getPosition pnod)
+                         opos (aget pnod (name orig-sym))
+                         opos (if opos opos (aset pnod (name orig-sym) cpos))
+                         xpos (if (= :curx xpos) (.x opos) xpos)
+                         ypos (if (= :cury ypos) (.y opos) ypos)
+                         xstep (/ (- xpos (.x opos)) steps)
+                         ystep (/ (- ypos (.y opos)) steps)
+                         clone (.clone cpos)]
+                     (if (and
+                           (or 
+                             (zero? xstep)
+                             (and (neg? xstep) (>= xpos (.x cpos)))
+                             (and (pos? xstep) (<= xpos (.x cpos))))
+                           (or 
+                             (zero? ystep)
+                             (and (neg? ystep) (>= ypos (.y cpos)))
+                             (and (pos? ystep) (<= ypos (.y cpos)))))
+                       (do 
+                         (aset pnod (name orig-sym) nil) 
+                         (set! (.x clone) xpos)
+                         (set! (.y clone) ypos)
+                         (style/setPosition pnod (.x clone) (.y clone))
+                         true)
+                       false)))
+                 (fn [pnod]
+                   (let [cpos (style/getPosition pnod)
+                         opos (aget pnod (name orig-sym))
+                         opos (if opos opos (aset pnod (name orig-sym) cpos))
+                         xpos (if (= :curx xpos) (.x opos) xpos)
+                         ypos (if (= :cury ypos) (.y opos) ypos)
+                         xstep (/ (- xpos (.x opos)) steps)
+                         ystep (/ (- ypos (.y opos)) steps)
+                         xstep (if (neg? xstep) (Math/floor xstep) (Math/ceil xstep))
+                         ystep (if (neg? ystep) (Math/floor ystep) (Math/ceil ystep))
+                         clone (.clone cpos)]
+                     (when (or 
+                             (and (neg? xstep) (< xpos (.x cpos)))
+                             (and (pos? xstep) (> xpos (.x cpos))))
+                       (set! (.x clone) (+ (.x cpos) xstep)))
+                     (when (or 
+                             (and (neg? ystep) (< ypos (.y cpos)))
+                             (and (pos? ystep) (> ypos (.y cpos))))
+                       (set! (.y clone) (+ (.y cpos) ystep)))
+                     (style/setPosition pnod (.x clone) (.y clone))))))))               
                    
  
 ;##################################################################

@@ -189,3 +189,6 @@
 
 (defmacro resize [width height ttime step]
   `(enfocus.core/en-resize ~width ~height ~ttime ~step)) 
+
+(defmacro move [xpos ypos ttime step]
+  `(enfocus.core/en-move ~xpos ~ypos ~ttime ~step)) 

@@ -94,10 +94,15 @@
                           :click 
                           #(em/at js/document
                                ["#sz-tst"] (em/do-> (em/resize 2 30 500 20)
-                                                    (em/delay 520 (em/resize 200 30 500 20))))))
+                                                    (em/delay 520 (em/resize 200 30 500 20)))))
+              ["#mclick"] (em/add-event
+                          :click 
+                          #(em/at js/document
+                               ["#mv-tst"] (em/do-> (em/move 300 300 500 20)
+                                                    (em/delay 520 (em/move 0 0 500 20))))))
     
 ;(em/defaction test-suite [])
- 
+  
   
   
 (defn funtimes [msg]   

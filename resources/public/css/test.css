@@ -93,3 +93,12 @@ th{
 	overflow: hidden;
 	background-color: #009900;
 }
+
+#mv-tst {
+	position:absolute;
+	width:10px;
+	height: 10px;
+	top: 0px;
+	left: 0px;	
+	background-color: #009900;
+}
