@@ -1,6 +1,6 @@
 (ns enfocus.example
   (:require [enfocus.core :as ef])
-  (:require-macros [enfocus.macros :as em]))
+  (:require-macros [enfocus.macros :as em])) 
   
 
 

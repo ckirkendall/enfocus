@@ -1,4 +1,4 @@
-(ns enfocus.core
+(ns enfocus.core 
   (:require [goog.net.XhrIo :as xhr]
             [goog.dom.query :as query]
             [goog.style :as style]
