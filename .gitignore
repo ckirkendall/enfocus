@@ -6,4 +6,4 @@ target/*
 .metadata
 .project
 .classpath
-resources/public/cljs/
+/sample/resources/public/cljs/
