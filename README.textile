@@ -96,8 +96,10 @@ New Transformations
   remove-style	     (remove-style :font-size :background)
   add-event	     (add-event :mouseover (fn [event] ...))
   remove-event	     (remove-event :mouseover :mouseout)
-  fade-in	     (fade-in time num-steps)
-  fade-out           (fade-out time num-steps)
+  fade-in	     (fade-in time step-size)
+  fade-out           (fade-out time step-size)
+  resize	     (resize width height ttime step-size)
+  move		     (move x y ttime step-size)
 </pre>
 
 Currently there are several transformation that are supported by Enlive but not Enfocus. (Patches very welcome!!)
@@ -110,6 +112,31 @@ Currently there are several transformation that are supported by Enlive but not 
                           selector2 transformation2)
   move               (move [:.footnote] [:#footnotes] content)
 </pre>
+
+h2. Contributing
+ * Download lieningen:https://github.com/technomancy/leiningen
+ * Download & Install cljs-watch:https://github.com/ibdknox/cljs-watch
+
+h3. Compile ClojureScript
+<pre>
+ git clone git://github.com/ckirkendall/enfocus.git
+ cd enfocus/project
+ cljs-watch cljs-src {:output-dir "../sample/resources/public/cljs" \
+                      :output-to "../sample/resources/public/cljs/enfocus.js"}' 
+</pre>
+
+h3. Viewing the Test Page
+<pre>
+ cd enfocus/sample
+ lein deps
+ lein repl
+ =>(use 'ring.adapter.jetty)  
+ =>(use 'enfocus.ring)
+ =>(run-jetty app {:port 3000}) 
+</pre>
+
+http://localhost:3000/test.html
+ 
 
 h2. Special Thanks!
 
