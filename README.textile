@@ -135,7 +135,8 @@ h4. Viewing the Test Page
  =>(run-jetty app {:port 3000}) 
 </pre>
 
-http://localhost:3000/test.html
+Open your browser to:
+"http://localhost:3000/test.html":http://localhost:3000/test.html
  
 
 h2. Special Thanks!
