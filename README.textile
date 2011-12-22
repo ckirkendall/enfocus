@@ -116,13 +116,14 @@ Currently there are several transformation that are supported by Enlive but not 
 h2. Contributing
  * Download "lieningen":https://github.com/technomancy/leiningen
  * Download & Install "cljs-watch":https://github.com/ibdknox/cljs-watch
+ * Make sure that you have your CLOJURESCRIPT_HOME path setup correctly
+ * Also ensure that your lib has the goog-jar.jar that comes with cljs-watch
 
 h4. Compile ClojureScript
 <pre>
  git clone git://github.com/ckirkendall/enfocus.git
  cd enfocus/project
- cljs-watch cljs-src '{:output-dir "../sample/resources/public/cljs" \
-                      :output-to "../sample/resources/public/cljs/enfocus.js"}' 
+ cljs-watch cljs-src/ '{:output-to "../sample/resources/public/cljs/enfocus.js"}'
 </pre>
 
 h4. Viewing the Test Page
