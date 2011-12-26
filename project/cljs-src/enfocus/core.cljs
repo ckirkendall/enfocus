@@ -15,6 +15,11 @@
 ;####################################################
 ; Utility functions
 ;####################################################
+(def debug true)
+
+(defn log-debug [mesg] 
+  (when (and debug js/console)
+    (.log js/console mesg)))  
 
 (defn node? [tst]  
   (dom/isNodeLike tst))
@@ -378,7 +383,7 @@
 
 
 (defn start-effect [pnod etype]
-  (.log js/console (str "start-effect" pnod ":" etype))
+  (log-debug (str "start-effect" pnod ":" etype))
   (let [effs (aget pnod (get-eff-prop-name etype))
         eff-id (gensym "efid_")]
     (if effs 
@@ -387,11 +392,10 @@
 
 (defn check-effect [pnod etype sym]
   (let [effs (aget pnod (get-eff-prop-name etype))]
-    ;(.log js/console (pr-str "check-effect" pnod ":" etype ":" sym ":" effs ":" (get-eff-prop-name etype)))
     (if (and effs (contains? @effs sym)) true false)))
 
 (defn finish-effect [pnod etype sym]
-  (.log js/console (str "finish-effect" pnod ":" etype ":" sym))
+  (log-debug (str "finish-effect" pnod ":" etype ":" sym))
   (let [effs (aget pnod (get-eff-prop-name etype))]
     (when effs (swap! effs disj sym))))
  
@@ -402,7 +406,7 @@
 
 (defn en-stop-effect [& etypes]
   (fn [pnod]
-    (.log js/console (pr-str "stop-effect" pnod ":" etypes))
+    (log-debug (pr-str "stop-effect" pnod ":" etypes))
     (doall (map #(aset pnod (get-eff-prop-name %) (atom #{})) etypes)))) 
 
 
