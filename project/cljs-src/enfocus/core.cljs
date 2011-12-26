@@ -18,8 +18,8 @@
 (def debug true)
 
 (defn log-debug [mesg] 
-  (when (and debug js/console)
-    (.log js/console mesg)))  
+  (when (and debug (not (= (.console js/window) js/undefined)))
+    (.log js/console mesg)))
 
 (defn node? [tst]  
   (dom/isNodeLike tst))
