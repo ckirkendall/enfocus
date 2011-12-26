@@ -52,6 +52,29 @@
 
 (defn get-mills [] (. (js/Date.) (getMilliseconds)))
 
+
+(defn child-of? 
+  "returns true if the node(child) is a child of parent"
+  [parent child]
+  (cond 
+    (not child) false
+    (identical? parent child) false
+    (identical? (.parentNode child) parent) true
+    :else (recur parent (.parentNode child))))
+    
+
+(defn mouse-enter-leave 
+  "this is used to build cross browser versions of
+   :mouseenter and :mouseleave events"
+  [func]
+  (fn [e]
+    (let [re (.relatedTarget e)
+          this (.currentTarget e)]
+      (when (and
+              (not (identical? re this))
+              (not (child-of? this re)))
+        (func e)))))
+
 ;####################################################
 ; The following functions are used to transform
 ; the dom structure
@@ -334,9 +357,12 @@
 (defn en-add-event 
   "adding an event to the selected nodes"
   [event func]
-  (multi-node-proc 
-    (fn [pnod]
-      (events/listen pnod (name event) func))))
+  (cond 
+    (= :mouseenter event) (en-add-event :mouseover (mouse-enter-leave func))
+    (= :mouseleave event) (en-add-event :mouseout (mouse-enter-leave func))
+    :else (multi-node-proc  
+            (fn [pnod]
+              (events/listen pnod (name event) func)))))
   
 (defn en-remove-event 
   "adding an event to the selected nodes"

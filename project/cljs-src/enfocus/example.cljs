@@ -72,7 +72,7 @@
               ["#test-content tbody tr"] (em/add-event 
                                            :mouseover 
                                            #((em/add-class "highlight") (.currentTarget %)))
-              ["#test-content tbody tr"] (em/add-event 
+              ["#test-content tbody tr"] (em/add-event  
                                            :mouseout 
                                            #((em/remove-class "highlight") (.currentTarget %)))
               ["#test-content2"] (em/content (template2 {"bannan" 5 "pineapple" 10}))
@@ -85,10 +85,16 @@
               ["#test-content5"] (em/set-style :background "#dd0000" :font-size "10px")
               ["#test-content5"] (em/remove-style :background :font-size)
               ["#test-content6"] (em/add-event
-                                   :mouseover 
+                                   :mouseover
                                    #((em/fade-out 500 20) (.currentTarget %)))
               ["#test-content6"] (em/add-event
                                    :mouseout 
+                                   #((em/fade-in 500 20) (.currentTarget %)))
+              ["#test-content6_5"] (em/add-event
+                                   :mouseenter
+                                   #((em/fade-out 500 20) (.currentTarget %)))
+              ["#test-content6_5"] (em/add-event
+                                   :mouseleave 
                                    #((em/fade-in 500 20) (.currentTarget %)))
               ["#click"] (em/add-event
                           :click 
