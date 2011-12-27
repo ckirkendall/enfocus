@@ -1,3 +1,4 @@
+
 *.jar
 classes/*
 target/*
@@ -7,5 +8,3 @@ target/*
 .project
 .classpath
 *.js
-/sample/resources/public/cljs/*
-project/resources/public/cljs/*
