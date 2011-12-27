@@ -111,8 +111,8 @@
   
   
 
-(defn funtimes [msg]   
-  ((em/add-event :resize #(js/alert (str "you resized your window:" %))) js/window)
+(defn funtimes [msg]
+  (em/at js/window (em/add-event :resize #(js/alert (str "you resized your window:" %))))
   (em/at js/document
       [:.heading (ef/attr= :foo "true")] (em/content msg))
   (em/wait-for-load (test-grid)))   

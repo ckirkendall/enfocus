@@ -76,7 +76,7 @@
 
 (defmacro at [nod & forms]
     (if (= 1 (count forms)) 
-      `(fn [pnod#] (~@forms pnod#))
+      `(~@forms ~nod)
       (let [pnode-sym (gensym "pnod")
             new-form (create-transform-call "" pnode-sym forms)]
         `((fn [~pnode-sym] ~@new-form ~pnode-sym) ~nod))))
