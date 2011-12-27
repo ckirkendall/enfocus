@@ -4,6 +4,7 @@
             [goog.style :as style]
             [goog.events :as events]
             [goog.dom :as dom]
+            [goog.dom.ViewportSizeMonitor :as vsmonitor]
             [goog.debug :as debug]
             [goog.debug.Logger :as glog]
             [goog.events :as events]
@@ -33,6 +34,7 @@
   (cond
     (nil? nl) []
     (node? nl) [nl]
+    (identical? js/window nl) [nl]
     (or (instance? js/Array nl) (coll? nl)) nl
     (nodelist? nl) (for [x (range 0 (.length nl))]
                     (aget nl x))))
@@ -359,6 +361,18 @@
       (doall 
         (map #(. (.style pnod) (removeProperty (name %))) values)))))
 
+(def view-port-monitor (atom nil))
+
+(defn get-vp-monitor
+  "needed to support window :resize"
+  [] 
+  (if @view-port-monitor @view-port-monitor
+    (do
+      (swap! view-port-monitor #(new goog.dom.ViewportSizeMonitor))
+      (log-debug @view-port-monitor)
+      @view-port-monitor)))
+      
+
 (defn en-add-event 
   "adding an event to the selected nodes"
   [event func]
@@ -367,7 +381,9 @@
     (= :mouseleave event) (en-add-event :mouseout (mouse-enter-leave func))
     :else (multi-node-proc  
             (fn [pnod]
-              (events/listen pnod (name event) func)))))
+              (if (and (= :resize event) (identical? js/window pnod)) ;support window resize
+                (events/listen (get-vp-monitor) "resize" func)
+                (events/listen pnod (name event) func))))))
   
 (defn en-remove-event 
   "adding an event to the selected nodes"

@@ -110,8 +110,9 @@
 ;(em/defaction test-suite [])
   
   
-  
+
 (defn funtimes [msg]   
+  ((em/add-event :resize #(js/alert (str "you resized your window:" %))) js/window)
   (em/at js/document
       [:.heading (ef/attr= :foo "true")] (em/content msg))
   (em/wait-for-load (test-grid)))   
