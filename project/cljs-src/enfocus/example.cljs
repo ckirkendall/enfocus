@@ -3,7 +3,7 @@
   (:require-macros [enfocus.macros :as em])) 
   
 
-
+(comment
 (em/defsnippet snippet1 "templates/template1.html" [:tbody :> 'first-child] 
                [fruit quantity]   
                [:tr :> 'first-child] (em/content fruit)
@@ -14,7 +14,7 @@
                 [:thead :tr :> 'last-child] (em/content "quantity")
                 [:tbody] (em/content
                            (map #(snippet1 % (fruit-data %)) (keys fruit-data))))
-    
+)
     
 
 (em/defsnippet snippet2 "templates/template1.html" ["tbody > *:first-child"] 
@@ -62,9 +62,9 @@
                 ["#test13 > *:last-child"] (em/do-> 
                                              (em/content "a:")
                                              (em/append (success)))
-                ["#test14 > *:last-child"] (em/do->
+                ["#test14 > *:last-child"] (em/do->  
                                              (em/content ":p")
-                                             (em/prepend (success)))) 
+                                             (em/prepend (success))))  
   
 (em/defaction test-grid []  
               ["#test-content"] (em/content (test-cases))
@@ -75,12 +75,12 @@
               ["#test-content tbody tr"] (em/add-event  
                                            :mouseout 
                                            #((em/remove-class "highlight") (.currentTarget %)))
-              ["#test-content2"] (em/content (template2 {"bannan" 5 "pineapple" 10}))
+              ["#test-content2"] (em/content (template2 {"banana" 5 "pineapple" 10 "apple" 5}))
               ["#heading1"] (em/set-attr :id "new-heading1")
               ["#heading2"] (em/set-attr :id "new-heading2")
-              ["#test-content2 tfoot tr > *:last-child"] (em/content (str 15))
-              [:#test-content3] (em/content (template1 {"apple" 5 "pear" 6}))
-              [:#test-content3 :tfoot :tr :> 'last-child] (em/content (str 11))
+              ["#test-content2 tfoot tr > *:last-child"] (em/content (str 20))
+              ;[:#test-content3] (em/content (template {"apple" 5 "pear" 6}))
+              ;[:#test-content3 :tfoot :tr :> 'last-child] (em/content (str 11))
               ["#test-content4"] (em/set-style :background "#00dd00" :font-size "10px")
               ["#test-content5"] (em/set-style :background "#dd0000" :font-size "10px")
               ["#test-content5"] (em/remove-style :background :font-size)
@@ -101,7 +101,7 @@
                           #(em/at js/document
                                ["#sz-tst"] (em/do-> (em/resize 2 30 500 20)
                                                     (em/delay 520 (em/resize 200 30 500 20)))))
-              ["#mclick"] (em/add-event
+              ["#mclick"] (em/add-event  
                           :click 
                           #(em/at js/document
                                ["#mv-tst"] (em/do-> (em/move 300 300 500 20)

@@ -83,10 +83,10 @@
 
   
 (defmacro wait-for-load [& forms]
-	`(js/setTimeout (fn check# []
+	`(enfocus.core/setTimeout (fn check# []
 	                   (if (zero? (deref enfocus.core/tpl-load-cnt))
                       (do ~@forms)
-                      (js/setTimeout #(check#) 10))) 0))   
+                      (enfocus.core/setTimeout #(check#) 10))) 0))   
   
 
 (defmacro select [& forms]
@@ -153,7 +153,7 @@
             eff# (fn run# [tm#] 
                    (when (<= tm# ~ttime) 
                     ((enfocus.macros/at ~@forms) pnod#)
-                    (js/setTimeout #(run# (+ tm# incr#)) incr#)))]
+                    (enfocus.core/setTimeout #(run# (+ tm# incr#)) incr#)))]
         (eff# 0))))) 
  
 (defmacro effect [step etype bad-etypes test-func & forms]
@@ -168,7 +168,7 @@
                          (not (~test-func pnod# (-  (enfocus.core/get-mills) start#)) ))
                      (do
                        ((enfocus.macros/at ~@forms) pnod#)
-                       (js/setTimeout #(run#) ~step))
+                       (enfocus.core/setTimeout #(run#) ~step))
                      (enfocus.core/finish-effect pnod# ~etype eff-id#)
                      ))]
         (eff# 0)))))  
@@ -185,7 +185,7 @@
 (defmacro delay [ttime & forms]
   `(enfocus.core/multi-node-proc
     (fn [pnod#] 
-      (js/setTimeout #((enfocus.macros/at ~@forms) pnod#) ~ttime))))
+      (enfocus.core/setTimeout #((enfocus.macros/at ~@forms) pnod#) ~ttime))))
 
 (defmacro resize [width height ttime step]
   `(enfocus.core/en-resize ~width ~height ~ttime ~step)) 

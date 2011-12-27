@@ -8,12 +8,13 @@
             [goog.debug :as debug]
             [goog.debug.Logger :as glog]
             [goog.events :as events]
+            [goog.async.Delay :as gdelay]
             [clojure.string :as string])
-  (:require-macros [enfocus.macros :as em]))
+  (:require-macros [enfocus.macros :as em])) 
 (declare css-syms css-select create-sel-str)
 
 
-;####################################################
+;#################################################### 
 ; Utility functions
 ;####################################################
 (def debug true)
@@ -21,6 +22,9 @@
 (defn log-debug [mesg] 
   (when (and debug (not (= (.console js/window) js/undefined)))
     (.log js/console mesg)))
+
+(defn setTimeout [func ttime]
+  (. (new goog.async.Delay func ttime) (start))) 
 
 (defn node? [tst]  
   (dom/isNodeLike tst))
@@ -49,10 +53,18 @@
 (defn- style-set
   "Sets property name to a value on a javascript object
 	Returns the original object (js-set obj :attr value) "
-  ([obj values]
+  [obj values]
     (do (doseq [[attr value] (apply hash-map values)]
           (style/setStyle obj (name attr) value))
-      obj)))
+      obj))
+
+(defn- style-remove
+  "removes the property value from an elements style obj."
+  [obj values]
+  (doseq [attr values]
+    (if (.IE goog/userAgent) 
+      (style/setStyle obj (name attr) "")
+      (.  (.style obj) (removeProperty (name attr))))))
 
 (defn get-eff-prop-name [etype]
   (str "__ef_effect_" etype))
@@ -164,7 +176,7 @@
                      #(do 
                         (callback req) 
                         (swap! tpl-load-cnt dec)))
-      (. req (send uri "GET")))))
+      (. req (send uri "GET"))))) 
 
 
 (defn get-cached-dom 
@@ -358,8 +370,7 @@
   [& values]
   (multi-node-proc 
     (fn [pnod]
-      (doall 
-        (map #(. (.style pnod) (removeProperty (name %))) values)))))
+      (style-remove pnod values))))
 
 (def view-port-monitor (atom nil))
 
@@ -427,7 +438,7 @@
 
 
 (defn en-fade-out 
-  "fade the selected nodes over a set of steps"
+  "fade the selected nodes over a set of steps" 
   [ttime step]
   (let [incr (/ 1 (/ ttime step))]
     (em/effect step :fade-out [:fade-in]
