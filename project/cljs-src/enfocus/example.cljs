@@ -15,7 +15,11 @@
                 [:tbody] (em/content
                            (map #(snippet1 % (fruit-data %)) (keys fruit-data))))
 )
-    
+   
+(defn test-callback [pnods]
+  (em/at pnods (em/do-> 
+                 (em/content "callback successful")
+                 (em/set-style :color "#fff"))))
 
 (em/defsnippet snippet2 "templates/template1.html" ["tbody > *:first-child"] 
                [fruit quantity] 
@@ -66,7 +70,7 @@
                                              (em/content ":p")
                                              (em/prepend (success))))  
   
-(em/defaction test-grid []  
+(em/defaction test-grid []    
               ["#test-content"] (em/content (test-cases))
               ["#test-content tbody tr:nth-of-type(even)"] (em/add-class "even")
               ["#test-content tbody tr"] (em/add-event 
@@ -94,18 +98,19 @@
                                    :mouseenter
                                    #((em/fade-out 500 20) (.currentTarget %)))
               ["#test-content6_5"] (em/add-event
-                                   :mouseleave 
+                                   :mouseleave  
                                    #((em/fade-in 500 20) (.currentTarget %)))
               ["#click"] (em/add-event
                           :click 
                           #(em/at js/document
-                               ["#sz-tst"] (em/do-> (em/resize 2 30 500 20)
-                                                    (em/delay 520 (em/resize 200 30 500 20)))))
+                               ["#sz-tst"] (em/chain 
+                                             (em/resize 2 30 500 20)
+                                             (em/resize 200 30 500 20 test-callback))))
               ["#mclick"] (em/add-event  
                           :click 
                           #(em/at js/document
-                               ["#mv-tst"] (em/do-> (em/move 300 300 500 20)
-                                                    (em/delay 520 (em/move 0 0 500 20))))))
+                               ["#mv-tst"] (em/move 300 305 500 20
+                                                    (em/move 0 0 500 20)))))
     
 ;(em/defaction test-suite [])
   
