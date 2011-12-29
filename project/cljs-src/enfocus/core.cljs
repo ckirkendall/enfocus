@@ -43,7 +43,6 @@
     (nodelist? nl) (for [x (range 0 (.length nl))]
                     (aget nl x))))
 
-
 (defn- flatten-nodes-coll [values]
   "takes a set of nodes and nodelists and flattens them"
   (mapcat #(cond (string? %) [(dom/createTextNode %)]
@@ -96,6 +95,18 @@
 
 (defn pix-round [step]
   (if (neg? step) (Math/floor step) (Math/ceil step)))
+
+(defn add-map-attrs 
+  ([elem ats]
+   (when elem 
+     (when (map? ats)
+       (do
+         (doseq [[k v] ats]
+           (add-map-attrs elem k v))
+         elem))))
+  ([elem k v]
+	   (. elem (setAttribute (name k) v))
+   elem))
 
 ;####################################################
 ; The following functions are used to transform
@@ -395,6 +406,18 @@
   (chainable-standard  
     (fn [pnod]
       (dom/removeNode pnod))))
+
+(defn en-wrap 
+  "wrap and element in a new element defined as :div {:class 'temp'}"
+  [elm mattr]
+  (chainable-standard
+    (fn [pnod]
+      (let [elem (dom/createElement (name elm))]
+        (add-map-attrs elem mattr)
+        (em/at elem (em/content (.cloneNode pnod true)))
+        (em/at pnod (em/do-> (em/after elem)
+                             (em/remove-node)))))))
+  
 
 (defn en-set-style 
   "set a list of style elements from the selected nodes"

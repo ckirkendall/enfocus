@@ -140,6 +140,9 @@
 (defmacro remove-node [& forms]
   `(enfocus.core/en-remove-node ~@forms))
 
+(defmacro wrap [elm mattrs]
+  `(enfocus.core/en-wrap ~elm ~mattrs))
+
 (defmacro clone-for [[sym lst] & forms]
   `(enfocus.core/chainable-standard 
     (fn [pnod#]

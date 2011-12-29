@@ -111,3 +111,8 @@ th{
 	left: 0px;	
 	background-color: #009900;
 }
+
+#test15 > td:last-child {
+	color: #dd0000;	
+	font-weight: bold;
+}

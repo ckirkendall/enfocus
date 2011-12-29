@@ -92,6 +92,7 @@ Supported Enlive Transformations
                      or (clone-for [item items] 
                           selector1 transformation1
                           selector2 transformation2)
+  wrap               (wrap :div) or (wrap :div {:class "foo"}) 
 </pre>
 
 New Transformations
@@ -116,7 +117,6 @@ New Transformations
 
 Currently there are several transformation that are supported by Enlive but not Enfocus. (Patches very welcome!!)
 <pre>
-  wrap               (wrap :div) or (wrap :div {:class "foo"}) 
   unwrap             unwrap
   move               (move [:.footnote] [:#footnotes] content)
 </pre>
