@@ -76,10 +76,16 @@
 
 (defmacro at [nod & forms]
     (if (= 1 (count forms)) 
-      `(~@forms ~nod)
+      `(do (~@forms ~nod) ~nod)
       (let [pnode-sym (gensym "pnod")
             new-form (create-transform-call "" pnode-sym forms)]
-        `((fn [~pnode-sym] ~@new-form ~pnode-sym) ~nod))))
+        `(let [nods# (enfocus.core/nodes->coll ~nod)] 
+           (doall (map (fn [~pnode-sym] ~@new-form ~pnode-sym) nods#))
+           ~nod))))
+
+(defmacro transform 
+  ([nod trans] `(enfocus.macros/at ~nod ~trans))
+  ([nod sel trans] `(enfocus.macros/at ~nod ~sel ~trans)))
 
   
 (defmacro wait-for-load [& forms]
@@ -133,6 +139,23 @@
 
 (defmacro remove-node [& forms]
   `(enfocus.core/en-remove-node ~@forms))
+
+(defmacro clone-for [[sym lst] & forms]
+  `(enfocus.core/chainable-standard 
+    (fn [pnod#]
+      (let [div# (enfocus.core/create-hidden-dom 
+                    (. js/document (~(symbol "createDocumentFragment"))))]
+        (enfocus.core/log-debug pnod#)
+        (enfocus.core/log-debug (pr-str ~lst))
+        (doseq [~(symbol (name sym)) ~lst]
+          (do 
+            (enfocus.macros/at div#  (enfocus.macros/append (. pnod# (~(symbol "cloneNode") true))))
+            (enfocus.macros/at (goog.dom/getLastElementChild div#) ~@forms)))
+        (enfocus.core/log-debug div#)
+        (enfocus.macros/at 
+          pnod# 
+          (enfocus.macros/do-> (enfocus.macros/after (enfocus.core/remove-node-return-child div#))
+                               (enfocus.macros/remove-node)))))))
 
 (defmacro set-style [& forms]
   `(enfocus.core/en-set-style ~@forms))
