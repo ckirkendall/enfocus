@@ -96,18 +96,18 @@ Supported Enlive Transformations
 
 New Transformations
 <pre>
-  set-style	         (set-style :font-size "10px" :background "#fff")
-  remove-style	     (remove-style :font-size :background)
-  add-event	         (add-event :mouseover (fn [event] ...))
-  remove-event	     (remove-event :mouseover :mouseout)
-  fade-in	         (fade-in time step-size)
+  set-style          (set-style :font-size "10px" :background "#fff")
+  remove-style       (remove-style :font-size :background)
+  add-event          (add-event :mouseover (fn [event] ...))
+  remove-event       (remove-event :mouseover :mouseout)
+  fade-in            (fade-in time step-size)
                      or (fade-in time step-size callback)
   fade-out           (fade-out time step-size)
                      or (fade-out time step-size callback)
-  resize	         (resize width height ttime step-size)
+  resize             (resize width height ttime step-size)
                      or (resize width height ttime step-size callback)
-  move		         (move x y ttime step-size)
-  					 or (move x y ttime step size callback)
+  move               (move x y ttime step-size)
+                     or (move x y ttime step size callback)
   chain              (chain (fade-in ttime step-size) ;serialize async effects
                             (move x y ttime step-size)
                             (fade-out ttime step-size)
