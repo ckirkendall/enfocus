@@ -25,7 +25,7 @@ templates/template1.html and grabs the first row.  It then fills the content of 
 </pre>
 
 
-A template is very similar to a snippit except it does not require a selector to 
+A template is very similar to a snippet except it does not require a selector to 
 grap a sub section, instead the entire remote resource is used as the dom. 
 If the remote resource is a full html document only what is inside the body tag is
 brought into the template.
@@ -43,7 +43,7 @@ definition of a an action.
 
 <pre>
 (em/defaction action2 [] 
-             [".cool[foo=false]"] (em/content (template2 {"bannan" 5 "pineapple" 10}))
+             [".cool[foo=false]"] (em/content (template2 {"banana" 5 "pineapple" 10}))
              ["#heading1"] (em/set-attr :id "new-heading1"))
 </pre>
 
@@ -55,8 +55,8 @@ forms in @action@, @snippet@ and @template@.
 
 <pre>
   (at a-node
-    [:a :selector] a-transformation
-    [:another :selector] another-transformation
+    ["a[selector]"] a-transformation
+    ["another[selector]"] another-transformation
     ...)
 </pre>
 
@@ -88,28 +88,36 @@ Supported Enlive Transformations
   after              (after "xyz" a-node "abc")
   before             (before "xyz" a-node "abc")
   substitute         (substitute "xyz" a-node "abc")
+  clone-for          (clone-for [item items] transformation)
+                     or (clone-for [item items] 
+                          selector1 transformation1
+                          selector2 transformation2)
 </pre>
 
 New Transformations
 <pre>
-  set-style	     (set-style :font-size "10px" :background "#fff")
+  set-style	         (set-style :font-size "10px" :background "#fff")
   remove-style	     (remove-style :font-size :background)
-  add-event	     (add-event :mouseover (fn [event] ...))
+  add-event	         (add-event :mouseover (fn [event] ...))
   remove-event	     (remove-event :mouseover :mouseout)
-  fade-in	     (fade-in time step-size)
+  fade-in	         (fade-in time step-size)
+                     or (fade-in time step-size callback)
   fade-out           (fade-out time step-size)
-  resize	     (resize width height ttime step-size)
-  move		     (move x y ttime step-size)
+                     or (fade-out time step-size callback)
+  resize	         (resize width height ttime step-size)
+                     or (resize width height ttime step-size callback)
+  move		         (move x y ttime step-size)
+  					 or (move x y ttime step size callback)
+  chain              (chain (fade-in ttime step-size) ;serialize async effects
+                            (move x y ttime step-size)
+                            (fade-out ttime step-size)
+                            ...)
 </pre>
 
 Currently there are several transformation that are supported by Enlive but not Enfocus. (Patches very welcome!!)
 <pre>
   wrap               (wrap :div) or (wrap :div {:class "foo"}) 
   unwrap             unwrap
-  clone-for          (clone-for [item items] transformation)
-                     or (clone-for [item items] 
-                          selector1 transformation1
-                          selector2 transformation2)
   move               (move [:.footnote] [:#footnotes] content)
 </pre>
 
