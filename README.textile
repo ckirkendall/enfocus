@@ -93,6 +93,7 @@ Supported Enlive Transformations
                           selector1 transformation1
                           selector2 transformation2)
   wrap               (wrap :div) or (wrap :div {:class "foo"}) 
+  unwrap             (unwrap)
 </pre>
 
 New Transformations
@@ -115,10 +116,10 @@ New Transformations
                             ...)
 </pre>
 
-Currently there are several transformation that are supported by Enlive but not Enfocus. (Patches very welcome!!)
+Currently there is one transformation that is supported by Enlive but not Enfocus. (Patches very welcome!!)
 <pre>
-  unwrap             unwrap
-  move               (move [:.footnote] [:#footnotes] content)
+  move               (move [:.footnote] [:#footnotes] content) 
+                     ;this will be called relocate in enfocus
 </pre>
 
 h2. Contributing

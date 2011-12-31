@@ -261,7 +261,6 @@
             cnt (atom (count pnod-col))
             partial-cback (fn []
                             (swap! cnt dec)
-                            (log-debug (str "cnt:" @cnt))
                             (when (= 0 @cnt) 
                               (when (not (nil? callback)) (callback pnodes))
                               (when (not (nil? chain)) (chain pnodes))))] 
@@ -417,6 +416,18 @@
         (em/at elem (em/content (.cloneNode pnod true)))
         (em/at pnod (em/do-> (em/after elem)
                              (em/remove-node)))))))
+
+(defn en-unwrap
+  "replaces a node with all its children"
+  []
+  (chainable-standard
+    (fn [pnod]
+      (let [frag (. js/document (createDocumentFragment))]
+         (em/at frag (em/append (.childNodes pnod)))
+         (log-debug frag)
+         (log-debug pnod)
+         (log-debug (.childNodes pnod))
+         (dom/replaceNode frag pnod)))))
   
 
 (defn en-set-style 
@@ -443,7 +454,6 @@
   (if @view-port-monitor @view-port-monitor
     (do
       (swap! view-port-monitor #(new goog.dom.ViewportSizeMonitor))
-      (log-debug @view-port-monitor)
       @view-port-monitor)))
       
 
@@ -590,7 +600,6 @@
                        xstep (pix-round (/ (- xpos (.x opos)) steps))
                        ystep (pix-round (/ (- ypos (.y opos)) steps))
                        clone (.clone cpos)]
-                   (log-debug (str cpos ":" xpos ":" ypos ":" xstep ":" ystep))
                    (if (and
                          (or 
                            (zero? xstep)

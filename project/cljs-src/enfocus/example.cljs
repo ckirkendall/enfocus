@@ -78,7 +78,8 @@
                                              (em/content ":p")
                                              (em/prepend (success)))
               ["#wrap-span"] (em/wrap :span {:class "success"})
-              ["#test15 > *:last-child > .success > span"] (em/content "success"))  
+              ["#test15 > *:last-child > .success > span"] (em/content "success")
+              ["#wrapper"] (em/unwrap))  
   
 (em/defaction test-grid []    
               ["#test-content"] (em/content (test-cases))

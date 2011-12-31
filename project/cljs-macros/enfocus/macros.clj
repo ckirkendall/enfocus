@@ -143,6 +143,9 @@
 (defmacro wrap [elm mattrs]
   `(enfocus.core/en-wrap ~elm ~mattrs))
 
+(defmacro unwrap []
+  `(enfocus.core/en-unwrap))
+
 (defmacro clone-for [[sym lst] & forms]
   `(enfocus.core/chainable-standard 
     (fn [pnod#]
