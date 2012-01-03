@@ -457,19 +457,19 @@
       @view-port-monitor)))
       
 
-(defn en-add-event 
+(defn en-listen
   "adding an event to the selected nodes"
   [event func]
   (cond 
-    (= :mouseenter event) (en-add-event :mouseover (mouse-enter-leave func))
-    (= :mouseleave event) (en-add-event :mouseout (mouse-enter-leave func))
+    (= :mouseenter event) (en-listen :mouseover (mouse-enter-leave func))
+    (= :mouseleave event) (en-listen :mouseout (mouse-enter-leave func))
     :else (chainable-standard   
             (fn [pnod]
               (if (and (= :resize event) (identical? js/window pnod)) ;support window resize
                 (events/listen (get-vp-monitor) "resize" func)
                 (events/listen pnod (name event) func))))))
   
-(defn en-remove-event 
+(defn en-remove-listener 
   "adding an event to the selected nodes"
   [& event-list]
   (chainable-standard  

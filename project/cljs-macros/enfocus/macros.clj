@@ -169,11 +169,11 @@
 (defmacro remove-style [& forms]
   `(enfocus.core/en-remove-style ~@forms))
 
-(defmacro add-event [& forms]
-  `(enfocus.core/en-add-event ~@forms))
+(defmacro listen [& forms]
+  `(enfocus.core/en-listen ~@forms))
 
-(defmacro remove-event [& forms]
-  `(enfocus.core/en-remove-event ~@forms))
+(defmacro remove-listener [& forms]
+  `(enfocus.core/en-remove-listener ~@forms))
 
  
 (defmacro effect [step etype bad-etypes callback test-func & forms]

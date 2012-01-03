@@ -84,10 +84,10 @@
 (em/defaction test-grid []    
               ["#test-content"] (em/content (test-cases))
               ["#test-content tbody tr:nth-of-type(even)"] (em/add-class "even")
-              ["#test-content tbody tr"] (em/add-event 
+              ["#test-content tbody tr"] (em/listen 
                                            :mouseover 
                                            #((em/add-class "highlight") (.currentTarget %)))
-              ["#test-content tbody tr"] (em/add-event  
+              ["#test-content tbody tr"] (em/listen  
                                            :mouseout 
                                            #((em/remove-class "highlight") (.currentTarget %)))
               ["#test-content2"] (em/content (template2 {"banana" 5 "pineapple" 10 "apple" 5}))
@@ -98,28 +98,28 @@
               ["#test-content4"] (em/set-style :background "#00dd00" :font-size "10px")
               ["#test-content5"] (em/set-style :background "#dd0000" :font-size "10px")
               ["#test-content5"] (em/remove-style :background :font-size)
-              ["#test-content6"] (em/add-event
+              ["#test-content6"] (em/listen
                                    :mouseover
                                    #((em/fade-out 500 20) (.currentTarget %)))
-              ["#test-content6"] (em/add-event
+              ["#test-content6"] (em/listen
                                    :mouseout 
                                    #((em/fade-in 500 20) (.currentTarget %)))
-              ["#test-content6_5"] (em/add-event
+              ["#test-content6_5"] (em/listen
                                    :mouseenter
                                    #((em/fade-out 500 20) (.currentTarget %)))
-              ["#test-content6_5"] (em/add-event
+              ["#test-content6_5"] (em/listen
                                    :mouseleave  
                                    #((em/fade-in 500 20) (.currentTarget %)))
-              ["#click"] (em/add-event
+              ["#click"] (em/listen
                           :click 
                           #(em/at js/document
                                ["#sz-tst"] (em/chain 
                                              (em/resize 2 30 500 20)
                                              (em/resize 200 30 500 20 test-callback))))
-              ["#mclick"] (em/add-event  
+              ["#mclick"] (em/listen  
                           :click 
                           #(em/at js/document
-                               ["#mv-tst"] (em/move 300 305 500 20
+                               ["#mv-tst"] (em/move 300 305 500 20 
                                                     (em/move 0 0 500 20)))))
     
 ;(em/defaction test-suite [])
@@ -127,7 +127,7 @@
   
 
 (defn funtimes [msg]
-  (em/at js/window (em/add-event :resize #(js/alert (str "you resized your window:" %))))
+  (em/at js/window (em/listen :resize #(js/alert (str "you resized your window:" %))))
   (em/at js/document
       [:.heading (ef/attr= :foo "true")] (em/content msg))
   (em/wait-for-load (test-grid)))   

@@ -100,8 +100,8 @@ New Transformations
 <pre>
   set-style          (set-style :font-size "10px" :background "#fff")
   remove-style       (remove-style :font-size :background)
-  add-event          (add-event :mouseover (fn [event] ...))
-  remove-event       (remove-event :mouseover :mouseout)
+  listen             (listen :mouseover (fn [event] ...))
+  remove-listener    (remove-listener :mouseover :mouseout)
   fade-in            (fade-in time step-size)
                      or (fade-in time step-size callback)
   fade-out           (fade-out time step-size)
