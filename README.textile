@@ -67,7 +67,8 @@ the results of each selector is passed on to its partner transformation.
   
 A @selector@ is a string representing a CSS3 compliant selector":http://www.w3schools.com/cssref/css_selectors.asp
 
-h3.Handling Events
+h3. Handling Events
+
 Enfocus has event handling.  Below is a simple example to add an @onclick@ event handler to a button.
 <pre>
 (em/defaction change [msg] 
