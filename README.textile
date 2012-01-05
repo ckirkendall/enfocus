@@ -11,8 +11,10 @@ David Nolen wrote a "nice tutorial":http://github.com/swannodette/enlive-tutoria
 Another "tutorial":https://github.com/cgrand/enlive/wiki/Table-and-Layout-Tutorial,-Part-1:-The-Goal by Brian Marick.
 
 
-h1.Quick Start
-h2.Setup
+h1. Quick Start
+
+h2. Setup
+
 From any leiningen project file:
 <pre>
 [enfocus "0.8.0-SNAPSHOT"]
@@ -22,7 +24,8 @@ Then make sure you have your lib folder on your classpath.
 For the best development experience, try out cljs-watch. If you do, you'll need to replace the goog.jar in your CLOJURESCRIPT_HOME/lib with the goog-jar.jar that comes down as a dependency with enfocus.
 
 
-h3.The Basics
+h3. The Basics
+
 Every great journey starts with "Hello world!"
 <pre>
 (ns my.namespace
@@ -37,6 +40,7 @@ Every great journey starts with "Hello world!"
 </pre>
 
 h2. The @at@ form
+
 At the core to understanding Enfocus is the @at@ form used in the 
 "Hello world!" example above.  It comes in two basic flavors listed below:
 <pre>
@@ -80,7 +84,8 @@ creates a function that calls the @at@ form like discussed above
 and passes in js/document as the node to be transformed.
  
 
-h3.Effects
+h3. Effects
+
 Enfocus has the concept of effects.  Effects are nothing more than transformations
 over a period of time. Below is a simple example of a resize effect. Notice how the 
 effects can be chained.
