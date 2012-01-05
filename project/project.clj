@@ -1,4 +1,4 @@
-(defproject enfocus "0.1.0-SNAPSHOT"
+(defproject enfocus "0.8.0-SNAPSHOT"
   :description "DOM manipulation tool for clojurescript inspired by Enlive"
   :source-path "cljs-src"
   :resources-path "cljs-macros"

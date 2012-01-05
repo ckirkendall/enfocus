@@ -2,13 +2,102 @@ h1. Enfocus
 
 Enfocus is a @DOM@ manipulation and templating library for ClojureScript. Inspired by Christophe Grand's "Enlive":http://github/cgrand/enlive, Enfocus' primary purpose is providing a base for building rich interfaces in ClojureScript.
 
-If you are unfamiliar with enlive it is suggested you take a look at the following tutorials before diving into Enfocus.
+You can find examples and documention for enfocus "here":http:/ckirkendall.github.com/enfocus-site
+
+
+If you are unfamiliar with enlive I also recommend taking a look at these links.
 
 David Nolen wrote a "nice tutorial":http://github.com/swannodette/enlive-tutorial/
 Another "tutorial":https://github.com/cgrand/enlive/wiki/Table-and-Layout-Tutorial,-Part-1:-The-Goal by Brian Marick.
 
 
-h2. Actions, templates and snippets
+h1.Quick Start
+h2.Setup
+From any leiningen project file:
+<pre>
+[enfocus "0.8.0-SNAPSHOT"]
+</pre>
+Then make sure you have your lib folder on your classpath.
+
+For the best development experience, try out cljs-watch. If you do, you'll need to replace the goog.jar in your CLOJURESCRIPT_HOME/lib with the goog-jar.jar that comes down as a dependency with enfocus.
+
+
+h3.The Basics
+Every great journey starts with "Hello world!"
+<pre>
+(ns my.namespace
+  (:require [enfocus.core :as ef])
+  (:require-macros [enfocus.macros :as em]))
+
+(defn start [] 
+  (em/at js/document
+    ["body"] (em/content "Hello world!"))
+
+(set! (.onload js/window) start)         
+</pre>
+
+h2. The @at@ form
+At the core to understanding Enfocus is the @at@ form used in the 
+"Hello world!" example above.  It comes in two basic flavors listed below:
+<pre>
+(at a-node (transform arg1 ...))
+
+and
+
+(at a-node
+    [selector1] (transform1 arg1 ...)
+    [selector2] (transform2 arg1 ...))
+</pre>
+
+In the first case @at@ is passed a node or node set and a transform and calls the 
+transform on each element in the node set.
+ 
+A @transform@ is nothing more than a function that takes a set of arguments and returns a function 
+that takes a set of nodes.  In case of the "Hello World!" example above, we see the use of
+(em/content "Hello world!") this call returns a function that takes node or node set
+and replaces the content with "Hello world!"
+
+In the second case, we see @at@ is passed a node or node set and a set of 
+selector/transform pairs. The selectors are scoped by the node or node set passed in and 
+the results of each selector is passed on to its partner transformation.
+  
+A @selector@ is a string representing a CSS3 compliant selector":http://www.w3schools.com/cssref/css_selectors.asp
+
+h3.Handling Events
+Enfocus has event handling.  Below is a simple example to add an @onclick@ event handler to a button.
+<pre>
+(em/defaction change [msg] 
+  ["#button1"] (em/content msg))
+
+(em/defaction setup []
+  ["#button1"] (em/listen :click #(change "I have been clicked")))
+	
+(set! (.onload js/window) setup)         
+</pre>
+
+The @defaction@ construct is use here instead @defn@.  @defaction@
+creates a function that calls the @at@ form like discussed above 
+and passes in js/document as the node to be transformed.
+ 
+
+h3.Effects
+Enfocus has the concept of effects.  Effects are nothing more than transformations
+over a period of time. Below is a simple example of a resize effect. Notice how the 
+effects can be chained.
+
+<pre>
+(em/defaction resize-div [width] 
+  ["#rz-demo"] (em/chain 
+                 (em/resize width :curheight 500 20)
+                 (em/resize 5 :curheight 500 20)))
+
+(em/defaction setup []
+  ["#button2"] (em/listen #(resize-div 200)))
+	
+(set! (.onload js/window) setup)         
+</pre>
+
+h3. Actions, templates and snippets
 
 A snippet is a function that returns a seq of nodes, it can be used as a
 building block for more complex templates or actions.  
@@ -46,26 +135,6 @@ definition of a an action.
              [".cool[foo=false]"] (em/content (template2 {"banana" 5 "pineapple" 10}))
              ["#heading1"] (em/set-attr :id "new-heading1"))
 </pre>
-
-
-h2. The @at@ form
-
-The @at@ form is a very important form in Enfocus and in Enlive. There are implicit @at@ 
-forms in @action@, @snippet@ and @template@.  
-
-<pre>
-  (at a-node
-    ["a[selector]"] a-transformation
-    ["another[selector]"] another-transformation
-    ...)
-</pre>
-
-
-Transformations are closures which take one arg (the selected node) and return
-nil, another node or an arbitrarily nested collection of nodes.
-
-Rules are applied top-down: the first rule transforms the whole tree and the
-resulting tree is passed to the next rules.
 
 
 h2. Transformations
