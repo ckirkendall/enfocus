@@ -16,8 +16,7 @@ h1. Quick Start
 h2. Setup
 
 From any leiningen project file:
-<pre>
-[enfocus "0.8.0-SNAPSHOT"]
+<pre>[enfocus "0.8.0-SNAPSHOT"]
 </pre>
 Then make sure you have your lib folder on your classpath.
 
@@ -27,8 +26,7 @@ For the best development experience, try out cljs-watch. If you do, you'll need 
 h3. The Basics
 
 Every great journey starts with "Hello world!"
-<pre>
-(ns my.namespace
+<pre>(ns my.namespace
   (:require [enfocus.core :as ef])
   (:require-macros [enfocus.macros :as em]))
 
@@ -43,8 +41,7 @@ h2. The @at@ form
 
 At the core to understanding Enfocus is the @at@ form used in the 
 "Hello world!" example above.  It comes in two basic flavors listed below:
-<pre>
-(at a-node (transform arg1 ...))
+<pre>(at a-node (transform arg1 ...))
 
 and
 
@@ -70,8 +67,7 @@ A @selector@ is a string representing a CSS3 compliant selector":http://www.w3sc
 h3. Handling Events
 
 Enfocus has event handling.  Below is a simple example to add an @onclick@ event handler to a button.
-<pre>
-(em/defaction change [msg] 
+<pre>(em/defaction change [msg] 
   ["#button1"] (em/content msg))
 
 (em/defaction setup []
