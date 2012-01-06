@@ -472,9 +472,13 @@
 (defn en-remove-listener 
   "adding an event to the selected nodes"
   [& event-list]
-  (chainable-standard  
-    (fn [pnod]
-      (doall (map #(events/removeAll pnod (name %)) event-list)))))
+  (let [get-name #(name (cond  
+                          (= % :mouseenter) :mouseover
+                          (= % :mouseleave) :mouseout
+                          :else %))]
+    (chainable-standard  
+      (fn [pnod]
+        (doall (map #(events/removeAll pnod (get-name %)) event-list))))))
 
 
 ;####################################################
