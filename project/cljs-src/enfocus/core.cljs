@@ -517,14 +517,16 @@
   (let [incr (/ 1 (/ ttime step))]
     (em/effect step :fade-out [:fade-in] callback
                (fn [pnod etime] 
-                 (let [op (style/getOpacity pnod)] 
+                 (let [op (style/getOpacity pnod)
+                       op (if (or (= op js/undefined) (= "" op)) 1 op)]
                    (if (<= (- op incr) 0) 
                      (do
                        (style/setOpacity pnod 0)
                        true)
                      false)))
                (fn [pnod]
-                 (let [op (style/getOpacity pnod)]
+                 (let [op (style/getOpacity pnod)
+                       op (if (= op js/undefined) 1 op)]
                    (cond
                      (= "" op) (style/setOpacity pnod (- 1 incr))
                      (< 0 op) (style/setOpacity pnod (- op incr))))))))
