@@ -222,19 +222,16 @@
 ; taking the a set of nodes from a selector
 ;####################################################
 
-(defn multi-node-proc 
+(defn extr-multi-node 
   "takes a function an returns a function that
    applys a given function on all nodes returned
    by a given selector"
-  ([func] (multi-node-proc func nil))
-  ([func callback1]
-    (fn trans 
-      ([pnodes] (trans pnodes nil))
-      ([pnodes callback2]
-        (let [pnod-col (nodes->coll pnodes)
-              cnt (atom (count pnod-col))
-              ] 
-          (doall (map func pnod-col )))))))
+  [func]
+  (fn trans 
+    [pnodes] 
+    (let [pnod-col (nodes->coll pnodes)
+          result (doall (map func pnod-col ))] 
+      (if (= 1 (count result)) (first result) result))))
 
 (defn chainable-standard 
   "takes a function an returns a function that
@@ -305,7 +302,7 @@
   "Assocs attributes and values on the selected element."
   [& values] 
   (let [at-lst (partition 2 values)]
-    (multi-node-proc 
+    (chainable-standard 
       (fn[pnod]
         (doall (map (fn [[a v]] (. pnod (setAttribute (name a) v))) at-lst))))))
 
@@ -313,7 +310,7 @@
 (defn en-remove-attr 
   "Dissocs attributes on the selected element."
   [& values] 
-  (multi-node-proc 
+  (chainable-standard 
     (fn[pnod]
       (doall (map #(. pnod (removeAttribute (name %))) values)))))
 
@@ -648,6 +645,20 @@
                            (and (pos? ystep) (> ypos (.y cpos))))
                      (set! (.y clone) (+ (.y cpos) ystep)))
                    (style/setPosition pnod (.x clone) (.y clone)))))))              
+
+
+
+;##################################################################
+; data extractors
+;##################################################################
+
+(defn en-get-attr 
+  "Assocs attributes and values on the selected element."
+  [attr] 
+  (extr-multi-node 
+    (fn[pnod]
+      (. pnod (getAttribute (name attr))))))
+
 
 
 ;##################################################################

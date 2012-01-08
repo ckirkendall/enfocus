@@ -34,9 +34,16 @@
 
 (defn- create-transform-call [id-sym pnod-sym forms]
   (map (fn [[sel tran]] (list 
-                          (if tran tran  'enfocus.core/remove-all) 
+                          (if tran tran  'enfocus.macros/remove-node) 
                           (list 'enfocus.core/css-select id-sym pnod-sym sel)))
        (partition 2 forms)))
+
+(defn- create-extraction-call [id-sym pnod-sym map-sym forms]
+  (map (fn [[ky sel tran]] 
+         (list 'clojure.core/swap! map-sym 'clojure.core/assoc ky (list
+                                                (if tran tran  'enfocus.macros/remove-node) 
+                                                (list 'enfocus.core/css-select id-sym pnod-sym sel))))
+       (partition 3 forms)))
 
 
 (defmacro create-dom-action [sym nod tmp-dom args & forms]  
@@ -88,6 +95,17 @@
   ([nod sel trans] `(enfocus.macros/at ~nod ~sel ~trans)))
 
   
+(defmacro from [nod & forms]
+    (if (= 1 (count forms)) 
+      `(~@forms ~nod)
+      (let [pnode-sym (gensym "pnod")
+            map-sym (gensym "map")
+            new-form (create-extraction-call "" pnode-sym map-sym forms)]
+        `(let [nods# (enfocus.core/nodes->coll ~nod)
+               ~map-sym (atom {}) 
+               map-list# (doall (map (fn [~pnode-sym] ~@new-form ~pnode-sym) nods#))]
+           (deref ~map-sym)))))
+
 (defmacro wait-for-load [& forms]
 	`(enfocus.core/setTimeout (fn check# []
 	                   (if (zero? (deref enfocus.core/tpl-load-cnt))
@@ -235,3 +253,6 @@
   (if (empty? chains)
     `(fn [pnod#] (~func pnod#))
     `(fn [pnod#] (~func pnod# (enfocus.macros/chain ~@chains)))))
+
+(defmacro get-attr [attr]
+  `(enfocus.core/en-get-attr ~attr))

@@ -3,19 +3,15 @@
   (:require-macros [enfocus.macros :as em])) 
   
 
-(comment
-(em/defsnippet snippet1 "templates/template1.html" [:tbody :> 'first-child] 
-               [fruit quantity]   
-               [:tr :> 'first-child] (em/content fruit)
-               [:tr :> 'last-child] (em/content (str quantity)))
-  
-(em/deftemplate template1 "/templates/template1.html" [fruit-data] 
-                [:#heading1] (em/content "fruit")  
-                [:thead :tr :> 'last-child] (em/content "quantity")
-                [:tbody] (em/content
-                           (map #(snippet1 % (fruit-data %)) (keys fruit-data))))
-)
-   
+
+(defn test-from []
+  (let [form-vals (em/from js/document
+                        :test1 ["#ftest1"] (em/get-attr :value)
+                        :test2 ["#ftest2"] (em/get-attr :value))]
+    (em/at js/document 
+        ["#test-from-div"] (em/content (pr-str form-vals)))))
+
+
 (defn test-callback [pnods]
   (em/at pnods (em/do-> 
                  (em/content "callback successful")
@@ -120,7 +116,8 @@
                           :click 
                           #(em/at js/document
                                ["#mv-tst"] (em/move 300 305 500 20 
-                                                    (em/move 0 0 500 20)))))
+                                                    (em/move 0 0 500 20))))
+              ["#test-from"] (em/listen :click test-from))
     
 ;(em/defaction test-suite [])
   
