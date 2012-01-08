@@ -684,6 +684,7 @@
 (defn css-select 
   "takes either an enlive selector or a css3 selector and
    returns a set of nodes that match the selector"
+  ([css-sel] (css-select "" js/document css-sel))
   ([dom-node css-sel] (css-select "" dom-node css-sel))
   ([id-scope-sym dom-node css-sel]
     (let [sel (string/trim (string/replace (create-sel-str id-scope-sym css-sel) " :" ":"))
