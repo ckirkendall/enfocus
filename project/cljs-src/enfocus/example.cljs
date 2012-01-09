@@ -9,9 +9,16 @@
                         :test1 ["#ftest1"] (em/get-attr :value)
                         :test2 ["#ftest2"] (em/get-attr :value))
         from-val (em/from (em/select ["#ftest1"]) (em/get-attr :value))]
-    (em/at js/document 
-        ["#test-from-div"] (em/content (pr-str form-vals))
-        ["#test-from-div"] (em/append from-val))))
+    (em/at js/document
+           ["#test-from-div"] (em/do-> (em/content (pr-str form-vals))
+                                       (em/append from-val)))))
+
+(defn test-get-text []
+  (let [from-text (em/from (em/select ["#ftext-test"]) (ef/en-get-text))]
+    (ef/log-debug (str "from-text:" from-text))
+    (em/at js/document
+           ["#ftext-test-result"] (em/content from-text))))
+
 
 
 (defn test-callback [pnods]
@@ -119,7 +126,8 @@
                           #(em/at js/document
                                ["#mv-tst"] (em/move 300 305 500 20 
                                                     (em/move 0 0 500 20))))
-              ["#test-from"] (em/listen :click test-from))
+              ["#test-from"] (em/listen :click test-from)
+              ["#test-get-text"] (em/listen :click test-get-text))
     
 ;(em/defaction test-suite [])
   

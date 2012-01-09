@@ -655,13 +655,22 @@
 ;##################################################################
 
 (defn en-get-attr 
-  "Assocs attributes and values on the selected element."
+  "returns the attribute on the selected element or elements.
+   in cases where more than one element is selected you will
+   receive a list of values"
   [attr] 
   (extr-multi-node 
     (fn[pnod]
       (. pnod (getAttribute (name attr))))))
 
-
+(defn en-get-text
+  "returns the attribute on the selected element or elements.
+   in cases where more than one element is selected you will
+   receive a list of values"
+  [] 
+  (extr-multi-node 
+    (fn[pnod]
+      (dom/getTextContent pnod))))
 
 ;##################################################################
 ; functions involved in processing the selectors
