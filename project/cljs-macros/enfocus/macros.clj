@@ -260,3 +260,6 @@
 
 (defmacro get-attr [attr]
   `(enfocus.core/en-get-attr ~attr))
+
+(defmacro get-text []
+  `(enfocus.core/en-get-text))

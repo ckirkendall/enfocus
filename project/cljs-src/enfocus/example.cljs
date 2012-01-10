@@ -18,7 +18,7 @@
                                        (em/append from-val)))))
 
 (defn test-get-text []
-  (let [from-text (em/from (em/select ["#ftext-test"]) (ef/en-get-text))]
+  (let [from-text (em/from (em/select ["#ftext-test"]) (em/get-text))]
     (ef/log-debug (str "from-text:" from-text))
     (em/at js/document
            ["#ftext-test-result"] (em/content from-text))))

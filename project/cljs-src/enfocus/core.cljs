@@ -231,7 +231,7 @@
     [pnodes] 
     (let [pnod-col (nodes->coll pnodes)
           result (doall (map func pnod-col ))] 
-      (if (= 1 (count result)) (first result) result))))
+      (if (<= (count result) 1) (first result) result))))
 
 (defn chainable-standard 
   "takes a function an returns a function that
