@@ -263,3 +263,8 @@
 
 (defmacro get-text []
   `(enfocus.core/en-get-text))
+
+(defmacro get-prop [prop]
+  `(enfocus.core/extr-multi-node
+     (fn [pnod#]
+       (~(symbol (str "." (name prop))) pnod#))))

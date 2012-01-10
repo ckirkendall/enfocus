@@ -663,6 +663,16 @@
     (fn[pnod]
       (. pnod (getAttribute (name attr))))))
 
+
+(defn en-get-attr 
+  "returns the attribute on the selected element or elements.
+   in cases where more than one element is selected you will
+   receive a list of values"
+  [attr] 
+  (extr-multi-node 
+    (fn[pnod]
+      (. pnod (getAttribute (name attr))))))
+
 (defn en-get-text
   "returns the attribute on the selected element or elements.
    in cases where more than one element is selected you will
@@ -671,6 +681,8 @@
   (extr-multi-node 
     (fn[pnod]
       (dom/getTextContent pnod))))
+
+
 
 
 
