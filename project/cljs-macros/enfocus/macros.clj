@@ -113,8 +113,12 @@
                       (enfocus.core/setTimeout #(check#) 10))) 0))   
   
 
+
 (defmacro select [& forms]
   `(enfocus.core/css-select ~@forms))
+
+(defmacro filter [tst trans]
+  `(enfocus.core/en-filter ~tst ~trans))
 
 (defmacro content [& forms]
   `(enfocus.core/en-content ~@forms))
