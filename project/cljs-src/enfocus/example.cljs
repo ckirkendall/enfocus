@@ -7,7 +7,11 @@
 (defn test-from []
   (let [form-vals (em/from js/document
                         :test1 ["#ftest1"] (em/get-attr :value)
-                        :test2 ["#ftest2"] (em/get-attr :value))
+                        :test2 ["#ftest2"] (em/get-attr :value)
+                        :test3 ["#from-form > input[type=checkbox]"] (ef/en-filter #(.checked %)
+                                                                                   (em/get-attr :value))
+                        :test4 ["#from-form option"] (ef/en-filter :selected
+                                                                   (em/get-attr :value)))
         from-val (em/from (em/select ["#ftest1"]) (em/get-attr :value))]
     (em/at js/document
            ["#test-from-div"] (em/do-> (em/content (pr-str form-vals))

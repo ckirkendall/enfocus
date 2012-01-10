@@ -672,6 +672,56 @@
     (fn[pnod]
       (dom/getTextContent pnod))))
 
+
+
+;##################################################################
+; filtering - these funcitons are to make up for choosing
+; css3 selectors as our selectors, not everything can 
+; be selected with css selectors in all browser so this
+; provides an abstract way to add additional selection
+; criteria
+;##################################################################
+
+;registerd filter that can be refrenced by keyword
+(def reg-filt (atom {}))
+
+(defn en-filter 
+  "filter allows you to apply function to futhur scope
+   down what is returned by a selector"
+  [tst trans]
+  (fn filt
+    ([pnodes] (filt pnodes nil))
+    ([pnodes chain]
+      (let [pnod-col (nodes->coll pnodes)
+            ttest (if (keyword? tst) (@reg-filt tst) tst)
+            res (filter ttest pnod-col)]
+        (log-debug (pr-str res))
+        (if (nil? chain) 
+          (trans res)
+          (trans res chain))))))
+
+(defn register-filter 
+  "registers a filter for a given keyword"
+  [ky func]
+  (swap! reg-filt assoc ky func))
+
+(defn selected-options 
+  "takes a list of options and returns the selected ones
+   will return an empty list if passed nodes that are 
+   no options"
+  [pnod]
+  (.selected pnod))
+
+(defn checked-radio-checkbox 
+  "takes a list of options and returns the selected ones
+   will return an empty list if passed nodes that are 
+   no options"
+  [pnod]
+  (.checked pnod))
+
+(register-filter :selected selected-options)
+(register-filter :checked checked-radio-checkbox)
+
 ;##################################################################
 ; functions involved in processing the selectors
 ;##################################################################
