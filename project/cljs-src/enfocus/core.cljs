@@ -108,8 +108,8 @@
    elem))
 
 ;####################################################
-; The following functions are used to transform
-; the dom structure
+; The following functions are used to manage the
+; emote dom features for templates and snippets
 ;####################################################
 
 (def tpl-load-cnt 
