@@ -4,9 +4,8 @@
             [goog.style :as style]
             [goog.events :as events]
             [goog.dom :as dom]
+            [goog.dom.classes :as classes]
             [goog.dom.ViewportSizeMonitor :as vsmonitor]
-            [goog.debug :as debug]
-            [goog.debug.Logger :as glog]
             [goog.events :as events]
             [goog.async.Delay :as gdelay]
             [clojure.string :as string])
@@ -318,9 +317,7 @@
 (defn- has-class 
   "returns true if the element has a given class"
   [el cls]
-  (let [regex (js/RegExp. (str "(\\s|^)" cls "(\\s|$)"))
-        cur-cls (.className el)]
-    (. cur-cls (match regex))))
+  (classes/hasClass el cls))
 
 
 (defn en-add-class 
@@ -328,22 +325,15 @@
   [ & values]
   (chainable-standard 
     (fn [pnod]
-      (let [cur-cls (.className pnod)]
-        (doall (map #(if (not (has-class pnod %))
-                       (set! (.className pnod) (str cur-cls " " %)))
-                       values))))))
+        (doall (map #(classes/add pnod %) values)))))
 
 
 (defn en-remove-class 
   "Removes the specified classes from the selected element." 
   [ & values]
-  (chainable-standard 
+  (chainable-standard
     (fn [pnod]
-      (let [cur (.className pnod)]
-        (doall (map #(if (has-class pnod %)
-                       (let [regex (js/RegExp. (str "(\\s|^)" % "(\\s|$)"))]
-                         (set! (.className pnod) (. cur (replace regex " ")))))
-                         values))))))
+      (doall (map #(classes/remove pnod %) values)))))
 
 (defn en-do-> [ & forms]
   "Chains (composes) several transformations. Applies functions from left to right."
@@ -421,9 +411,6 @@
     (fn [pnod]
       (let [frag (. js/document (createDocumentFragment))]
          (em/at frag (em/append (.childNodes pnod)))
-         (log-debug frag)
-         (log-debug pnod)
-         (log-debug (.childNodes pnod))
          (dom/replaceNode frag pnod)))))
   
 
