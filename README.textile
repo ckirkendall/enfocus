@@ -20,7 +20,7 @@ h1. Quick Start
 h2. Setup
 
 From any leiningen project file:
-<pre>[enfocus "0.8.0-SNAPSHOT"]
+<pre>[enfocus "0.9.0-SNAPSHOT"]
 </pre>
 Then make sure you have your lib folder on your classpath.
 
@@ -177,14 +177,17 @@ New Transformations
   remove-style       (remove-style :font-size :background)
   listen             (listen :mouseover (fn [event] ...))
   remove-listener    (remove-listener :mouseover :mouseout)
-  fade-in            (fade-in time step-size)
-                     or (fade-in time step-size callback)
+  fade-in            (fade-in time)
+                     or (fade-in time callback)
+                     or (fade-in time callback accellerator)
   fade-out           (fade-out time step-size)
-                     or (fade-out time step-size callback)
-  resize             (resize width height ttime step-size)
-                     or (resize width height ttime step-size callback)
-  move               (move x y ttime step-size)
-                     or (move x y ttime step size callback)
+                     or (fade-out time callback)
+  resize             (resize width height ttime)
+                     or (resize width height ttime callback)
+                     or (resize width height ttime callback accellerator)
+  move               (move x y ttime)
+                     or (move x y ttime callback)
+                     or (move x y ttime callback accellerator)
   chain              (chain (fade-in ttime step-size) ;serialize async effects
                             (move x y ttime step-size)
                             (fade-out ttime step-size)

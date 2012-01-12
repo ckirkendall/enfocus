@@ -7,6 +7,8 @@
             [goog.dom.classes :as classes]
             [goog.dom.ViewportSizeMonitor :as vsmonitor]
             [goog.events :as events]
+            [goog.fx :as fx]
+            [goog.fx.dom :as fx-dom]
             [goog.async.Delay :as gdelay]
             [clojure.string :as string])
   (:require-macros [enfocus.macros :as em])) 
@@ -449,175 +451,65 @@
         (doall (map #(events/removeAll pnod (get-name %)) event-list))))))
 
 
-;####################################################
-; these functions have to do with effects
-;#################################################### 
-
-
-(defn start-effect [pnod etype]
-  (log-debug (str "start-effect" pnod ":" etype))
-  (let [effs (aget pnod (get-eff-prop-name etype))
-        eff-id (gensym "efid_")]
-    (if effs 
-      (do (swap! effs conj eff-id) eff-id)
-      (do (aset pnod (get-eff-prop-name etype) (atom #{eff-id})) eff-id))))
-
-(defn check-effect [pnod etype sym]
-  (let [effs (aget pnod (get-eff-prop-name etype))]
-    (if (and effs (contains? @effs sym)) true false)))
-
-(defn finish-effect [pnod etype sym]
-  (log-debug (str "finish-effect" pnod ":" etype ":" sym))
-  (let [effs (aget pnod (get-eff-prop-name etype))]
-    (when effs (swap! effs disj sym))))
- 
 
 ;####################################################
 ; effect based transforms
 ;####################################################
-
-(defn en-stop-effect [& etypes]
-  (fn [pnod]
-    (log-debug (pr-str "stop-effect" pnod ":" etypes))
-    (doall (map #(aset pnod (get-eff-prop-name %) (atom #{})) etypes)))) 
-
     
 (defn en-fade-out 
   "fade the selected nodes over a set of steps" 
-  [ttime step callback]  
-  (let [incr (/ 1 (/ ttime step))]
-    (em/effect step :fade-out [:fade-in] callback
-               (fn [pnod etime] 
-                 (let [op (style/getOpacity pnod)
-                       op (if (or (= op js/undefined) (= "" op)) 1 op)]
-                   (if (<= (- op incr) 0) 
-                     (do
-                       (style/setOpacity pnod 0)
-                       true)
-                     false)))
-               (fn [pnod]
-                 (let [op (style/getOpacity pnod)
-                       op (if (= op js/undefined) 1 op)]
-                   (cond
-                     (= "" op) (style/setOpacity pnod (- 1 incr))
-                     (< 0 op) (style/setOpacity pnod (- op incr))))))))
+  [ttime callback accel]  
+  (chainable-effect
+    (fn [pnod pcallback]
+      (let [anim (fx-dom/FadeOut. pnod ttime accel)]
+        (when (not (nil? pcallback)) 
+          (events/listen anim goog.fx.Animation.EventType/END pcallback))
+        (. anim (play))))
+       callback))
 
 (defn en-fade-in  
   "fade the selected nodes over a set of steps" 
-  [ttime step callback]
-  (let [incr (/ 1 (/ ttime step))]
-    (em/effect step :fade-in [:fade-out] callback
-               (fn [pnod etime] 
-                 (let [op (style/getOpacity pnod)] 
-                   (if (>= (+ op incr) 1) 
-                     (do
-                       (style/setOpacity pnod 1)
-                       true)
-                     false)))
-               (fn [pnod]
-                 (let [op (style/getOpacity pnod)]  
-                   (cond
-                     (= "" op) (style/setOpacity pnod incr)
-                     (> 1 op) (style/setOpacity pnod (+ op incr))))))))
+  [ttime callback accel]
+  (chainable-effect
+    (fn [pnod pcallback]
+      (let [anim (fx-dom/FadeIn. pnod ttime accel)]
+        (when (not (nil? pcallback)) 
+          (events/listen anim goog.fx.Animation.EventType/END pcallback))
+        (. anim (play))))
+       callback))
 
 (defn en-resize 
   "resizes the selected elements to a width and height in px optional time series data"
-  [wth hgt ttime step callback]
-  (let [orig-sym (gensym "orig-size")
-        steps (if (or (zero? ttime) (zero? step) (<= ttime step)) 1 (/ ttime step))]
-    (em/effect step :resize [:resize] callback
-               (fn [pnod etime] true
-                 (let [csize (style/getSize pnod)
-                       osize (aget pnod (name orig-sym))
-                       osize (if osize osize (aset pnod (name orig-sym) csize))
-                       wth (if (= :curwidth wth) (.width osize) wth)
-                       hgt (if (= :curheight hgt) (.height osize) hgt)
-                       wstep (pix-round (/ (- wth (.width osize)) steps))
-                       hstep (pix-round (/ (- hgt (.height osize)) steps))]
-                   (if (and
-                         (or 
-                           (zero? wstep)
-                           (and (neg? wstep) (>= wth (.width csize)))
-                           (and (pos? wstep) (<= wth (.width csize))))
-                         (or 
-                           (zero? hstep)
-                           (and (neg? hstep) (>= hgt (.height csize)))
-                           (and (pos? hstep) (<= hgt (.height csize)))))
-                     (do 
-                       (aset pnod (name orig-sym) nil) 
-                       (style/setWidth pnod wth)
-                       (style/setHeight pnod hgt)
-                       true)
-                     false)))
-               (fn [pnod]
-                 (let [csize (style/getSize pnod)
-                       osize (aget pnod (name orig-sym))
-                       osize (if osize osize (aset pnod (name orig-sym) csize))
-                       wth (if (= :curwidth wth) (.width osize) wth)
-                       hgt (if (= :curheight hgt) (.height osize) hgt)
-                       wstep (pix-round (/ (- wth (.width osize)) steps))
-                       hstep (pix-round (/ (- hgt (.height osize)) steps))]
-                   (when (or 
-                           (and (neg? wstep) (< wth (.width csize)))
-                           (and (pos? wstep) (> wth (.width csize))))
-                     (style/setWidth pnod (+ (.width csize) wstep)))
-                   (when (or 
-                           (and (neg? hstep) (< hgt (.height csize)))
-                           (and (pos? hstep) (> hgt (.height csize))))
-                     (style/setHeight pnod (+ (.height csize) hstep))))))))
-
-
+  [wth hgt ttime callback accel]
+  (chainable-effect
+    (fn [pnod pcallback]
+      (let [csize (style/getSize pnod)
+            start (array (.width csize) (.height csize))
+            wth (if (= :curwidth wth) (.width csize) wth)
+            hgt (if (= :curheight hgt) (.height csize) hgt)
+            end (array wth hgt)
+            anim (fx-dom/Resize. pnod start end ttime accel)]
+        (when (not (nil? pcallback)) 
+          (events/listen anim goog.fx.Animation.EventType/END pcallback))
+        (. anim (play))))
+       callback))
+  
 (defn en-move
   "moves the selected elements to a x and y in px optional time series data "
-  [xpos ypos ttime step callback]
-  (let [orig-sym (gensym "orig-pos")
-        steps (if (or (zero? ttime) (zero? step) (<= ttime step)) 1 (/ ttime step))]
-    (em/effect step :move [:move] callback
-               (fn [pnod etime] true
-                 (let [cpos (style/getPosition pnod)
-                       opos (aget pnod (name orig-sym))
-                       opos (if opos opos (aset pnod (name orig-sym) cpos))
-                       xpos (if (= :curx xpos) (.x opos) xpos)
-                       ypos (if (= :cury ypos) (.y opos) ypos)
-                       xstep (pix-round (/ (- xpos (.x opos)) steps))
-                       ystep (pix-round (/ (- ypos (.y opos)) steps))
-                       clone (.clone cpos)]
-                   (if (and
-                         (or 
-                           (zero? xstep)
-                           (and (neg? xstep) (>= xpos (.x cpos)))
-                           (and (pos? xstep) (<= xpos (.x cpos))))
-                         (or 
-                           (zero? ystep)
-                           (and (neg? ystep) (>= ypos (.y cpos)))
-                           (and (pos? ystep) (<= ypos (.y cpos)))))
-                     (do 
-                       (aset pnod (name orig-sym) nil) 
-                       (set! (.x clone) xpos)
-                       (set! (.y clone) ypos)
-                       (style/setPosition pnod (.x clone) (.y clone))
-                       true)
-                     false)))
-               (fn [pnod]
-                 (let [cpos (style/getPosition pnod)
-                       opos (aget pnod (name orig-sym))
-                       opos (if opos opos (aset pnod (name orig-sym) cpos))
-                       xpos (if (= :curx xpos) (.x opos) xpos)
-                       ypos (if (= :cury ypos) (.y opos) ypos)
-                       xstep (pix-round (/ (- xpos (.x opos)) steps))
-                       ystep (pix-round (/ (- ypos (.y opos)) steps))
-                       clone (.clone cpos)]
-                   (when (or 
-                           (and (neg? xstep) (< xpos (.x cpos)))
-                           (and (pos? xstep) (> xpos (.x cpos))))
-                     (set! (.x clone) (+ (.x cpos) xstep)))
-                   (when (or 
-                           (and (neg? ystep) (< ypos (.y cpos)))
-                           (and (pos? ystep) (> ypos (.y cpos))))
-                     (set! (.y clone) (+ (.y cpos) ystep)))
-                   (style/setPosition pnod (.x clone) (.y clone)))))))              
-
-
+  [xpos ypos ttime callback accel]
+  (chainable-effect
+    (fn [pnod pcallback]
+      (let [cpos (style/getPosition pnod)
+            start (array (.x cpos) (.y cpos))
+            xpos (if (= :curx) (.x cpos) xpos)
+            ypos (if (= :cury) (.y cpos) ypos)
+            end (array xpos ypos)
+            anim (fx-dom/Slide. pnod start end ttime accel)]
+        (when (not (nil? pcallback)) 
+          (events/listen anim goog.fx.Animation.EventType/END pcallback))
+        (. anim (play))))
+       callback))
+  
 
 ;##################################################################
 ; data extractors

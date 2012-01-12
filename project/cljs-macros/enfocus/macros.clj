@@ -197,34 +197,14 @@
 (defmacro remove-listener [& forms]
   `(enfocus.core/en-remove-listener ~@forms))
 
- 
-(defmacro effect [step etype bad-etypes callback test-func & forms]
-  `(enfocus.core/chainable-effect
-    (fn [pnod# pcallback#]
-      ((enfocus.macros/stop-effect ~@bad-etypes) pnod#)
-      (let [start# (enfocus.core/get-mills)
-            eff-id# (enfocus.core/start-effect pnod# ~etype) 
-            eff# (fn run# [] 
-                   (if (and
-                         (enfocus.core/check-effect pnod# ~etype eff-id#)
-                         (not (~test-func pnod# (-  (enfocus.core/get-mills) start#)) ))
-                     (do
-                       ((enfocus.macros/at ~@forms) pnod#)
-                       (enfocus.core/setTimeout #(run#) ~step))
-                     (do
-                       (enfocus.core/finish-effect pnod# ~etype eff-id#)
-                       (pcallback#))
-                     ))]
-        (eff# 0))) ~callback))  
-
-(defmacro stop-effect [& etypes]
-  `(enfocus.core/en-stop-effect ~@etypes))  
-      
+   
 (defmacro fade-out 
-  ([ttime num-steps] 
-    `(enfocus.core/en-fade-out ~ttime ~num-steps nil))
-  ([ttime num-steps callback]
-    `(enfocus.core/en-fade-out ~ttime ~num-steps ~callback)))
+  ([ttime] 
+    `(enfocus.core/en-fade-out ~ttime nil nil))
+  ([ttime callback]
+    `(enfocus.core/en-fade-out ~ttime ~callback nil))
+  ([ttime callback accel]
+    `(enfocus.core/en-fade-out ~ttime ~callback nil)))
 
 (defmacro delay [ttime & forms]
   `(enfocus.core/chainable-standard 
@@ -232,26 +212,32 @@
       (enfocus.core/setTimeout #((enfocus.macros/at ~@forms) pnod#) ~ttime))))
 
 (defmacro fade-in  
-  ([ttime num-steps] 
-    `(enfocus.core/en-fade-in ~ttime ~num-steps nil))
-  ([ttime num-steps callback]
-  `(enfocus.core/en-fade-in ~ttime ~num-steps ~callback)))
+  ([ttime] 
+    `(enfocus.core/en-fade-in ~ttime nil nil))
+  ([ttime callback]
+    `(enfocus.core/en-fade-in ~ttime ~callback nil))
+  ([ttime callback accel]
+    `(enfocus.core/en-fade-in ~ttime ~callback nil)))
 
 (defmacro resize 
-  ([width height] 
-    `(enfocus.core/en-resize ~width ~height 0 0 nil))
-  ([width height ttime step] 
-    `(enfocus.core/en-resize ~width ~height ~ttime ~step nil))
-  ([width height ttime step callback]
-    `(enfocus.core/en-resize ~width ~height ~ttime ~step ~callback))) 
+  ([width height]
+    `(enfocus.core/en-resize ~width ~height 0)) 
+  ([width height ttime]
+    `(enfocus.core/en-resize ~width ~height ~ttime nil nil))
+  ([width height ttime callback]
+    `(enfocus.core/en-resize ~width ~height ~ttime ~callback nil))
+  ([width height ttime callback accel]
+    `(enfocus.core/en-resize ~width ~height ~ttime ~callback ~accel))) 
 
 (defmacro move 
   ([xpos ypos] 
-    `(enfocus.core/en-move ~xpos ~ypos 0 0 nil))
-  ([xpos ypos ttime step] 
-    `(enfocus.core/en-move ~xpos ~ypos ~ttime ~step nil))
-  ([xpos ypos ttime step callback]
-  `(enfocus.core/en-move ~xpos ~ypos ~ttime ~step ~callback))) 
+    `(enfocus.core/en-move ~xpos ~ypos 0 nil nil))
+  ([xpos ypos ttime] 
+    `(enfocus.core/en-move ~xpos ~ypos ~ttime nil nil))
+  ([xpos ypos ttime callback]
+  `(enfocus.core/en-move ~xpos ~ypos ~ttime ~callback nil))
+  ([xpos ypos ttime callback accel]
+  `(enfocus.core/en-move ~xpos ~ypos ~ttime ~callback ~accel))) 
 
 (defmacro chain [func & chains]
   (if (empty? chains)

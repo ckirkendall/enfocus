@@ -109,27 +109,27 @@
               ["#test-content5"] (em/remove-style :background :font-size)
               ["#test-content6"] (em/listen
                                    :mouseover
-                                   #((em/fade-out 500 20) (.currentTarget %)))
+                                   #((em/fade-out 500) (.currentTarget %)))
               ["#test-content6"] (em/listen
                                    :mouseout 
-                                   #((em/fade-in 500 20) (.currentTarget %)))
+                                   #((em/fade-in 500) (.currentTarget %)))  
               ["#test-content6_5"] (em/listen
                                    :mouseenter
-                                   #((em/fade-out 500 20) (.currentTarget %)))
+                                   #((em/fade-out 500) (.currentTarget %)))
               ["#test-content6_5"] (em/listen
                                    :mouseleave  
-                                   #((em/fade-in 500 20) (.currentTarget %)))
+                                   #((em/fade-in 500) (.currentTarget %)))
               ["#click"] (em/listen
                           :click 
                           #(em/at js/document
                                ["#sz-tst"] (em/chain 
-                                             (em/resize 2 30 500 20)
-                                             (em/resize 200 30 500 20 test-callback))))
+                                             (em/resize 2 30 500)
+                                             (em/resize 200 30 500 test-callback))))
               ["#mclick"] (em/listen  
                           :click 
-                          #(em/at js/document
-                               ["#mv-tst"] (em/move 300 305 500 20 
-                                                    (em/move 0 0 500 20))))
+                          #(em/at js/document 
+                               ["#mv-tst"] (em/move 300 305 500 
+                                                    (em/move 0 0 500))))
               ["#test-from"] (em/listen :click test-from)
               ["#test-get-text"] (em/listen :click test-get-text))
     
@@ -138,7 +138,7 @@
   
 
 (defn funtimes [msg]
-  (em/at js/window (em/listen :resize #(js/alert (str "you resized your window:" %))))
+  (em/at js/window (em/listen :resize #(ef/log-debug (str "you resized your window:" %))))
   (em/at js/document
       [:.heading (ef/attr= :foo "true")] (em/content msg))
   (em/wait-for-load (test-grid)))   
