@@ -180,7 +180,7 @@ New Transformations
   fade-in            (fade-in time)
                      or (fade-in time callback)
                      or (fade-in time callback accelerator)
-  fade-out           (fade-out time step-size)
+  fade-out           (fade-out time)
                      or (fade-out time callback)
   resize             (resize width height ttime)
                      or (resize width height ttime callback)
@@ -188,9 +188,9 @@ New Transformations
   move               (move x y ttime)
                      or (move x y ttime callback)
                      or (move x y ttime callback accelerator)
-  chain              (chain (fade-in ttime step-size) ;serialize async effects
-                            (move x y ttime step-size)
-                            (fade-out ttime step-size)
+  chain              (chain (fade-in ttime) ;serialize async effects
+                            (move x y ttime)
+                            (fade-out ttime)
                             ...)
 </pre>
 
