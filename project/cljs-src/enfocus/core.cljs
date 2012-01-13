@@ -21,7 +21,7 @@
 (def debug true)
 
 (defn log-debug [mesg] 
-  (when (and debug (not (= (.console js/window) js/undefined)))
+  (when (and debug (not (= (.-console js/window) js/undefined)))
     (.log js/console mesg)))
 
 (defn setTimeout [func ttime]
@@ -41,7 +41,7 @@
     (node? nl) [nl]
     (identical? js/window nl) [nl]
     (or (instance? js/Array nl) (coll? nl)) nl
-    (nodelist? nl) (for [x (range 0 (.length nl))]
+    (nodelist? nl) (for [x (range 0 (.-length nl))]
                     (aget nl x))))
 
 (defn- flatten-nodes-coll [values]
@@ -61,9 +61,9 @@
   "removes the property value from an elements style obj."
   [obj values]
   (doseq [attr values]
-    (if (.IE goog/userAgent) 
+    (if (.-IE goog/userAgent) 
       (style/setStyle obj (name attr) "")
-      (.  (.style obj) (removeProperty (name attr))))))
+      (.  (.-style obj) (removeProperty (name attr))))))
 
 (defn get-eff-prop-name [etype]
   (str "__ef_effect_" etype))
@@ -77,16 +77,16 @@
   (cond 
     (not child) false
     (identical? parent child) false
-    (identical? (.parentNode child) parent) true
-    :else (recur parent (.parentNode child))))
+    (identical? (.-parentNode child) parent) true
+    :else (recur parent (.-parentNode child))))
     
 
 (defn mouse-enter-leave 
   "this is used to build cross browser versions of :mouseenter and :mouseleave events"
   [func]
   (fn [e]
-    (let [re (.relatedTarget e)
-          this (.currentTarget e)]
+    (let [re (.-relatedTarget e)
+          this (.-currentTarget e)]
       (when (and
               (not (identical? re this))
               (not (child-of? this re)))
@@ -122,7 +122,7 @@
   "cache for the remote templates"
   (atom {}))
 
-(def hide-style (.strobj {"style" "display: none; width: 0px; height: 0px"}))
+(def hide-style (.-strobj {"style" "display: none; width: 0px; height: 0px"}))
 
 (defn create-hidden-dom 
   "Add a hidden div to hold the dom as we are transforming it this has to be done
@@ -130,13 +130,13 @@
   [child]
   (let [div (dom/createDom "div" hide-style)]
     (. div (appendChild child))
-    (dom/appendChild (.body (dom/getDocument)) div)
+    (dom/appendChild (.-body (dom/getDocument)) div)
     div)) 
     
 (defn remove-node-return-child 
   "removes the hidden div and returns the children"
   [div]
-  (let [child (.childNodes div)
+  (let [child (.-childNodes div)
         frag (. js/document (createDocumentFragment))]
     (dom/append frag child)
     (dom/removeNode div)
@@ -176,7 +176,7 @@
                            body (first (nodes->coll (css-select data "body")))]
                        (if body
                          (let [frag (. js/document (createDocumentFragment))
-                               childs (.childNodes frag)]
+                               childs (.-childNodes frag)]
                            (dom/append frag childs)
                            (swap! tpl-cache assoc uri [sym frag]))
                          (swap! tpl-cache assoc uri [sym data] ))))]
@@ -344,7 +344,7 @@
   (content-based-trans
     values
     (fn [pnod frag]
-      (let [nod (.firstChild pnod)]
+      (let [nod (.-firstChild pnod)]
         (. pnod (insertBefore frag nod))))))
 
 
@@ -398,7 +398,7 @@
   (chainable-standard
     (fn [pnod]
       (let [frag (. js/document (createDocumentFragment))]
-         (em/at frag (em/append (.childNodes pnod)))
+         (em/at frag (em/append (.-childNodes pnod)))
          (dom/replaceNode frag pnod)))))
   
 
@@ -484,9 +484,9 @@
   (chainable-effect
     (fn [pnod pcallback]
       (let [csize (style/getSize pnod)
-            start (array (.width csize) (.height csize))
-            wth (if (= :curwidth wth) (.width csize) wth)
-            hgt (if (= :curheight hgt) (.height csize) hgt)
+            start (array (.-width csize) (.-height csize))
+            wth (if (= :curwidth wth) (.-width csize) wth)
+            hgt (if (= :curheight hgt) (.-height csize) hgt)
             end (array wth hgt)
             anim (fx-dom/Resize. pnod start end ttime accel)]
         (when (not (nil? pcallback)) 
@@ -500,9 +500,9 @@
   (chainable-effect
     (fn [pnod pcallback]
       (let [cpos (style/getPosition pnod)
-            start (array (.x cpos) (.y cpos))
-            xpos (if (= :curx) (.x cpos) xpos)
-            ypos (if (= :cury) (.y cpos) ypos)
+            start (array (.-x cpos) (.-y cpos))
+            xpos (if (= :curx) (.-x cpos) xpos)
+            ypos (if (= :cury) (.-y cpos) ypos)
             end (array xpos ypos)
             anim (fx-dom/Slide. pnod start end ttime accel)]
         (when (not (nil? pcallback)) 
@@ -580,12 +580,12 @@
 (defn selected-options 
   "takes a list of options and returns the selected ones. "
   [pnod]
-  (.selected pnod))
+  (.-selected pnod))
 
 (defn checked-radio-checkbox 
   "takes a list of radio or checkboxes and returns the checked ones"
   [pnod]
-  (.checked pnod))
+  (.-checked pnod))
 
 (register-filter :selected selected-options)
 (register-filter :checked checked-radio-checkbox)

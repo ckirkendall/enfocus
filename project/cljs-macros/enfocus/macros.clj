@@ -253,4 +253,4 @@
 (defmacro get-prop [prop]
   `(enfocus.core/extr-multi-node
      (fn [pnod#]
-       (~(symbol (str "." (name prop))) pnod#))))
+       (~(symbol (str ".-" (name prop))) pnod#))))

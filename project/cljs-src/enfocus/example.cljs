@@ -8,7 +8,7 @@
   (let [form-vals (em/from js/document
                         :test1 ["#ftest1"] (em/get-prop :value) 
                         :test2 ["#ftest2"] (em/get-prop :value)
-                        :test3 ["#from-form > input[type=checkbox]"] (em/filter #(.checked %)
+                        :test3 ["#from-form > input[type=checkbox]"] (em/filter #(.-checked %)
                                                                                 (em/get-prop :value))
                         :test4 ["#from-form option"] (em/filter :selected
                                                                 (em/get-prop :value)))
@@ -95,10 +95,10 @@
               ["#test-content tbody tr:nth-of-type(even)"] (em/add-class "even")
               ["#test-content tbody tr"] (em/listen 
                                            :mouseover 
-                                           #((em/add-class "highlight") (.currentTarget %)))
+                                           #((em/add-class "highlight") (.-currentTarget %)))
               ["#test-content tbody tr"] (em/listen  
                                            :mouseout 
-                                           #((em/remove-class "highlight") (.currentTarget %)))
+                                           #((em/remove-class "highlight") (.-currentTarget %)))
               ["#test-content2"] (em/content (template2 {"banana" 5 "pineapple" 10 "apple" 5}))
               ["#heading1"] (em/set-attr :id "new-heading1")
               ["#heading2"] (em/set-attr :id "new-heading2")
@@ -109,16 +109,16 @@
               ["#test-content5"] (em/remove-style :background :font-size)
               ["#test-content6"] (em/listen
                                    :mouseover
-                                   #((em/fade-out 500) (.currentTarget %)))
+                                   #((em/fade-out 500) (.-currentTarget %)))
               ["#test-content6"] (em/listen
                                    :mouseout 
-                                   #((em/fade-in 500) (.currentTarget %)))  
+                                   #((em/fade-in 500) (.-currentTarget %)))  
               ["#test-content6_5"] (em/listen
                                    :mouseenter
-                                   #((em/fade-out 500) (.currentTarget %)))
+                                   #((em/fade-out 500) (.-currentTarget %)))
               ["#test-content6_5"] (em/listen
                                    :mouseleave  
-                                   #((em/fade-in 500) (.currentTarget %)))
+                                   #((em/fade-in 500) (.-currentTarget %)))
               ["#click"] (em/listen
                           :click 
                           #(em/at js/document
@@ -143,4 +143,4 @@
       [:.heading (ef/attr= :foo "true")] (em/content msg))
   (em/wait-for-load (test-grid)))   
                               
-(set! (.onload js/window) #(funtimes "THIS IS A TEST"))
+(set! (.-onload js/window) #(funtimes "THIS IS A TEST"))
