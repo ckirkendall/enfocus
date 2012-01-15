@@ -427,17 +427,43 @@
       @view-port-monitor)))
       
 
+(defn gen-enter-leave-wrapper [event]
+  (let [obj (new js/Object)]
+    (set! (.-listen obj) 
+          (fn [elm func opt-cap opt-scope opt-handler]
+            (let [callback (mouse-enter-leave func)]
+              (set! (.-listen callback) func)
+              (set! (.-scope callback) opt-scope)
+              (if op-handler
+                (.listen opt-handler elm (name event) callback)
+                (events/listen elm (name event) callback)))))
+    (set! (.-unlisten obj)
+          (fn [elm func opt-cap opt-scope opt-handler]
+            (let [listeners (events/getListeners elm event false)]
+              (for [obj listeners]
+                (let[listener (.-listener obj)]
+                  (if (and (or (not func) (= (.-listen listener) func))
+                           (or (not opt-scope) (= (.-scope listener) opt-scope)))
+                    (if opt-handler
+                      (.unlisten opt-handler elm event listener)
+                      (events/unlisten elm event listerner))))))))
+    obj))
+
+(def wrapper-register {:mouseenter (gen-enter-leave-wrapper :mouseover)
+                       :mouseleave (gen-enter-leave-wrapper :mouseout)})
+
+
 (defn en-listen
   "adding an event to the selected nodes"
   [event func]
-  (cond 
-    (= :mouseenter event) (en-listen :mouseover (mouse-enter-leave func))
-    (= :mouseleave event) (en-listen :mouseout (mouse-enter-leave func))
-    :else (chainable-standard   
-            (fn [pnod]
-              (if (and (= :resize event) (identical? js/window pnod)) ;support window resize
-                (events/listen (get-vp-monitor) "resize" func)
-                (events/listen pnod (name event) func))))))
+  (let [wrapper (wrapper-register event)]
+    (chainable-standard  
+      (fn [pnod]
+        (if (and (= :resize event) (identical? js/window pnod)) ;support window resize
+          (events/listen (get-vp-monitor) "resize" func)
+          (if (nil? wrapper)
+            (events/listen pnod (name event) func)
+            (events/listenWithWrapper pnod wrapper func)))))))
   
 (defn en-remove-listener 
   "adding an event to the selected nodes"
