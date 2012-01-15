@@ -194,10 +194,17 @@
 (defmacro listen [& forms]
   `(enfocus.core/en-listen ~@forms))
 
-(defmacro remove-listener [& forms]
-  `(enfocus.core/en-remove-listener ~@forms))
+(defmacro unlisten [& forms]
+  `(enfocus.core/en-unlisten ~@forms))
 
-   
+(defmacro remove-listener [& forms]
+  `(do
+     (enfocus.core/log-debug "this method is deprecated should use remove-listeners")
+     (enfocus.core/en-remove-listeners ~@forms)))
+
+(defmacro remove-listeners [& forms]
+  `(enfocus.core/en-remove-listeners ~@forms))
+
 (defmacro fade-out 
   ([ttime] 
     `(enfocus.core/en-fade-out ~ttime nil nil))

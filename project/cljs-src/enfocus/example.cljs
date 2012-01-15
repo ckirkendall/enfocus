@@ -88,7 +88,13 @@
                                              (em/prepend (success)))
               ["#wrap-span"] (em/wrap :span {:class "success"})
               ["#test15 > *:last-child > .success > span"] (em/content "success")
-              ["#wrapper"] (em/unwrap))  
+              ["#wrapper"] (em/unwrap)) 
+
+(defn fade-in [event]
+  ((em/fade-in 500) (.-currentTarget event)))
+
+(defn fade-out [event]
+  ((em/fade-out 500) (.-currentTarget event)))
   
 (em/defaction test-grid []    
               ["#test-content"] (em/content (test-cases))
@@ -107,18 +113,20 @@
               ["#test-content4"] (em/set-style :background "#00dd00" :font-size "10px")
               ["#test-content5"] (em/set-style :background "#dd0000" :font-size "10px")
               ["#test-content5"] (em/remove-style :background :font-size)
-              ["#test-content6"] (em/listen
-                                   :mouseover
-                                   #((em/fade-out 500) (.-currentTarget %)))
-              ["#test-content6"] (em/listen
-                                   :mouseout 
-                                   #((em/fade-in 500) (.-currentTarget %)))  
-              ["#test-content6_5"] (em/listen
-                                   :mouseenter
-                                   #((em/fade-out 500) (.-currentTarget %)))
-              ["#test-content6_5"] (em/listen
-                                   :mouseleave  
-                                   #((em/fade-in 500) (.-currentTarget %)))
+              ["#test-content6"] (em/listen :mouseover fade-out)
+              ["#test-content6"] (em/listen :mouseout fade-in)
+              ["#test-remove-listeners"] (em/listen  
+                                   :click 
+                                   #(em/at js/document 
+                                           ["#test-content6"] (em/remove-listeners :mouseover :mouseout)))
+              ["#test-content6_5"] (em/listen :mouseenter fade-out)
+              ["#test-content6_5"] (em/listen :mouseleave  fade-in)
+              ["#test-unlisten"] (em/listen  
+                                   :click 
+                                   #(em/at js/document  
+                                           ["#test-content6_5"] (em/do->
+                                                                  (em/unlisten :mouseenter fade-out)
+                                                                  (em/unlisten :mouseleave fade-in))))
               ["#click"] (em/listen
                           :click 
                           #(em/at js/document

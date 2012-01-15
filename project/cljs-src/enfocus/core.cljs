@@ -439,14 +439,15 @@
                 (events/listen elm (name event) callback)))))
     (set! (.-unlisten obj)
           (fn [elm func opt-cap opt-scope opt-handler]
-            (let [listeners (events/getListeners elm event false)]
-              (for [obj listeners]
-                (let[listener (.-listener obj)]
-                  (if (and (or (not func) (= (.-listen listener) func))
-                           (or (not opt-scope) (= (.-scope listener) opt-scope)))
-                    (if opt-handler
-                      (.unlisten opt-handler elm event listener)
-                      (events/unlisten elm event listerner))))))))
+            (let [listeners (events/getListeners elm (name event) false)]
+              (dorun 
+                (map (fn [obj]
+                       (let[listener (.-listener obj)]
+                         (when (and (or (not func) (= (.-listen listener) func))
+                                    (or (not opt-scope) (= (.-scope listener) opt-scope)))
+                           (if opt-handler
+                             (.unlisten opt-handler elm (name event) listener)
+                             (events/unlisten elm (name event) listener))))) listeners)))))
     obj))
 
 (def wrapper-register {:mouseenter (gen-enter-leave-wrapper :mouseover)
@@ -464,8 +465,18 @@
           (if (nil? wrapper)
             (events/listen pnod (name event) func)
             (events/listenWithWrapper pnod wrapper func)))))))
+
+(defn en-unlisten 
+  "removing a specific event from the selected nodes"
+  [event func]
+  (let [wrapper (wrapper-register event)]
+    (chainable-standard  
+      (fn [pnod]
+        (if (nil? wrapper) 
+          (events/unlisten pnod (name event) func)
+          (events/unlistenWithWrapper pnod wrapper func))))))
   
-(defn en-remove-listener 
+(defn en-remove-listeners 
   "adding an event to the selected nodes"
   [& event-list]
   (let [get-name #(name (cond  
