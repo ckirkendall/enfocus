@@ -133,6 +133,12 @@
                                ["#sz-tst"] (em/chain 
                                              (em/resize 2 30 500)
                                              (em/resize 200 30 500 test-callback))))
+              ["#delay-click"] (em/listen
+                          :click 
+                          #(em/at js/document
+                               ["#dly-tst"] (em/chain 
+                                             (em/resize 2 30 500)
+                                             (em/delay 2000 (em/resize 200 30 500)))))
               ["#mclick"] (em/listen  
                           :click 
                           #(em/at js/document 

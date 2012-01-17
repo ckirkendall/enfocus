@@ -10,6 +10,7 @@
             [goog.fx :as fx]
             [goog.fx.dom :as fx-dom]
             [goog.async.Delay :as gdelay]
+            [goog.Timer :as timer]
             [clojure.string :as string])
   (:require-macros [enfocus.macros :as em])) 
 (declare css-syms css-select create-sel-str)
@@ -25,7 +26,7 @@
     (.log js/console mesg)))
 
 (defn setTimeout [func ttime]
-  (. (new goog.async.Delay func ttime) (start))) 
+  (timer/callOnce func ttime)) 
 
 (defn node? [tst]  
   (dom/isNodeLike tst))
