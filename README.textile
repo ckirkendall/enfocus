@@ -202,9 +202,6 @@ Currently there is one transformation that is supported by Enlive but not Enfocu
 
 h2. Contributing
  * Download "lieningen":https://github.com/technomancy/leiningen
- * Download & Install "cljs-watch":https://github.com/ibdknox/cljs-watch
- * Make sure that you have your CLOJURESCRIPT_HOME path setup correctly
- * Also ensure that your ClojureScript lib has the goog-jar.jar that comes down as an enfocus dependency
 
 h4. Compile ClojureScript
 <pre>
