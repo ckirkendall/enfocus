@@ -204,6 +204,7 @@ h2. Contributing
  * Download "lieningen":https://github.com/technomancy/leiningen
 
 h4. Compile ClojureScript
+
 <pre>
  git clone git://github.com/ckirkendall/enfocus.git
  cd enfocus/project
@@ -212,6 +213,7 @@ h4. Compile ClojureScript
 </pre>
 
 h4. Viewing the Test Page
+
 <pre>
  cd enfocus/sample
  lein deps
