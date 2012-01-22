@@ -1,6 +1,6 @@
-(defproject enfocus "0.9.0-SNAPSHOT"
+(defproject enfocus "0.9.1-SNAPSHOT"
   :description "DOM manipulation tool for clojurescript inspired by Enlive"
-  :souce-path "cljs-src"
+  :source-path "cljs-src"
   :dependencies [[org.clojure/clojure "1.3.0"]
                  [goog-jar "1.0.0"]]
   :dev-dependencies [[lein-eclipse "1.0.0"]
