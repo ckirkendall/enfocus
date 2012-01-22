@@ -24,7 +24,7 @@ From any leiningen project file:
 </pre>
 Then make sure you have your lib folder on your classpath.
 
-For the best development experience, use "lein-cljsbuild":https://github.com/emezeske/lein-cljsbuild.  lein-cljsbuild 0.7.0 includes the third party google libraries needed for enfocus.  If you choose something else you will need you'll need to replace the goog.jar in your CLOJURESCRIPT_HOME/lib with the goog-jar.jar that comes down as a dependency with enfocus.
+For the best development experience, use "lein-cljsbuild":https://github.com/emezeske/lein-cljsbuild.  lein-cljsbuild 0.7.0 includes the third party google libraries needed for enfocus.  If you choose something else you will need to replace the goog.jar in your CLOJURESCRIPT_HOME/lib with the goog-jar.jar that comes down as a dependency with enfocus.
 
 If you are using an older version of ClojureScript you will need to use [&#34;0.9.0-SNAPSHOT&#34;].
 
