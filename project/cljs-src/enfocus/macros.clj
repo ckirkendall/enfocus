@@ -173,8 +173,6 @@
     (fn [pnod#]
       (let [div# (enfocus.core/create-hidden-dom 
                     (. js/document (~(symbol "createDocumentFragment"))))]
-        (enfocus.core/log-debug pnod#)
-        (enfocus.core/log-debug (pr-str ~lst))
         (doseq [~(symbol (name sym)) ~lst]
           (do 
             (enfocus.macros/at div#  (enfocus.macros/append (. pnod# (~(symbol "cloneNode") true))))

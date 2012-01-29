@@ -29,7 +29,7 @@
   (timer/callOnce func ttime)) 
 
 (defn node? [tst]  
-  (dom/isNodeLike tst))
+  (dom/isNodeLike tst))  
 
 (defn nodelist? [tst]
   (instance? js/NodeList tst))
@@ -42,8 +42,9 @@
     (node? nl) [nl]
     (identical? js/window nl) [nl]
     (or (instance? js/Array nl) (coll? nl)) nl
-    (nodelist? nl) (for [x (range 0 (.-length nl))]
-                    (aget nl x))))
+    ;would love this to be lazy but NodeList is dynamic list
+    (nodelist? nl) (doall (for [x (range 0 (.-length nl))] 
+                            (. nl (item x))))))
 
 (defn- flatten-nodes-coll [values]
   "takes a set of nodes and nodelists and flattens them"
@@ -173,14 +174,8 @@
           callback (fn [req] 
                      (let [text (. req (getResponseText))
                            [sym txt] (replace-ids text)
-                           data (dom/htmlToDocumentFragment txt)
-                           body (first (nodes->coll (css-select data "body")))]
-                       (if body
-                         (let [frag (. js/document (createDocumentFragment))
-                               childs (.-childNodes frag)]
-                           (dom/append frag childs)
-                           (swap! tpl-cache assoc uri [sym frag]))
-                         (swap! tpl-cache assoc uri [sym data] ))))]
+                           data (dom/htmlToDocumentFragment txt)]
+                       (swap! tpl-cache assoc uri [sym data] )))]
       (events/listen req goog.net.EventType/COMPLETE 
                      #(do 
                         (callback req) 
@@ -259,11 +254,16 @@
   "HOF to remove the duplicate code in transformation that handle creating a 
    fragment and applying it in some way to the selected node"
   [values func]
-  (let [fnodes (flatten-nodes-coll values)]
+  (let [fnodes (flatten-nodes-coll values)
+        clone? (atom false)]
     (chainable-standard 
       (fn [pnod]
-        (let [frag (. js/document (createDocumentFragment))]
-          (doall (map #(dom/appendChild frag (. % (cloneNode true))) fnodes))
+        (let [frag (. js/document (createDocumentFragment))
+              app-func (if (or @clone? (instance? js/DocumentFragment))
+                         #(dom/appendChild frag (. % (cloneNode true)))
+                         #(dom/appendChild frag %))]
+          (doall (map app-func fnodes))
+          (reset! clone? true)
           (func pnod frag))))))
     
 
@@ -399,7 +399,7 @@
   (chainable-standard
     (fn [pnod]
       (let [frag (. js/document (createDocumentFragment))]
-         (em/at frag (em/append (.-childNodes pnod)))
+         (dom/append frag (.-childNodes pnod))
          (dom/replaceNode frag pnod)))))
   
 
@@ -605,7 +605,6 @@
       (let [pnod-col (nodes->coll pnodes)
             ttest (if (keyword? tst) (@reg-filt tst) tst)
             res (filter ttest pnod-col)]
-        (log-debug (pr-str res))
         (if (nil? chain) 
           (trans res)
           (trans res chain))))))
