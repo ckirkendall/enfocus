@@ -193,11 +193,11 @@
   "returns the cached snippet or creates one and adds it to the cache if needed"
   [uri sel]  
   (let [sel-str  (create-sel-str sel)
-        cache (@tpl-cache (str (uri sel-str)))]
+        cache (@tpl-cache (str uri sel-str))]
     (if cache [(first cache) (. (second cache) (cloneNode true))]
 		  (let [[sym tdom] (get-cached-dom uri)  
 		        dom (create-hidden-dom tdom)
-		        tsnip (css-select dom sel-str)
+		        tsnip (css-select sym dom sel)
             snip (if (instance? js/Array tsnip) (first tsnip) tsnip)]
 		    (remove-node-return-child dom)
 	      (assoc @tpl-cache (str uri sel-str) [sym snip])
