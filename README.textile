@@ -1,6 +1,6 @@
 h1. Enfocus
 
-Enfocus is a @DOM@ manipulation and templating library for ClojureScript. Inspired by Christophe Grand's "Enlive":http://github/cgrand/enlive, Enfocus' primary purpose is providing a base for building rich interfaces in ClojureScript.
+Enfocus is a @DOM@ manipulation and templating library for ClojureScript. Inspired by Christophe Grand's "Enlive":http://github.com/cgrand/enlive, Enfocus' primary purpose is providing a base for building rich interfaces in ClojureScript.
 
 You can find examples and documention for enfocus "here":http:/ckirkendall.github.com/enfocus-site
 
