@@ -60,22 +60,35 @@
            (enfocus.core/remove-node-return-child ~pnode-sym))
          ~pnode-sym)))))
 
-(defmacro deftemplate [sym uri args & forms]
-  `(do 
-     (enfocus.core/load-remote-dom ~uri)
-     (enfocus.macros/create-dom-action 
-       ~sym
-       #(enfocus.core/get-cached-dom ~uri) 
-       true ~args ~@forms)))
 
-(defmacro defsnippet [sym uri sel args & forms]
-  `(do 
-     (enfocus.core/load-remote-dom ~uri)
-     (enfocus.macros/create-dom-action 
-       ~sym
-       #(enfocus.core/get-cached-snippet ~uri ~sel) 
-       true ~args ~@forms)))
-  
+(defn ensure-mode [body]
+  ;; 'mode' argument is not required and defaults to :remote, for
+  ;; backward compatiblity.
+  (if (= (first body) :compiled)
+    body
+    (cons :remote body)))
+
+(defmacro deftemplate [sym & body]
+  (let [[mode uri args & forms] (ensure-mode body)]
+    `(do
+       ~@(case mode
+           :remote   `(enfocus.core/load-remote-dom ~uri)
+           :compiled (load-local-dom uri))
+       (enfocus.macros/create-dom-action
+        ~sym
+        #(enfocus.core/get-cached-dom ~uri)
+        true ~args ~@forms))))
+
+(defmacro defsnippet [sym & body]
+  (let [[mode uri sel args & forms] (ensure-mode body)]
+    `(do
+       ~@(case mode
+           :remote   `(enfocus.core/load-remote-dom ~uri)
+           :compiled (load-local-dom uri))
+       (enfocus.macros/create-dom-action
+        ~sym
+        #(enfocus.core/get-cached-snippet ~uri ~sel)
+        true ~args ~@forms))))
   
 (defmacro defaction [sym args & forms]
   `(defn ~sym ~args (enfocus.macros/at js/document ~@forms)))
