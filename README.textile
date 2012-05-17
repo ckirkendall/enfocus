@@ -135,6 +135,18 @@ brought into the template.
                            (map #(snippit2 % (fruit-data %)) (keys fruit-data))))
 </pre>
 
+Normally, snippets and templates are loaded via an AJAX request, but you can
+also create @:compiled@ templates, which will be inlined in to resulting code
+at compile time:
+
+<pre>
+  (em/deftemplate :compiled template2 "/templates/template1.html" [fruit-data] 
+                ["#heading1"] (em/content "fruit")  
+                ["thead tr > *:last-child"] (em/content "quantity")
+                ["tbody"] (em/content
+                           (map #(snippit2 % (fruit-data %)) (keys fruit-data))))
+</pre>
+
 An action is a set of transforms that take place on the live dom.  below is a 
 definition of a an action.
 
