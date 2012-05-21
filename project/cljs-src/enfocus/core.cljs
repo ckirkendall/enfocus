@@ -163,7 +163,7 @@
     (doall (map #(let [id (. % (getAttribute "id"))
                        rid (. id (replace sym ""))]
                    (. % (setAttribute "id" rid))) nod-col))))  
-    
+
 
 (defn load-remote-dom 
   "loads a remote file into the cache, and masks the ids to avoid collisions"
