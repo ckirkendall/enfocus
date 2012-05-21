@@ -41,17 +41,18 @@
                 ["tbody"] (em/content
                            (map #(snippet2 % (fruit-data %)) (keys fruit-data))))
 
-(em/deftemplate template3 "/templates/template1.html" [fruit-data] 
-                ["#heading1"] (em/content "fruit")  
-                ["thead tr > *:last-child"] (em/content "quantity")
-                ["tbody > tr:not(:first-child)"] (em/remove-node)
-                ["tbody"] #(em/at % ["tr:first-of-type"] 
-                                  (em/clone-for [fr (vec fruit-data)]
-                                                ["*:first-child"] (em/content (first fr))
-                                                ["*:last-child"] (em/content (str (second fr))))))
+(em/deftemplate template3 :compiled "../sample/resources/public/templates/template1.html" [fruit-data]
+  ["#heading1"] (em/content "fruit")
+  ["thead tr > *:last-child"] (em/content "quantity")
+  ["tbody > tr:not(:first-child)"] (em/remove-node)
+  ["tbody"] #(em/at % ["tr:first-of-type"]
+                    (em/clone-for [fr (vec fruit-data)]
+                                  ["*:first-child"] (em/content (first fr))
+                                  ["*:last-child"] (em/content (str (second fr))))))
   
   
-(em/defsnippet success "templates/test-grid.html"  ["tbody > *:first-child > td span"] [] )
+(em/defsnippet success :compiled "../sample/resources/public/templates/test-grid.html"
+  ["tbody > *:first-child > td span"] [])
 
 (em/defsnippet row "templates/test-grid.html"  ["tbody > *:first-child"] 
            [test-desc value]
@@ -109,7 +110,7 @@
               ["#heading1"] (em/set-attr :id "new-heading1")
               ["#heading2"] (em/set-attr :id "new-heading2")
               ["#test-content2 tfoot tr > *:last-child"] (em/content (str 20))
-              ["#test-content3"] (em/content (template3 {"banana" 12 "apple" 6}))
+              ;; ["#test-content3"] (em/content (template3 {"banana" 12 "apple" 6}))
               ["#test-content4"] (em/set-style :background "#00dd00" :font-size "10px")
               ["#test-content5"] (em/set-style :background "#dd0000" :font-size "10px")
               ["#test-content5"] (em/remove-style :background :font-size)
