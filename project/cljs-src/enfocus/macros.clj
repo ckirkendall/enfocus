@@ -61,19 +61,27 @@
          ~pnode-sym)))))
 
 
-(defn ensure-mode [body]
+(defn ensure-mode [[mode & _ :as body]]
   ;; 'mode' argument is not required and defaults to :remote, for
   ;; backward compatiblity.
-  (if (= (first body) :compiled)
+  (if (keyword? mode)
     body
     (cons :remote body)))
+
+(defn load-local-dom [path]
+  "same as 'load-remote-dom', but work for local files"
+  (let [text (slurp path)]
+    `(when (nil? (@enfocus.core/tpl-cache ~path))
+       (let [[sym# txt#] (enfocus.core/replace-ids ~text)
+             data# (goog.dom/htmlToDocumentFragment txt#)]
+         (swap! enfocus.core/tpl-cache assoc ~path [sym# data#])))))
 
 (defmacro deftemplate [sym & body]
   (let [[mode uri args & forms] (ensure-mode body)]
     `(do
-       ~@(case mode
-           :remote   `(enfocus.core/load-remote-dom ~uri)
-           :compiled (load-local-dom uri))
+       ~(case mode
+          :remote   `(enfocus.core/load-remote-dom ~uri)
+          :compiled (load-local-dom uri))
        (enfocus.macros/create-dom-action
         ~sym
         #(enfocus.core/get-cached-dom ~uri)
@@ -82,9 +90,9 @@
 (defmacro defsnippet [sym & body]
   (let [[mode uri sel args & forms] (ensure-mode body)]
     `(do
-       ~@(case mode
-           :remote   `(enfocus.core/load-remote-dom ~uri)
-           :compiled (load-local-dom uri))
+       ~(case mode
+          :remote   `(enfocus.core/load-remote-dom ~uri)
+          :compiled (load-local-dom uri))
        (enfocus.macros/create-dom-action
         ~sym
         #(enfocus.core/get-cached-snippet ~uri ~sel)

@@ -165,16 +165,6 @@
                    (. % (setAttribute "id" rid))) nod-col))))  
 
 
-(defn load-local-dom [path]
-  "same as 'load-remote-dom', but work for local files"
-  (let [text (slurp path)]
-    `(when (nil? (@enfocus.core/tpl-cache ~path))
-       (swap! enfocus.core/tpl-load-cnt inc)
-       (let [[sym# txt#] (enfocus.core/replace-ids ~text)
-             data# (goog.dom/htmlToDocumentFragment txt#)]
-         (swap! enfocus.core/tpl-cache assoc ~path [sym# data#])))))
-
-
 (defn load-remote-dom 
   "loads a remote file into the cache, and masks the ids to avoid collisions"
   [uri]
