@@ -49,9 +49,9 @@
                     (em/clone-for [fr (vec fruit-data)]
                                   ["*:first-child"] (em/content (first fr))
                                   ["*:last-child"] (em/content (str (second fr))))))
+    
   
-  
-(em/defsnippet success :compiled "../sample/resources/public/templates/test-grid.html"
+(em/defsnippet success :compiled "enfocus/html/test-grid.html"
   ["tbody > *:first-child > td span"] [])
 
 (em/defsnippet row "templates/test-grid.html"  ["tbody > *:first-child"] 
@@ -110,7 +110,7 @@
               ["#heading1"] (em/set-attr :id "new-heading1")
               ["#heading2"] (em/set-attr :id "new-heading2")
               ["#test-content2 tfoot tr > *:last-child"] (em/content (str 20))
-              ;; ["#test-content3"] (em/content (template3 {"banana" 12 "apple" 6}))
+              ["#test-content3"] (em/content (template3 {"banana" 12 "apple" 6}))
               ["#test-content4"] (em/set-style :background "#00dd00" :font-size "10px")
               ["#test-content5"] (em/set-style :background "#dd0000" :font-size "10px")
               ["#test-content5"] (em/remove-style :background :font-size)
@@ -157,5 +157,5 @@
   (em/at js/document
       [:.heading (ef/attr= :foo "true")] (em/content msg))
   (em/wait-for-load (test-grid)))   
-                              
+                               
 (set! (.-onload js/window) #(funtimes "THIS IS A TEST"))

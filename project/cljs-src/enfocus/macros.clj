@@ -1,4 +1,5 @@
-(ns enfocus.macros)
+(ns enfocus.macros
+  (:require [clojure.java.io :as io]))
 
 ;##############################################
 ; All main transformations and functions are 
@@ -40,9 +41,11 @@
 
 (defn- create-extraction-call [id-sym pnod-sym map-sym forms]
   (map (fn [[ky sel tran]] 
-         (list 'clojure.core/swap! map-sym 'clojure.core/assoc ky (list
-                                                (if tran tran  'enfocus.macros/remove-node) 
-                                                (list 'enfocus.core/css-select id-sym pnod-sym sel))))
+         (list 'clojure.core/swap!
+               map-sym
+               'clojure.core/assoc ky (list
+                                       (if tran tran  'enfocus.macros/remove-node) 
+                                       (list 'enfocus.core/css-select id-sym pnod-sym sel))))
        (partition 3 forms)))
 
 
@@ -52,7 +55,9 @@
         new-form (create-transform-call id-sym pnode-sym forms)]   
   `(defn ~sym ~args 
      (let [[~id-sym ~pnode-sym] (if (fn? ~nod) (~nod) ["" ~nod])
-           ~pnode-sym (if ~tmp-dom (enfocus.core/create-hidden-dom ~pnode-sym) ~pnode-sym)]
+           ~pnode-sym (if ~tmp-dom
+                        (enfocus.core/create-hidden-dom ~pnode-sym)
+                        ~pnode-sym)]
        ~@new-form
        (if ~tmp-dom 
          (do
@@ -60,17 +65,29 @@
            (enfocus.core/remove-node-return-child ~pnode-sym))
          ~pnode-sym)))))
 
+(defn find-url
+  "Given a string, returns a URL. Attempts to resolve as a classpath-relative
+  path, then as a path relative to the working directory or a URL string"
+  [path-or-url]
+  (or (io/resource path-or-url)
+      (try (io/as-url path-or-url)
+           (catch java.net.MalformedURLException e
+             false))
+      (io/as-url (io/as-file path-or-url))))
 
-(defn ensure-mode [[mode & _ :as body]]
-  ;; 'mode' argument is not required and defaults to :remote, for
-  ;; backward compatiblity.
+
+(defn ensure-mode
+  " 'mode' argument is not required and defaults to :remote, for
+    backward compatability"
+  [[mode & _ :as body]]
   (if (keyword? mode)
     body
     (cons :remote body)))
 
-(defn load-local-dom [path]
+(defn load-local-dom
   "same as 'load-remote-dom', but work for local files"
-  (let [text (slurp path)]
+  [path]
+  (let [text (slurp (io/reader (find-url path)))]
     `(when (nil? (@enfocus.core/tpl-cache ~path))
        (let [[sym# txt#] (enfocus.core/replace-ids ~text)
              data# (goog.dom/htmlToDocumentFragment txt#)]
