@@ -11,7 +11,9 @@
             [goog.fx.dom :as fx-dom]
             [goog.async.Delay :as gdelay]
             [goog.Timer :as timer]
-            [clojure.string :as string])
+            [clojure.string :as string]
+            [domina :as domina]
+            [domina.css :as dcss])
   (:require-macros [enfocus.macros :as em])) 
 (declare css-syms css-select create-sel-str)
 
@@ -37,14 +39,15 @@
 (defn nodes->coll 
   "coverts a nodelist, node into a collection"
   [nl]
-  (cond
-    (nil? nl) []
-    (node? nl) [nl]
-    (identical? js/window nl) [nl]
-    (or (instance? js/Array nl) (coll? nl)) nl
-    ;would love this to be lazy but NodeList is dynamic list
-    (nodelist? nl) (doall (for [x (range 0 (.-length nl))] 
-                            (. nl (item x))))))
+  (domina/nodes nl))
+  ;(cond
+  ;  (nil? nl) []
+  ;  (node? nl) [nl]
+  ;  (identical? js/window nl) [nl]
+  ;  (or (instance? js/Array nl) (coll? nl)) nl
+  ;  ;would love this to be lazy but NodeList is dynamic list
+  ;  (nodelist? nl) (doall (for [x (range 0 (.-length nl))] 
+  ;                          (. nl (item x))))))
 
 (defn- flatten-nodes-coll [values]
   "takes a set of nodes and nodelists and flattens them"
@@ -131,9 +134,14 @@
    because css selectors do not work unless we have it in the main dom"
   [child]
   (let [div (dom/createDom "div" hide-style)]
-    (. div (appendChild child))
+    (if (instance? js/DocumentFragment child) 
+      (dom/appendChild div child)
+      (do
+        (log-debug (count (domina/nodes child))) 
+        (doseq [node (domina/nodes child)]
+          (dom/appendChild div node))))
     (dom/appendChild (.-body (dom/getDocument)) div)
-    div)) 
+    div))   
     
 (defn remove-node-return-child 
   "removes the hidden div and returns the children"
@@ -197,9 +205,9 @@
     (if cache [(first cache) (. (second cache) (cloneNode true))]
 		  (let [[sym tdom] (get-cached-dom uri)  
 		        dom (create-hidden-dom tdom)
-		        tsnip (css-select sym dom sel)
-            snip (if (instance? js/Array tsnip) (first tsnip) tsnip)]
-		    (remove-node-return-child dom)
+		        tsnip (domina/nodes (css-select sym dom sel))
+                        snip (first tsnip)]
+                    (remove-node-return-child dom)
 	      (assoc @tpl-cache (str uri sel-str) [sym snip])
 		    [sym snip]))))  
  
@@ -259,40 +267,52 @@
     (chainable-standard 
       (fn [pnod]
         (let [frag (. js/document (createDocumentFragment))
-              app-func (if (or @clone? (instance? js/DocumentFragment))
+              app-func (if (or @clone? (instance? js/DocumentFragment pnod))
                          #(dom/appendChild frag (. % (cloneNode true)))
                          #(dom/appendChild frag %))]
           (doall (map app-func fnodes))
           (reset! clone? true)
           (func pnod frag))))))
-    
 
+(defn domina-chain
+  "Allows standard domina functions to be chainable"
+  ([func]
+     (fn trans
+       ([nodes] (trans nodes nil))
+       ([nodes chain]
+          (func nodes)
+          (when (not (nil? chain)) (chain nodes)))))
+  ([values func]
+     (fn trans
+       ([nodes] (trans nodes nil))
+       ([nodes chain]
+          (let [vnodes (mapcat #(domina/nodes %) values)]
+            (func nodes vnodes))
+          (when (not (nil? chain)) (chain nodes))))))
+
+;;TODO need to figure out how to make sure this stay just as
+;;text and not convert to html.
 (defn en-content 
   "Replaces the content of the element. Values can be nodes or collection of nodes."
   [& values]
-  (content-based-trans
-    values
-    (fn [pnod frag]
-      (dom/removeChildren pnod)
-      (dom/appendChild pnod frag))))
-
+  (domina-chain values #(do
+                          (domina/destroy-children! %1)
+                          (domina/append! %1 %2))))
+ 
 (defn en-html-content
   "Replaces the content of the element with the dom structure represented by the html string passed"
   [txt]
-  (chainable-standard 
-    (fn [pnod] 
-      (let [frag (dom/htmlToDocumentFragment txt)]
-        (dom/removeChildren pnod)
-        (dom/append pnod frag)))))
+  (domina-chain values #(do
+                          (domina/destroy-children! %1)
+                          (domina/append! %1 %2))))
 
 
 (defn en-set-attr 
   "Assocs attributes and values on the selected element."
   [& values] 
   (let [at-lst (partition 2 values)]
-    (chainable-standard 
-      (fn[pnod]
-        (doall (map (fn [[a v]] (. pnod (setAttribute (name a) v))) at-lst))))))
+    (domina-chain
+      #(doseq [pair at-lst] (apply domina/set-attr! % pair))))))
 
 
 (defn en-remove-attr 
@@ -650,7 +670,7 @@
   ([dom-node css-sel] (css-select "" dom-node css-sel))
   ([id-mask-sym dom-node css-sel]
     (let [sel (string/trim (string/replace (create-sel-str id-mask-sym css-sel) " :" ":"))
-          ret (dom/query sel dom-node)]
+          ret (dcss/sel dom-node sel)]
       ret)))
 
 
@@ -701,7 +721,12 @@
   ([x y]  (str ":nth-last-of-type(" x "n+" y ")")))
    
 
-  
+;;domina extentions to work with enfocus
+
+(extend-protocol domina/DomContent
+  js/Text
+  (nodes [content] [content])
+  (single-node [content] content))
 
 
 
