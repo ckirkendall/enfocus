@@ -40,7 +40,7 @@ Every great journey starts with "Hello world!"
   (em/at js/document
     ["body"] (em/content "Hello world!"))
 
-(set! (.onload js/window) start)         
+(set! (.-onload js/window) start)         
 </pre>
 
 h2. The @at@ form
@@ -79,7 +79,7 @@ Enfocus has event handling.  Below is a simple example to add an @onclick@ event
 (em/defaction setup []
   ["#button1"] (em/listen :click #(change "I have been clicked")))
 	
-(set! (.onload js/window) setup)         
+(set! (.-onload js/window) setup)         
 </pre>
 
 The @defaction@ construct is use here instead @defn@.  @defaction@
@@ -102,7 +102,7 @@ effects can be chained.
 (em/defaction setup []
   ["#button2"] (em/listen #(resize-div 200)))
 	
-(set! (.onload js/window) setup)         
+(set! (.-onload js/window) setup)         
 </pre>
 
 h3. Actions, templates and snippets
