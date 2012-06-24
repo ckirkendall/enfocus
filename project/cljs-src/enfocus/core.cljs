@@ -310,17 +310,15 @@
 (defn en-set-attr 
   "Assocs attributes and values on the selected element."
   [& values] 
-  (let [at-lst (partition 2 values)]
     (domina-chain
-      #(doseq [pair at-lst] (apply domina/set-attr! % pair))))))
+      #(doseq [[name value] at-lst] (domina/set-attr! % name value))))
 
 
 (defn en-remove-attr 
   "Dissocs attributes on the selected element."
   [& values] 
-  (chainable-standard 
-    (fn[pnod]
-      (doall (map #(. pnod (removeAttribute (name %))) values)))))
+    (domina-chain
+      #(doseq [[name value] at-lst] (domina/remove-attr! % name value))))
 
 
 (defn- has-class 
@@ -332,17 +330,23 @@
 (defn en-add-class 
   "Adds the specified classes to the selected element." 
   [ & values]
-  (chainable-standard 
-    (fn [pnod]
-        (doall (map #(classes/add pnod %) values)))))
+  (domina-chain
+    #(doseq [val values] (domina/add-class! % val))))
 
 
 (defn en-remove-class 
   "Removes the specified classes from the selected element." 
   [ & values]
-  (chainable-standard
-    (fn [pnod]
-      (doall (map #(classes/remove pnod %) values)))))
+  (domina-chain
+    #(doseq [val values] (domina/remove-class! % val))))
+
+
+(defn en-set-class
+  "Sets the specified classes on the selected element"
+  [ & values]
+  (domina-chain
+   #(domina/set-classes! % values))) 
+     
 
 (defn en-do-> [ & forms]
   "Chains (composes) several transformations. Applies functions from left to right."
@@ -353,20 +357,13 @@
 (defn en-append
   "Appends the content of the element. Values can be nodes or collection of nodes."
   [& values]
-  (content-based-trans
-    values
-    (fn [pnod frag]
-      (dom/appendChild pnod frag))))
-  
+  (domina-chain values #(domina/append! %1 %2)))
+
 
 (defn en-prepend
   "Prepends the content of the element. Values can be nodes or collection of nodes."
   [& values]
-  (content-based-trans
-    values
-    (fn [pnod frag]
-      (let [nod (.-firstChild pnod)]
-        (. pnod (insertBefore frag nod))))))
+  (domina-chain values #(domina/prepend! %1 %2)))
 
 
 (defn en-before
