@@ -35,7 +35,7 @@
                ["tr > *:first-child"] (em/content fruit)
                ["tr > *:last-child"] (em/content (str quantity)))
   
-(em/deftemplate template2 "/templates/template1.html" [fruit-data] 
+(em/deftemplate template2 "templates/template1.html" [fruit-data] 
                 ["#heading1"] (em/content "fruit")  
                 ["thead tr > *:last-child"] (em/content "quantity")
                 ["tbody"] (em/content
@@ -68,7 +68,6 @@
                 ["td[test6='cool']"] (em/content (success))
                 ["#test7"] (em/remove-attr :foo)
                 ["#test7 > *:last-child"] (em/content (success))
-                ["tr[foo]"] (em/html-content "<span class='fail'>fail</span>") ;should do nothing
                 ["#test8 > *:last-child"] (em/add-class "test8")
                 [".test8"] (em/content (success))
                 ["#test9"] (em/remove-class "bad")

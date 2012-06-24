@@ -302,23 +302,22 @@
 (defn en-html-content
   "Replaces the content of the element with the dom structure represented by the html string passed"
   [txt]
-  (domina-chain values #(do
-                          (domina/destroy-children! %1)
-                          (domina/append! %1 %2))))
-
+  (domina-chain #(domina/set-html! % txt)))
 
 (defn en-set-attr 
   "Assocs attributes and values on the selected element."
   [& values] 
+  (let [pairs (partition 2 values)]
     (domina-chain
-      #(doseq [[name value] at-lst] (domina/set-attr! % name value))))
+     #(doseq [[name value] pairs] (domina/set-attr! % name value)))))
 
 
 (defn en-remove-attr 
   "Dissocs attributes on the selected element."
-  [& values] 
+  [& values]
+  (let [pairs (partition 2 values)]
     (domina-chain
-      #(doseq [[name value] at-lst] (domina/remove-attr! % name value))))
+      #(doseq [[name value] pairs] (domina/remove-attr! % name value)))))
 
 
 (defn- has-class 
