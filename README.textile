@@ -147,6 +147,15 @@ at compile time:
                            (map #(snippit2 % (fruit-data %)) (keys fruit-data))))
 </pre>
 
+If, snippets and/or templates are loaded via AJAX it is important to make sure the
+content has been loaded before calling the template or snippit function.  Enfocus 
+provides a convient function that works like an onload callback but for AJAX driven
+snippets and templates.  
+
+<pre>
+(em/wait-for-load (render-page)) 
+</pre>
+
 An action is a set of transforms that take place on the live dom.  below is a 
 definition of a an action.
 
