@@ -376,17 +376,18 @@
   [& values]
   (domina-chain values #(domina/insert-after! %1 %2)))
 
+
 (defn en-substitute
   "substitutes the content for the selected node. Values can be nodes or collection of nodes"
   [& values]
   (domina-chain values #(domina/swap-content! %1 %2)))
 
+
 (defn en-remove-node 
   "removes the selected nodes from the dom" 
-  [& values]
-  (chainable-standard  
-    (fn [pnod]
-      (dom/removeNode pnod))))
+  []
+  (domina-chain #(domina/detach! %1)))
+
 
 (defn en-wrap 
   "wrap and element in a new element defined as :div {:class 'temp'}"
