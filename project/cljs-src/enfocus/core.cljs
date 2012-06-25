@@ -379,10 +379,7 @@
 (defn en-substitute
   "substitutes the content for the selected node. Values can be nodes or collection of nodes"
   [& values]
-  (content-based-trans
-    values
-    (fn [pnod frag]
-      (dom/replaceNode frag pnod))))
+  (domina-chain values #(domina/swap-content! %1 %2)))
 
 (defn en-remove-node 
   "removes the selected nodes from the dom" 
