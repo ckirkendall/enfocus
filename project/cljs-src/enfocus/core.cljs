@@ -40,14 +40,6 @@
   "coverts a nodelist, node into a collection"
   [nl]
   (domina/nodes nl))
-  ;(cond
-  ;  (nil? nl) []
-  ;  (node? nl) [nl]
-  ;  (identical? js/window nl) [nl]
-  ;  (or (instance? js/Array nl) (coll? nl)) nl
-  ;  ;would love this to be lazy but NodeList is dynamic list
-  ;  (nodelist? nl) (doall (for [x (range 0 (.-length nl))] 
-  ;                          (. nl (item x))))))
 
 (defn- flatten-nodes-coll [values]
   "takes a set of nodes and nodelists and flattens them"
@@ -304,6 +296,7 @@
   [txt]
   (domina-chain #(domina/set-html! % txt)))
 
+
 (defn en-set-attr 
   "Assocs attributes and values on the selected element."
   [& values] 
@@ -315,10 +308,8 @@
 (defn en-remove-attr 
   "Dissocs attributes on the selected element."
   [& values]
-  (let [pairs (partition 2 values)]
-    (domina-chain
-      #(doseq [[name value] pairs] (domina/remove-attr! % name value)))))
-
+  (domina-chain #(doseq [name values] (domina/remove-attr! % name))))
+ 
 
 (defn- has-class 
   "returns true if the element has a given class"

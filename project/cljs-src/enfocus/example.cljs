@@ -68,6 +68,7 @@
                 ["td[test6='cool']"] (em/content (success))
                 ["#test7"] (em/remove-attr :foo)
                 ["#test7 > *:last-child"] (em/content (success))
+                ["tr[foo]"] (em/html-content "<span class='fail'>fail</span>") ;should do nothing
                 ["#test8 > *:last-child"] (em/add-class "test8")
                 [".test8"] (em/content (success))
                 ["#test9"] (em/remove-class "bad")

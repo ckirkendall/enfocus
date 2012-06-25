@@ -3,7 +3,7 @@
   :source-path "cljs-src"
   :dependencies [[org.clojure/clojure "1.3.0"]
                  [goog-jar "1.0.0"]
-                 [domina "1.0.0-SNAPSHOT"]]
+                 [domina "1.0.0-beta4" :exclusions [org.clojure/clojurescript]]]
   :dev-dependencies [[lein-eclipse "1.0.0"]
                      [lein-cljsbuild "0.2.1"]]
   :cljsbuild {
