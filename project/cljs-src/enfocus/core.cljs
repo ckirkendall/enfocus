@@ -368,20 +368,13 @@
 (defn en-before
   "inserts the content before the selected node. Values can be nodes or collection of nodes"
   [& values]
-  (content-based-trans
-    values
-    (fn [pnod frag]
-      (dom/insertSiblingBefore frag pnod))))
+  (domina-chain values #(domina/insert-before! %1 %2)))
   
 
 (defn en-after
   "inserts the content after the selected node. Values can be nodes or collection of nodes"
   [& values]
-  (content-based-trans
-    values
-    (fn [pnod frag]
-      (dom/insertSiblingAfter frag pnod))))
-
+  (domina-chain values #(domina/insert-after! %1 %2)))
 
 (defn en-substitute
   "substitutes the content for the selected node. Values can be nodes or collection of nodes"
