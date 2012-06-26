@@ -6,13 +6,12 @@
                  [domina "1.0.0-beta4" :exclusions [org.clojure/clojurescript]]]
   :dev-dependencies [[lein-eclipse "1.0.0"]
                      [lein-cljsbuild "0.2.1"]]
-  :cljsbuild {
-    ; The path to the top-level ClojureScript source directory:
-    :source-path "cljs-src"
-    ; The standard ClojureScript compiler options:
-    ; (See the ClojureScript compiler documentation for details.)
-    :compiler {
-      :output-dir "../sample/resources/public/cljs" 
-      :output-to "../sample/resources/public/cljs/enfocus.js"         
-      :optimizations :whitespace
-      :pretty-print true}})
+  :cljsbuild
+  {:builds
+   [{:builds nil,
+     :source-path "cljs-src",
+     :compiler
+     {:output-dir "../sample/resources/public/cljs",
+      :output-to "../sample/resources/public/cljs/enfocus.js",
+      :optimizations :whitespace,
+      :pretty-print true}}]})

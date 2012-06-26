@@ -179,6 +179,9 @@
 (defmacro remove-class [& forms]
   `(enfocus.core/en-remove-class ~@forms))
 
+(defmacro set-class [& forms]
+  `(enfocus.core/en-set-class ~@forms))
+
 (defmacro do-> [& forms]
   `(enfocus.core/en-do-> ~@forms))
 

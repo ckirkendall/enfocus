@@ -387,15 +387,16 @@
 (defn en-set-style 
   "set a list of style elements from the selected nodes"
   [& values]
-  (chainable-standard 
-    (fn [pnod]
-      (style-set pnod values))))
+  (let [pairs (partition 2 values)]
+    (domina-chain
+      #(doseq [[name value] pairs] (domina/set-style! % name value)))))
+
 
 (defn en-remove-style 
   "remove a list style elements from the selected nodes. note: you can only remove styles that are inline"
   [& values]
   (chainable-standard  
-    (fn [pnod]
+    (fn [pnod] 
       (style-remove pnod values))))
 
 (def view-port-monitor (atom nil))
