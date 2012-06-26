@@ -180,7 +180,7 @@
                      #(do 
                         (callback req) 
                         (swap! tpl-load-cnt dec)))
-      (. req (send uri "GET"))))) 
+      (. req (send uri "GET")))))
 
 
 (defn get-cached-dom 
@@ -217,7 +217,7 @@
   (fn trans 
     [pnodes] 
     (let [pnod-col (nodes->coll pnodes)
-          result (doall (map func pnod-col ))] 
+          result (map func pnod-col)] 
       (if (<= (count result) 1) (first result) result))))
 
 (defn chainable-standard 
@@ -228,7 +228,7 @@
     ([pnodes] (trans pnodes nil))
     ([pnodes chain]
       (let [pnod-col (nodes->coll pnodes)] 
-        (doall (map func pnod-col ))
+        (doall (map func pnod-col))
         (when (not (nil? chain))
           (chain pnodes))))))
 
@@ -246,25 +246,8 @@
                             (when (= 0 @cnt) 
                               (when (not (nil? callback)) (callback pnodes))
                               (when (not (nil? chain)) (chain pnodes))))] 
-        (doall (map #(func % partial-cback) pnod-col ))))))
+        (doseq [pnod pnod-col] (func pnod partial-cback))))))
 
-
-
-(defn content-based-trans 
-  "HOF to remove the duplicate code in transformation that handle creating a 
-   fragment and applying it in some way to the selected node"
-  [values func]
-  (let [fnodes (flatten-nodes-coll values)
-        clone? (atom false)]
-    (chainable-standard 
-      (fn [pnod]
-        (let [frag (. js/document (createDocumentFragment))
-              app-func (if (or @clone? (instance? js/DocumentFragment pnod))
-                         #(dom/appendChild frag (. % (cloneNode true)))
-                         #(dom/appendChild frag %))]
-          (doall (map app-func fnodes))
-          (reset! clone? true)
-          (func pnod frag))))))
 
 (defn domina-chain
   "Allows standard domina functions to be chainable"
@@ -273,7 +256,7 @@
        ([nodes] (trans nodes nil))
        ([nodes chain]
           (func nodes)
-          (when (not (nil? chain)) (chain nodes)))))
+          (when (not (nil? chain)) (chain nodes))))) 
   ([values func]
      (fn trans
        ([nodes] (trans nodes nil))
@@ -342,7 +325,7 @@
   "Chains (composes) several transformations. Applies functions from left to right."
   (chainable-standard  
     (fn [pnod]
-      (doall (map #(% pnod) forms)))))
+      (doseq [fun forms] (fun pnod)))))
 
 (defn en-append
   "Appends the content of the element. Values can be nodes or collection of nodes."
@@ -439,14 +422,13 @@
     (set! (.-unlisten obj)
           (fn [elm func opt-cap opt-scope opt-handler]
             (let [listeners (events/getListeners elm (name event) false)]
-              (dorun 
-                (map (fn [obj]
-                       (let[listener (.-listener obj)]
-                         (when (and (or (not func) (= (.-listen listener) func))
-                                    (or (not opt-scope) (= (.-scope listener) opt-scope)))
-                           (if opt-handler
-                             (.unlisten opt-handler elm (name event) listener)
-                             (events/unlisten elm (name event) listener))))) listeners)))))
+              (doseq [obj listeners]
+                (let[listener (.-listener obj)]
+                  (when (and (or (not func) (= (.-listen listener) func))
+                             (or (not opt-scope) (= (.-scope listener) opt-scope)))
+                    (if opt-handler
+                      (.unlisten opt-handler elm (name event) listener)
+                      (events/unlisten elm (name event) listener))))) listeners)))
     obj))
 
 (def wrapper-register {:mouseenter (gen-enter-leave-wrapper :mouseover)
@@ -484,7 +466,7 @@
                           :else %))]
     (chainable-standard  
       (fn [pnod]
-        (doall (map #(events/removeAll pnod (get-name %)) event-list))))))
+        (doseq [ev event-list] (events/removeAll pnod (get-name ev)))))))
 
 
 
@@ -498,7 +480,7 @@
   (chainable-effect
     (fn [pnod pcallback]
       (let [anim (fx-dom/FadeOut. pnod ttime accel)]
-        (when (not (nil? pcallback)) 
+        (when pcallback 
           (events/listen anim goog.fx.Animation.EventType/END pcallback))
         (. anim (play))))
        callback))
@@ -509,7 +491,7 @@
   (chainable-effect
     (fn [pnod pcallback]
       (let [anim (fx-dom/FadeIn. pnod ttime accel)]
-        (when (not (nil? pcallback)) 
+        (when pcallback 
           (events/listen anim goog.fx.Animation.EventType/END pcallback))
         (. anim (play))))
        callback))
@@ -525,7 +507,7 @@
             hgt (if (= :curheight hgt) (.-height csize) hgt)
             end (array wth hgt)
             anim (fx-dom/Resize. pnod start end ttime accel)]
-        (when (not (nil? pcallback)) 
+        (when pcallback 
           (events/listen anim goog.fx.Animation.EventType/END pcallback))
         (. anim (play))))
        callback))
@@ -541,7 +523,7 @@
             ypos (if (= :cury) (.-y cpos) ypos)
             end (array xpos ypos)
             anim (fx-dom/Slide. pnod start end ttime accel)]
-        (when (not (nil? pcallback)) 
+        (when pcallback 
           (events/listen anim goog.fx.Animation.EventType/END pcallback))
         (. anim (play))))
        callback))
@@ -560,16 +542,6 @@
     (fn[pnod]
       (. pnod (getAttribute (name attr))))))
 
-
-(defn en-get-attr 
-  "returns the attribute on the selected element or elements.
-   in cases where more than one element is selected you will
-   receive a list of values"
-  [attr] 
-  (extr-multi-node 
-    (fn[pnod]
-      (. pnod (getAttribute (name attr))))))
-
 (defn en-get-text
   "returns the attribute on the selected element or elements.
    in cases where more than one element is selected you will
@@ -578,9 +550,6 @@
   (extr-multi-node 
     (fn[pnod]
       (dom/getTextContent pnod))))
-
-
-
 
 
 ;##################################################################
@@ -705,9 +674,6 @@
   js/Text
   (nodes [content] [content])
   (single-node [content] content))
-
-
-
   
 
    
