@@ -241,8 +241,8 @@ h4. Viewing the Test Page
  cd enfocus/sample
  lein deps
  lein repl
- =>(use &#39;ring.adapter.jetty)  
- =>(use &#39;enfocus.ring)
+ =>(use 'ring.adapter.jetty)  
+ =>(use 'enfocus.ring)
  =>(run-jetty app {:port 3000}) 
 </pre>
 
