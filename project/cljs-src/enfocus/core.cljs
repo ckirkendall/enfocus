@@ -450,13 +450,14 @@
 
 (defn en-unlisten 
   "removing a specific event from the selected nodes"
-  [event func]
-  (let [wrapper (wrapper-register event)]
-    (chainable-standard  
-      (fn [pnod]
-        (if (nil? wrapper) 
-          (events/unlisten pnod (name event) func)
-          (events/unlistenWithWrapper pnod wrapper func))))))
+  ([event] (en-remove-listeners event))
+  ([event func]
+     (let [wrapper (wrapper-register event)]
+       (chainable-standard  
+        (fn [pnod]
+          (if (nil? wrapper) 
+            (events/unlisten pnod (name event) func)
+            (events/unlistenWithWrapper pnod wrapper func)))))))
   
 (defn en-remove-listeners 
   "adding an event to the selected nodes"
