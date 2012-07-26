@@ -1,5 +1,6 @@
 (ns enfocus.core 
-  (:require [goog.net.XhrIo :as xhr]
+  (:require [enfocus.enlive.syntax :as en]
+            [goog.net.XhrIo :as xhr]
             [goog.dom.query :as query]
             [goog.style :as style]
             [goog.events :as events]
@@ -417,7 +418,7 @@
             (let [callback (mouse-enter-leave func)]
               (set! (.-listen callback) func)
               (set! (.-scope callback) opt-scope)
-              (if op-handler
+              (if opt-handler
                 (.listen opt-handler elm (name event) callback)
                 (events/listen elm (name event) callback)))))
     (set! (.-unlisten obj)
@@ -618,7 +619,7 @@
   ([css-sel] (css-select "" js/document css-sel))
   ([dom-node css-sel] (css-select "" dom-node css-sel))
   ([id-mask-sym dom-node css-sel]
-    (let [sel (string/trim (string/replace (create-sel-str id-mask-sym css-sel) " :" ":"))
+    (let [sel (string/trim (en/convert (create-sel-str id-mask-sym css-sel)))
           ret (dcss/sel dom-node sel)]
       ret)))
 

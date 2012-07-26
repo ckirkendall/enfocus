@@ -7,11 +7,13 @@
    (coll? item) (apply str (map #(sel-to-string %) item))))
 
 (defn convert [sel]
-  (apply str (interpose " " (map sel-to-string sel))))
+  (if (string? sel)
+    sel
+    (apply str (interpose " " (map sel-to-string sel)))))
 
 (defn- attr-pairs [op elms]
- (let [ts (fn [[x y]] (str "[" x op "='" y "']"))]
-    (apply str (map ts (partition elms 2)))))
+ (let [ts (fn [[x y]] (str "[" (name x) op "='" y "']"))]
+    (apply str (map ts (partition 2 elms)))))
   
 (defn attr? [& elms]
   (apply str (map #(str "[" (name %) "]") elms)))
@@ -19,7 +21,7 @@
 (defn attr= [& elms] (attr-pairs "" elms))
 
 (defn attr-has [x & vals]
-  (let [ts (fn [y] (str "[" x "~='" y "']"))]
+  (let [ts (fn [y] (str "[" (name x) "~='" y "']"))]
     (apply str (map ts vals))))
 
 (defn attr-starts [& elms] (attr-pairs "^" elms))
