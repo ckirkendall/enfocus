@@ -274,7 +274,7 @@
   (domina-chain values #(do
                           (domina/destroy-children! %1)
                           (domina/append! %1 %2)))) 
- 
+  
 (defn en-html-content 
   "Replaces the content of the element with the dom structure represented by the html string passed"
   [txt]
