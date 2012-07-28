@@ -9,3 +9,7 @@ target
 .project
 .classpath
 *.js
+sample/resources/public/cljs/
+*.*#
+.#*
+*.*~

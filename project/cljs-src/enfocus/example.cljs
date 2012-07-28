@@ -17,7 +17,7 @@
     (em/at js/document
            ["#test-from-div"] (em/do-> (em/content (pr-str form-vals))
                                        (em/append from-val)))))
-
+ 
 (defn test-get-text []
   (let [from-text (em/from (em/select ["#ftext-test"]) (em/get-text))]
     (ef/log-debug (str "from-text:" from-text))
@@ -60,15 +60,15 @@
            ["tr > *:first-child"] (em/content test-desc)
            ["tr > *:last-child > span"] (em/content value))
 
-     
+       
 (em/deftemplate test-cases "templates/test-grid.html" []
                 ["#test3 > *:last-child"] (em/content (success)) 
                 ["#test4 > *:last-child"] (em/content (success))
                 ["#test5 > *:last-child"] (em/html-content "<span class='success'>success</span>")
                 ["#test6 > *:last-child"] (em/set-attr :test6 "cool")
-                ;["td[test6='cool']"] (em/content (success))
-                [[:td (attr= :test6 "cool")]] (em/content (success))
-                ["#test7"] (em/remove-attr :foo)
+                ["td[test6='cool']"] (em/content (success))
+                ;[[:td (attr= :test6 "cool")]] (em/content (success))
+                ["#test7"] (em/remove-attr :foo)  
                 ["#test7 > *:last-child"] (em/content (success))
                 ["tr[foo]"] (em/html-content "<span class='fail'>fail</span>") ;should do nothing
                 ["#test8 > *:last-child"] (em/add-class "test8")
@@ -153,11 +153,11 @@
 ;(em/defaction test-suite [])
    
   
-
+ 
 (defn funtimes [msg]
   (em/at js/window (em/listen :resize #(ef/log-debug (str "you resized your window:" %))))
   (em/at js/document
-      [:.heading (ef/attr= :foo "true")] (em/content msg))
+      [:.heading (attr= :foo "true")] (em/content msg))
   (em/wait-for-load (test-grid)))   
                                
 (set! (.-onload js/window) #(funtimes "THIS IS A TEST"))

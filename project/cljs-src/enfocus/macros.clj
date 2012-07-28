@@ -49,21 +49,16 @@
        (partition 3 forms)))
 
 
-(defmacro create-dom-action [sym nod tmp-dom args & forms]  
+(defmacro create-dom-action [sym nod args & forms]  
   (let [id-sym (gensym "id-sym")
         pnode-sym (gensym "pnod")
-        new-form (create-transform-call id-sym pnode-sym forms)]   
+        new-form `(enfocus.core/i-at ~id-sym ~pnode-sym ~@forms)]   
   `(defn ~sym ~args 
-     (let [[~id-sym ~pnode-sym] (if (fn? ~nod) (~nod) ["" ~nod])
-           ~pnode-sym (if ~tmp-dom
-                        (enfocus.core/create-hidden-dom ~pnode-sym)
-                        ~pnode-sym)]
-       ~@new-form
-       (if ~tmp-dom 
-         (do
-           (enfocus.core/reset-ids ~id-sym ~pnode-sym)
-           (enfocus.core/remove-node-return-child ~pnode-sym))
-         ~pnode-sym)))))
+     (let [[~id-sym ~pnode-sym] (~nod)
+           ~pnode-sym (enfocus.core/create-hidden-dom ~pnode-sym)]
+       ~new-form
+        (enfocus.core/reset-ids ~id-sym ~pnode-sym)
+        (enfocus.core/remove-node-return-child ~pnode-sym)))))
 
 (defn find-url
   "Given a string, returns a URL. Attempts to resolve as a classpath-relative
@@ -102,7 +97,7 @@
        (enfocus.macros/create-dom-action
         ~sym
         #(enfocus.core/get-cached-dom ~uri)
-        true ~args ~@forms))))
+        ~args ~@forms))))
 
 (defmacro defsnippet [sym & body]
   (let [[mode uri sel args & forms] (ensure-mode body)]
@@ -113,7 +108,7 @@
        (enfocus.macros/create-dom-action
         ~sym
         #(enfocus.core/get-cached-snippet ~uri ~sel)
-        true ~args ~@forms))))
+        ~args ~@forms))))
   
 (defmacro defaction [sym args & forms]
   `(defn ~sym ~args (enfocus.macros/at js/document ~@forms)))

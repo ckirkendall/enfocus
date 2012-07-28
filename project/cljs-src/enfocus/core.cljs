@@ -196,13 +196,13 @@
   (let [sel-str  (create-sel-str sel)
         cache (@tpl-cache (str uri sel-str))]
     (if cache [(first cache) (. (second cache) (cloneNode true))]
-		  (let [[sym tdom] (get-cached-dom uri)  
-		        dom (create-hidden-dom tdom)
-		        tsnip (domina/nodes (css-select sym dom sel))
-                        snip (first tsnip)]
-                    (remove-node-return-child dom)
-	      (assoc @tpl-cache (str uri sel-str) [sym snip])
-		    [sym snip]))))  
+        (let [[sym tdom] (get-cached-dom uri)  
+              dom (create-hidden-dom tdom)
+              tsnip (domina/nodes (css-select sym dom sel))
+              snip (first tsnip)]
+          (remove-node-return-child dom)
+          (swap! tpl-cache assoc (str uri sel-str) [sym snip])
+          [sym snip]))))  
  
   
 
@@ -273,9 +273,9 @@
   [& values]
   (domina-chain values #(do
                           (domina/destroy-children! %1)
-                          (domina/append! %1 %2))))
+                          (domina/append! %1 %2)))) 
  
-(defn en-html-content
+(defn en-html-content 
   "Replaces the content of the element with the dom structure represented by the html string passed"
   [txt]
   (domina-chain #(domina/set-html! % txt)))
@@ -449,6 +449,18 @@
             (events/listen pnod (name event) func)
             (events/listenWithWrapper pnod wrapper func)))))))
 
+(defn en-remove-listeners 
+  "removing all listeners of a given event type from the selected nodes"
+  [& event-list]
+  (let [get-name #(name (cond  
+                          (= % :mouseenter) :mouseover
+                          (= % :mouseleave) :mouseout
+                          :else %))]
+    (chainable-standard  
+      (fn [pnod]
+        (doseq [ev event-list] (events/removeAll pnod (get-name ev)))))))
+
+
 (defn en-unlisten 
   "removing a specific event from the selected nodes"
   ([event] (en-remove-listeners event))
@@ -460,16 +472,6 @@
             (events/unlisten pnod (name event) func)
             (events/unlistenWithWrapper pnod wrapper func)))))))
   
-(defn en-remove-listeners 
-  "adding an event to the selected nodes"
-  [& event-list]
-  (let [get-name #(name (cond  
-                          (= % :mouseenter) :mouseover
-                          (= % :mouseleave) :mouseout
-                          :else %))]
-    (chainable-standard  
-      (fn [pnod]
-        (doseq [ev event-list] (events/removeAll pnod (get-name ev)))))))
 
 
 
@@ -619,57 +621,39 @@
   ([css-sel] (css-select "" js/document css-sel))
   ([dom-node css-sel] (css-select "" dom-node css-sel))
   ([id-mask-sym dom-node css-sel]
+     (log-debug dom-node)
+     (log-debug (pr-str css-sel))
+     ;(log-debug id-mask-sym)
     (let [sel (string/trim (en/convert (create-sel-str id-mask-sym css-sel)))
           ret (dcss/sel dom-node sel)]
       ret)))
 
+;###############################################
+;  Core functions and supporting fuctions for
+;  for "at" and "from"
+;###############################################
 
-;##################################################################
-; The following functions are used to support the enlive selector
-; syntax. They simply translate to the string representation to
-; the standard css3 selector standard
-;##################################################################
+(defn nil-t [func]
+  (or func en-remove-node))
 
-(def css-syms {'first-child " *:first-child" 
-               'last-child " *:last-child"})
-      
-(defn  attr?
-  "Matches any E element that contains att attribute: css -> E[att][att2]..."
-  [& kys] (apply str (mapcat #(str "[" (name %) "]") kys)))
+(defn i-at [id-mask node & trans] 
+  (if (= 1 (count trans))
+    ((first trans) node)
+    (doseq [[sel t] (partition 2 trans)]
+           ((nil-t t) (css-select id-mask node sel)))))
 
-(defn attr= 
-  "Matches any E element whose att attribute value equals 'val': 
-  css -> E[att=val][att2=val2]..."
-  ([] "")
-  ([ky txt & forms] 
-    (str "[" (name ky) "='" txt "']"   
-         (apply attr= forms))))
+(defn at [node & trans]
+  (apply i-at "" node trans)) 
+ 
+(defn from [node & trans] 
+  (if (= 1 (count trans))
+    ((first trans) node)
+    (hash-map
+     (doall (mapcat (fn [[ky sel ext]]
+                      [key (ext (css-select "" node sel))])
+                    (partition 3 trans))))))
 
-  
-(defn nth-child 
-  "Matches any E element that is the n-th child of its parent: 
-   css -> E:nth-child(x) or E:nth-child(xn+y)" 
-  ([x] (str ":nth-child(" x ")"))
-  ([x y]  (str ":nth-child(" x "n+" y ")")))
-
-(defn nth-of-type 
-  "Matches any E element that is the n-th sibling of its type: 
-   css -> E:nth-of-type(x) or E:nth-of-type(xn+y)" 
-  ([x] (str ":nth-of-type(" x ")"))
-  ([x y]  (str ":nth-of-type(" x "n+" y ")")))
-
-(defn nth-last-child 
-  "Matches any E element that is the n-th child of its parent, counting from the last child 
-   css -> E:nth-last-child(x) or E:nth-last-child(xn+y)"
-  ([x] (str ":nth-last-child(" x ")"))
-  ([x y]  (str ":nth-last-child(" x "n+" y ")")))
-
-(defn nth-last-of-type 
-  "Matches any E element that is the n-th sibling of its type counting from the last child: 
-   css -> E:nth-last-of-type(x) or E:nth-last-of-type(xn+y)"
-  ([x] (str ":nth-last-of-type(" x ")"))
-  ([x y]  (str ":nth-last-of-type(" x "n+" y ")")))
-   
+ 
 
 ;;domina extentions to work with enfocus
 
