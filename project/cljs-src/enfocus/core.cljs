@@ -654,10 +654,10 @@
 (defn from [node & trans] 
   (if (= 1 (count trans))
     ((first trans) node)
-    (hash-map
-     (doall (mapcat (fn [[ky sel ext]]
-                      [key (ext (css-select "" node sel))])
-                    (partition 3 trans))))))
+    (apply hash-map
+     (mapcat (fn [[ky sel ext]]
+               [ky (ext (css-select "" node sel))])
+             (partition 3 trans)))))
 
  
 
