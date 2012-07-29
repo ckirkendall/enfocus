@@ -286,14 +286,20 @@
   [& values] 
   (let [pairs (partition 2 values)]
     (domina-chain
-     #(doseq [[name value] pairs] (domina/set-attr! % name value)))))
-
+     #(doseq [[name value] pairs] (domina/set-attr! % name value)))))   
 
 (defn en-remove-attr 
   "Dissocs attributes on the selected element."
   [& values]
   (domina-chain #(doseq [name values] (domina/remove-attr! % name))))
- 
+
+
+(defn en-set-prop [& forms]
+  (chainable-standard
+   (fn [node]
+     (let [h (mapcat (fn [[n v]](list (name n) v)) (partition 2 forms))]
+       (dom/setProperties node (apply js-obj h))))))
+
 
 (defn- has-class 
   "returns true if the element has a given class"

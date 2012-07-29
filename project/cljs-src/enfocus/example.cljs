@@ -148,7 +148,8 @@
                                ["#mv-tst"] (em/move 300 305 500 
                                                     (em/move 0 0 500))))
               ["#test-from"] (em/listen :click test-from)
-              ["#test-get-text"] (em/listen :click test-get-text))
+              ["#test-get-text"] (em/listen :click test-get-text)
+              ["#cb1"] (em/set-prop :checked true))
     
 ;(em/defaction test-suite [])
    

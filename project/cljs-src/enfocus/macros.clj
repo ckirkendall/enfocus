@@ -131,10 +131,11 @@
 (defmacro set-attr [& forms] 
   `(enfocus.core/en-set-attr ~@forms))
 
-
 (defmacro remove-attr [& forms] 
   `(enfocus.core/en-remove-attr ~@forms))
 
+(defmacro set-prop [& forms]
+    `(enfocus.core/en-set-prop ~@forms))
 
 (defmacro add-class [& forms]
   `(enfocus.core/en-add-class ~@forms))

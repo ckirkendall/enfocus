@@ -54,3 +54,5 @@
 
 (defn but [& sel]
   (str "not(" (convert sel) ")"))
+
+  
