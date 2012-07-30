@@ -265,3 +265,6 @@
   `(enfocus.core/extr-multi-node
      (fn [pnod#]
        (~(symbol (str ".-" (name prop))) pnod#))))
+
+(defmacro get-data [& forms]
+  `(enfocus.core/en-get-data ~@forms))

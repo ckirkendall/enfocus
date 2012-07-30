@@ -406,6 +406,11 @@
     (fn [pnod] 
       (style-remove pnod values))))
 
+(defn en-set-data
+  "addes key value pair of data to the selected nodes. Only use clojure data structures when setting"
+  [ky val]
+  (domina-chain #(domina/set-data! % ky val)))
+
 (def view-port-monitor (atom nil))
 
 (defn get-vp-monitor
@@ -561,6 +566,14 @@
   (extr-multi-node 
     (fn[pnod]
       (dom/getTextContent pnod))))
+
+(defn en-get-data
+  "returns the data on a selected node for a given key. If bubble is set will look at parent"
+  ([ky] (en-get-text ky false))
+  ([ky bubble]
+     (ext-multi-node
+      (fn [node]
+        (domina/get-data ky bubble))))) 
 
 
 ;##################################################################
