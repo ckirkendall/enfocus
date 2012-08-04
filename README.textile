@@ -12,7 +12,7 @@ Another "tutorial":https://github.com/cgrand/enlive/wiki/Table-and-Layout-Tutori
 h1. Documentation & Examples
 
 "Documentation Site":http:/ckirkendall.github.com/enfocus-site
-"Example Website":http://https://github.com/ckirkendall/The-Great-Todo
+"Example Website":http://github.com/ckirkendall/The-Great-Todo
 
 
 h1. Where do I get support?
