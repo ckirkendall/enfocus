@@ -220,7 +220,7 @@
 (defmacro delay [ttime & forms]
   `(enfocus.core/chainable-standard 
     (fn [pnod#] 
-      (enfocus.core/setTimeout #((enfocus.macros/at ~@forms) pnod#) ~ttime))))
+      (enfocus.core/setTimeout #(enfocus.macros/at pnod# ~@forms) ~ttime))))
 
 (defmacro fade-in  
   ([ttime] 

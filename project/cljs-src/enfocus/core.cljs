@@ -535,8 +535,8 @@
     (fn [pnod pcallback]
       (let [cpos (style/getPosition pnod)
             start (array (.-x cpos) (.-y cpos))
-            xpos (if (= :curx) (.-x cpos) xpos)
-            ypos (if (= :cury) (.-y cpos) ypos)
+            xpos (if (= :curx xpos) (.-x cpos) xpos)
+            ypos (if (= :cury ypos) (.-y cpos) ypos)
             end (array xpos ypos)
             anim (fx-dom/Slide. pnod start end ttime accel)]
         (when pcallback 
