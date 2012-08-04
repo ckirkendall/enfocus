@@ -1,5 +1,6 @@
 (ns enfocus.core 
-  (:require [goog.net.XhrIo :as xhr]
+  (:require [enfocus.enlive.syntax :as en]
+            [goog.net.XhrIo :as xhr]
             [goog.dom.query :as query]
             [goog.style :as style]
             [goog.events :as events]
@@ -11,7 +12,9 @@
             [goog.fx.dom :as fx-dom]
             [goog.async.Delay :as gdelay]
             [goog.Timer :as timer]
-            [clojure.string :as string])
+            [clojure.string :as string]
+            [domina :as domina]
+            [domina.css :as dcss])
   (:require-macros [enfocus.macros :as em])) 
 (declare css-syms css-select create-sel-str)
 
@@ -37,14 +40,7 @@
 (defn nodes->coll 
   "coverts a nodelist, node into a collection"
   [nl]
-  (cond
-    (nil? nl) []
-    (node? nl) [nl]
-    (identical? js/window nl) [nl]
-    (or (instance? js/Array nl) (coll? nl)) nl
-    ;would love this to be lazy but NodeList is dynamic list
-    (nodelist? nl) (doall (for [x (range 0 (.-length nl))] 
-                            (. nl (item x))))))
+  (domina/nodes nl))
 
 (defn- flatten-nodes-coll [values]
   "takes a set of nodes and nodelists and flattens them"
@@ -131,9 +127,14 @@
    because css selectors do not work unless we have it in the main dom"
   [child]
   (let [div (dom/createDom "div" hide-style)]
-    (. div (appendChild child))
+    (if (instance? js/DocumentFragment child) 
+      (dom/appendChild div child)
+      (do
+        (log-debug (count (domina/nodes child))) 
+        (doseq [node (domina/nodes child)]
+          (dom/appendChild div node))))
     (dom/appendChild (.-body (dom/getDocument)) div)
-    div)) 
+    div))   
     
 (defn remove-node-return-child 
   "removes the hidden div and returns the children"
@@ -180,7 +181,7 @@
                      #(do 
                         (callback req) 
                         (swap! tpl-load-cnt dec)))
-      (. req (send uri "GET"))))) 
+      (. req (send uri "GET")))))
 
 
 (defn get-cached-dom 
@@ -195,13 +196,13 @@
   (let [sel-str  (create-sel-str sel)
         cache (@tpl-cache (str uri sel-str))]
     (if cache [(first cache) (. (second cache) (cloneNode true))]
-		  (let [[sym tdom] (get-cached-dom uri)  
-		        dom (create-hidden-dom tdom)
-		        tsnip (css-select sym dom sel)
-            snip (if (instance? js/Array tsnip) (first tsnip) tsnip)]
-		    (remove-node-return-child dom)
-	      (assoc @tpl-cache (str uri sel-str) [sym snip])
-		    [sym snip]))))  
+        (let [[sym tdom] (get-cached-dom uri)  
+              dom (create-hidden-dom tdom)
+              tsnip (domina/nodes (css-select sym dom sel))
+              snip (first tsnip)]
+          (remove-node-return-child dom)
+          (swap! tpl-cache assoc (str uri sel-str) [sym snip])
+          [sym snip]))))  
  
   
 
@@ -217,7 +218,7 @@
   (fn trans 
     [pnodes] 
     (let [pnod-col (nodes->coll pnodes)
-          result (doall (map func pnod-col ))] 
+          result (map func pnod-col)] 
       (if (<= (count result) 1) (first result) result))))
 
 (defn chainable-standard 
@@ -228,7 +229,7 @@
     ([pnodes] (trans pnodes nil))
     ([pnodes chain]
       (let [pnod-col (nodes->coll pnodes)] 
-        (doall (map func pnod-col ))
+        (doall (map func pnod-col))
         (when (not (nil? chain))
           (chain pnodes))))))
 
@@ -246,61 +247,58 @@
                             (when (= 0 @cnt) 
                               (when (not (nil? callback)) (callback pnodes))
                               (when (not (nil? chain)) (chain pnodes))))] 
-        (doall (map #(func % partial-cback) pnod-col ))))))
+        (doseq [pnod pnod-col] (func pnod partial-cback))))))
 
 
+(defn domina-chain
+  "Allows standard domina functions to be chainable"
+  ([func]
+     (fn trans
+       ([nodes] (trans nodes nil))
+       ([nodes chain]
+          (func nodes)
+          (when (not (nil? chain)) (chain nodes))))) 
+  ([values func]
+     (fn trans
+       ([nodes] (trans nodes nil))
+       ([nodes chain]
+          (let [vnodes (mapcat #(domina/nodes %) values)]
+            (func nodes vnodes))
+          (when (not (nil? chain)) (chain nodes))))))
 
-(defn content-based-trans 
-  "HOF to remove the duplicate code in transformation that handle creating a 
-   fragment and applying it in some way to the selected node"
-  [values func]
-  (let [fnodes (flatten-nodes-coll values)
-        clone? (atom false)]
-    (chainable-standard 
-      (fn [pnod]
-        (let [frag (. js/document (createDocumentFragment))
-              app-func (if (or @clone? (instance? js/DocumentFragment))
-                         #(dom/appendChild frag (. % (cloneNode true)))
-                         #(dom/appendChild frag %))]
-          (doall (map app-func fnodes))
-          (reset! clone? true)
-          (func pnod frag))))))
-    
-
+;;TODO need to figure out how to make sure this stay just as
+;;text and not convert to html.
 (defn en-content 
   "Replaces the content of the element. Values can be nodes or collection of nodes."
   [& values]
-  (content-based-trans
-    values
-    (fn [pnod frag]
-      (dom/removeChildren pnod)
-      (dom/appendChild pnod frag))))
-
-(defn en-html-content
+  (domina-chain values #(do
+                          (domina/destroy-children! %1)
+                          (domina/append! %1 %2)))) 
+  
+(defn en-html-content 
   "Replaces the content of the element with the dom structure represented by the html string passed"
   [txt]
-  (chainable-standard 
-    (fn [pnod] 
-      (let [frag (dom/htmlToDocumentFragment txt)]
-        (dom/removeChildren pnod)
-        (dom/append pnod frag)))))
+  (domina-chain #(domina/set-html! % txt)))
 
 
 (defn en-set-attr 
   "Assocs attributes and values on the selected element."
   [& values] 
-  (let [at-lst (partition 2 values)]
-    (chainable-standard 
-      (fn[pnod]
-        (doall (map (fn [[a v]] (. pnod (setAttribute (name a) v))) at-lst))))))
-
+  (let [pairs (partition 2 values)]
+    (domina-chain
+     #(doseq [[name value] pairs] (domina/set-attr! % name value)))))   
 
 (defn en-remove-attr 
   "Dissocs attributes on the selected element."
-  [& values] 
-  (chainable-standard 
-    (fn[pnod]
-      (doall (map #(. pnod (removeAttribute (name %))) values)))))
+  [& values]
+  (domina-chain #(doseq [name values] (domina/remove-attr! % name))))
+
+
+(defn en-set-prop [& forms]
+  (chainable-standard
+   (fn [node]
+     (let [h (mapcat (fn [[n v]](list (name n) v)) (partition 2 forms))]
+       (dom/setProperties node (apply js-obj h))))))
 
 
 (defn- has-class 
@@ -312,75 +310,65 @@
 (defn en-add-class 
   "Adds the specified classes to the selected element." 
   [ & values]
-  (chainable-standard 
-    (fn [pnod]
-        (doall (map #(classes/add pnod %) values)))))
+  (domina-chain
+    #(doseq [val values] (domina/add-class! % val))))
 
 
 (defn en-remove-class 
   "Removes the specified classes from the selected element." 
   [ & values]
-  (chainable-standard
-    (fn [pnod]
-      (doall (map #(classes/remove pnod %) values)))))
+  (domina-chain
+    #(doseq [val values] (domina/remove-class! % val))))
+
+
+(defn en-set-class
+  "Sets the specified classes on the selected element"
+  [ & values]
+  (domina-chain
+   #(domina/set-classes! % values))) 
+     
 
 (defn en-do-> [ & forms]
   "Chains (composes) several transformations. Applies functions from left to right."
   (chainable-standard  
     (fn [pnod]
-      (doall (map #(% pnod) forms)))))
+      (doseq [fun forms] (fun pnod)))))
 
 (defn en-append
   "Appends the content of the element. Values can be nodes or collection of nodes."
   [& values]
-  (content-based-trans
-    values
-    (fn [pnod frag]
-      (dom/appendChild pnod frag))))
-  
+  (domina-chain values #(domina/append! %1 %2)))
+
 
 (defn en-prepend
   "Prepends the content of the element. Values can be nodes or collection of nodes."
   [& values]
-  (content-based-trans
-    values
-    (fn [pnod frag]
-      (let [nod (.-firstChild pnod)]
-        (. pnod (insertBefore frag nod))))))
+  (domina-chain values #(domina/prepend! %1 %2)))
 
 
 (defn en-before
   "inserts the content before the selected node. Values can be nodes or collection of nodes"
   [& values]
-  (content-based-trans
-    values
-    (fn [pnod frag]
-      (dom/insertSiblingBefore frag pnod))))
+  (domina-chain values #(domina/insert-before! %1 %2)))
   
 
 (defn en-after
   "inserts the content after the selected node. Values can be nodes or collection of nodes"
   [& values]
-  (content-based-trans
-    values
-    (fn [pnod frag]
-      (dom/insertSiblingAfter frag pnod))))
+  (domina-chain values #(domina/insert-after! %1 %2)))
 
 
 (defn en-substitute
   "substitutes the content for the selected node. Values can be nodes or collection of nodes"
   [& values]
-  (content-based-trans
-    values
-    (fn [pnod frag]
-      (dom/replaceNode frag pnod))))
+  (domina-chain values #(domina/swap-content! %1 %2)))
+
 
 (defn en-remove-node 
   "removes the selected nodes from the dom" 
-  [& values]
-  (chainable-standard  
-    (fn [pnod]
-      (dom/removeNode pnod))))
+  []
+  (domina-chain #(domina/detach! %1)))
+
 
 (defn en-wrap 
   "wrap and element in a new element defined as :div {:class 'temp'}"
@@ -406,16 +394,22 @@
 (defn en-set-style 
   "set a list of style elements from the selected nodes"
   [& values]
-  (chainable-standard 
-    (fn [pnod]
-      (style-set pnod values))))
+  (let [pairs (partition 2 values)]
+    (domina-chain
+      #(doseq [[name value] pairs] (domina/set-style! % name value)))))
+
 
 (defn en-remove-style 
   "remove a list style elements from the selected nodes. note: you can only remove styles that are inline"
   [& values]
   (chainable-standard  
-    (fn [pnod]
+    (fn [pnod] 
       (style-remove pnod values))))
+
+(defn en-set-data
+  "addes key value pair of data to the selected nodes. Only use clojure data structures when setting"
+  [ky val]
+  (domina-chain #(domina/set-data! % ky val)))
 
 (def view-port-monitor (atom nil))
 
@@ -435,20 +429,19 @@
             (let [callback (mouse-enter-leave func)]
               (set! (.-listen callback) func)
               (set! (.-scope callback) opt-scope)
-              (if op-handler
+              (if opt-handler
                 (.listen opt-handler elm (name event) callback)
                 (events/listen elm (name event) callback)))))
     (set! (.-unlisten obj)
           (fn [elm func opt-cap opt-scope opt-handler]
             (let [listeners (events/getListeners elm (name event) false)]
-              (dorun 
-                (map (fn [obj]
-                       (let[listener (.-listener obj)]
-                         (when (and (or (not func) (= (.-listen listener) func))
-                                    (or (not opt-scope) (= (.-scope listener) opt-scope)))
-                           (if opt-handler
-                             (.unlisten opt-handler elm (name event) listener)
-                             (events/unlisten elm (name event) listener))))) listeners)))))
+              (doseq [obj listeners]
+                (let[listener (.-listener obj)]
+                  (when (and (or (not func) (= (.-listen listener) func))
+                             (or (not opt-scope) (= (.-scope listener) opt-scope)))
+                    (if opt-handler
+                      (.unlisten opt-handler elm (name event) listener)
+                      (events/unlisten elm (name event) listener))))) listeners)))
     obj))
 
 (def wrapper-register {:mouseenter (gen-enter-leave-wrapper :mouseover)
@@ -467,18 +460,8 @@
             (events/listen pnod (name event) func)
             (events/listenWithWrapper pnod wrapper func)))))))
 
-(defn en-unlisten 
-  "removing a specific event from the selected nodes"
-  [event func]
-  (let [wrapper (wrapper-register event)]
-    (chainable-standard  
-      (fn [pnod]
-        (if (nil? wrapper) 
-          (events/unlisten pnod (name event) func)
-          (events/unlistenWithWrapper pnod wrapper func))))))
-  
 (defn en-remove-listeners 
-  "adding an event to the selected nodes"
+  "removing all listeners of a given event type from the selected nodes"
   [& event-list]
   (let [get-name #(name (cond  
                           (= % :mouseenter) :mouseover
@@ -486,7 +469,20 @@
                           :else %))]
     (chainable-standard  
       (fn [pnod]
-        (doall (map #(events/removeAll pnod (get-name %)) event-list))))))
+        (doseq [ev event-list] (events/removeAll pnod (get-name ev)))))))
+
+
+(defn en-unlisten 
+  "removing a specific event from the selected nodes"
+  ([event] (en-remove-listeners event))
+  ([event func]
+     (let [wrapper (wrapper-register event)]
+       (chainable-standard  
+        (fn [pnod]
+          (if (nil? wrapper) 
+            (events/unlisten pnod (name event) func)
+            (events/unlistenWithWrapper pnod wrapper func)))))))
+  
 
 
 
@@ -500,7 +496,7 @@
   (chainable-effect
     (fn [pnod pcallback]
       (let [anim (fx-dom/FadeOut. pnod ttime accel)]
-        (when (not (nil? pcallback)) 
+        (when pcallback 
           (events/listen anim goog.fx.Animation.EventType/END pcallback))
         (. anim (play))))
        callback))
@@ -511,7 +507,7 @@
   (chainable-effect
     (fn [pnod pcallback]
       (let [anim (fx-dom/FadeIn. pnod ttime accel)]
-        (when (not (nil? pcallback)) 
+        (when pcallback 
           (events/listen anim goog.fx.Animation.EventType/END pcallback))
         (. anim (play))))
        callback))
@@ -527,7 +523,7 @@
             hgt (if (= :curheight hgt) (.-height csize) hgt)
             end (array wth hgt)
             anim (fx-dom/Resize. pnod start end ttime accel)]
-        (when (not (nil? pcallback)) 
+        (when pcallback 
           (events/listen anim goog.fx.Animation.EventType/END pcallback))
         (. anim (play))))
        callback))
@@ -543,7 +539,7 @@
             ypos (if (= :cury) (.-y cpos) ypos)
             end (array xpos ypos)
             anim (fx-dom/Slide. pnod start end ttime accel)]
-        (when (not (nil? pcallback)) 
+        (when pcallback 
           (events/listen anim goog.fx.Animation.EventType/END pcallback))
         (. anim (play))))
        callback))
@@ -552,16 +548,6 @@
 ;##################################################################
 ; data extractors
 ;##################################################################
-
-(defn en-get-attr 
-  "returns the attribute on the selected element or elements.
-   in cases where more than one element is selected you will
-   receive a list of values"
-  [attr] 
-  (extr-multi-node 
-    (fn[pnod]
-      (. pnod (getAttribute (name attr))))))
-
 
 (defn en-get-attr 
   "returns the attribute on the selected element or elements.
@@ -581,8 +567,13 @@
     (fn[pnod]
       (dom/getTextContent pnod))))
 
-
-
+(defn en-get-data
+  "returns the data on a selected node for a given key. If bubble is set will look at parent"
+  ([ky] (en-get-text ky false))
+  ([ky bubble]
+     (ext-multi-node
+      (fn [node]
+        (domina/get-data ky bubble))))) 
 
 
 ;##################################################################
@@ -649,62 +640,46 @@
   ([css-sel] (css-select "" js/document css-sel))
   ([dom-node css-sel] (css-select "" dom-node css-sel))
   ([id-mask-sym dom-node css-sel]
-    (let [sel (string/trim (string/replace (create-sel-str id-mask-sym css-sel) " :" ":"))
-          ret (dom/query sel dom-node)]
+     (log-debug dom-node)
+     (log-debug (pr-str css-sel))
+     ;(log-debug id-mask-sym)
+    (let [sel (string/trim (en/convert (create-sel-str id-mask-sym css-sel)))
+          ret (dcss/sel dom-node sel)]
       ret)))
 
+;###############################################
+;  Core functions and supporting fuctions for
+;  for "at" and "from"
+;###############################################
 
-;##################################################################
-; The following functions are used to support the enlive selector
-; syntax. They simply translate to the string representation to
-; the standard css3 selector standard
-;##################################################################
+(defn nil-t [func]
+  (or func en-remove-node))
 
-(def css-syms {'first-child " *:first-child" 
-               'last-child " *:last-child"})
-      
-(defn  attr?
-  "Matches any E element that contains att attribute: css -> E[att][att2]..."
-  [& kys] (apply str (mapcat #(str "[" (name %) "]") kys)))
+(defn i-at [id-mask node & trans] 
+  (if (= 1 (count trans))
+    ((first trans) node)
+    (doseq [[sel t] (partition 2 trans)]
+           ((nil-t t) (css-select id-mask node sel)))))
 
-(defn attr= 
-  "Matches any E element whose att attribute value equals 'val': 
-  css -> E[att=val][att2=val2]..."
-  ([] "")
-  ([ky txt & forms] 
-    (str "[" (name ky) "='" txt "']"   
-         (apply attr= forms))))
+(defn at [node & trans]
+  (apply i-at "" node trans)) 
+ 
+(defn from [node & trans] 
+  (if (= 1 (count trans))
+    ((first trans) node)
+    (apply hash-map
+     (mapcat (fn [[ky sel ext]]
+               [ky (ext (css-select "" node sel))])
+             (partition 3 trans)))))
 
-  
-(defn nth-child 
-  "Matches any E element that is the n-th child of its parent: 
-   css -> E:nth-child(x) or E:nth-child(xn+y)" 
-  ([x] (str ":nth-child(" x ")"))
-  ([x y]  (str ":nth-child(" x "n+" y ")")))
+ 
 
-(defn nth-of-type 
-  "Matches any E element that is the n-th sibling of its type: 
-   css -> E:nth-of-type(x) or E:nth-of-type(xn+y)" 
-  ([x] (str ":nth-of-type(" x ")"))
-  ([x y]  (str ":nth-of-type(" x "n+" y ")")))
+;;domina extentions to work with enfocus
 
-(defn nth-last-child 
-  "Matches any E element that is the n-th child of its parent, counting from the last child 
-   css -> E:nth-last-child(x) or E:nth-last-child(xn+y)"
-  ([x] (str ":nth-last-child(" x ")"))
-  ([x y]  (str ":nth-last-child(" x "n+" y ")")))
-
-(defn nth-last-of-type 
-  "Matches any E element that is the n-th sibling of its type counting from the last child: 
-   css -> E:nth-last-of-type(x) or E:nth-last-of-type(xn+y)"
-  ([x] (str ":nth-last-of-type(" x ")"))
-  ([x y]  (str ":nth-last-of-type(" x "n+" y ")")))
-   
-
-  
-
-
-
+(extend-protocol domina/DomContent
+  js/Text
+  (nodes [content] [content])
+  (single-node [content] content))
   
 
    

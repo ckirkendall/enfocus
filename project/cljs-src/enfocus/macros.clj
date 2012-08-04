@@ -33,37 +33,17 @@
 ;    effect
 ;##############################################
 
-(defn- create-transform-call [id-sym pnod-sym forms]
-  (map (fn [[sel tran]] (list 
-                          (if tran tran  'enfocus.macros/remove-node) 
-                          (list 'enfocus.core/css-select id-sym pnod-sym sel)))
-       (partition 2 forms)))
 
-(defn- create-extraction-call [id-sym pnod-sym map-sym forms]
-  (map (fn [[ky sel tran]] 
-         (list 'clojure.core/swap!
-               map-sym
-               'clojure.core/assoc ky (list
-                                       (if tran tran  'enfocus.macros/remove-node) 
-                                       (list 'enfocus.core/css-select id-sym pnod-sym sel))))
-       (partition 3 forms)))
-
-
-(defmacro create-dom-action [sym nod tmp-dom args & forms]  
+(defmacro create-dom-action [sym nod args & forms]  
   (let [id-sym (gensym "id-sym")
         pnode-sym (gensym "pnod")
-        new-form (create-transform-call id-sym pnode-sym forms)]   
+        new-form `(enfocus.core/i-at ~id-sym ~pnode-sym ~@forms)]   
   `(defn ~sym ~args 
-     (let [[~id-sym ~pnode-sym] (if (fn? ~nod) (~nod) ["" ~nod])
-           ~pnode-sym (if ~tmp-dom
-                        (enfocus.core/create-hidden-dom ~pnode-sym)
-                        ~pnode-sym)]
-       ~@new-form
-       (if ~tmp-dom 
-         (do
-           (enfocus.core/reset-ids ~id-sym ~pnode-sym)
-           (enfocus.core/remove-node-return-child ~pnode-sym))
-         ~pnode-sym)))))
+     (let [[~id-sym ~pnode-sym] (~nod)
+           ~pnode-sym (enfocus.core/create-hidden-dom ~pnode-sym)]
+       ~new-form
+        (enfocus.core/reset-ids ~id-sym ~pnode-sym)
+        (enfocus.core/remove-node-return-child ~pnode-sym)))))
 
 (defn find-url
   "Given a string, returns a URL. Attempts to resolve as a classpath-relative
@@ -102,7 +82,7 @@
        (enfocus.macros/create-dom-action
         ~sym
         #(enfocus.core/get-cached-dom ~uri)
-        true ~args ~@forms))))
+        ~args ~@forms))))
 
 (defmacro defsnippet [sym & body]
   (let [[mode uri sel args & forms] (ensure-mode body)]
@@ -113,36 +93,20 @@
        (enfocus.macros/create-dom-action
         ~sym
         #(enfocus.core/get-cached-snippet ~uri ~sel)
-        true ~args ~@forms))))
+        ~args ~@forms))))
   
 (defmacro defaction [sym args & forms]
-  `(defn ~sym ~args (enfocus.macros/at js/document ~@forms)))
+  `(defn ~sym ~args (enfocus.core/at js/document ~@forms)))
 
-
-(defmacro at [nod & forms]
-    (if (= 1 (count forms)) 
-      `(do (~@forms ~nod) ~nod)
-      (let [pnode-sym (gensym "pnod")
-            new-form (create-transform-call "" pnode-sym forms)]
-        `(let [nods# (enfocus.core/nodes->coll ~nod)] 
-           (doall (map (fn [~pnode-sym] ~@new-form ~pnode-sym) nods#))
-           ~nod))))
+(defmacro at [& forms]
+    `(enfocus.core/at ~@forms))
+  
+(defmacro from [& forms]
+  `(enfocus.core/from ~@forms))
 
 (defmacro transform 
-  ([nod trans] `(enfocus.macros/at ~nod ~trans))
-  ([nod sel trans] `(enfocus.macros/at ~nod ~sel ~trans)))
-
-  
-(defmacro from [nod & forms]
-    (if (= 1 (count forms)) 
-      `(~@forms ~nod)
-      (let [pnode-sym (gensym "pnod")
-            map-sym (gensym "map")
-            new-form (create-extraction-call "" pnode-sym map-sym forms)]
-        `(let [nods# (enfocus.core/nodes->coll ~nod)
-               ~map-sym (atom {}) 
-               map-list# (doall (map (fn [~pnode-sym] ~@new-form ~pnode-sym) nods#))]
-           (deref ~map-sym)))))
+  ([nod trans] `(enfocus.core/at ~nod ~trans))
+  ([nod sel trans] `(enfocus.core/at ~nod ~sel ~trans)))
 
 (defmacro wait-for-load [& forms]
 	`(enfocus.core/setTimeout (fn check# []
@@ -167,10 +131,11 @@
 (defmacro set-attr [& forms] 
   `(enfocus.core/en-set-attr ~@forms))
 
-
 (defmacro remove-attr [& forms] 
   `(enfocus.core/en-remove-attr ~@forms))
 
+(defmacro set-prop [& forms]
+    `(enfocus.core/en-set-prop ~@forms))
 
 (defmacro add-class [& forms]
   `(enfocus.core/en-add-class ~@forms))
@@ -178,6 +143,9 @@
 
 (defmacro remove-class [& forms]
   `(enfocus.core/en-remove-class ~@forms))
+
+(defmacro set-class [& forms]
+  `(enfocus.core/en-set-class ~@forms))
 
 (defmacro do-> [& forms]
   `(enfocus.core/en-do-> ~@forms))
@@ -297,3 +265,6 @@
   `(enfocus.core/extr-multi-node
      (fn [pnod#]
        (~(symbol (str ".-" (name prop))) pnod#))))
+
+(defmacro get-data [& forms]
+  `(enfocus.core/en-get-data ~@forms))
