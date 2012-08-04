@@ -2,13 +2,17 @@ h1. Enfocus
 
 Enfocus is a @DOM@ manipulation and templating library for ClojureScript. Inspired by Christophe Grand's "Enlive":http://github.com/cgrand/enlive, Enfocus' primary purpose is providing a base for building rich interfaces in ClojureScript.
 
-You can find examples and documention for enfocus "here":http:/ckirkendall.github.com/enfocus-site
-
 
 If you are unfamiliar with enlive I also recommend taking a look at these links.
 
 David Nolen wrote a "nice tutorial":http://github.com/swannodette/enlive-tutorial/
 Another "tutorial":https://github.com/cgrand/enlive/wiki/Table-and-Layout-Tutorial,-Part-1:-The-Goal by Brian Marick.
+
+
+h1. Documentation & Examples
+
+"Documentation Site":http:/ckirkendall.github.com/enfocus-site
+"Example Website":http://https://github.com/ckirkendall/The-Great-Todo
 
 
 h1. Where do I get support?
@@ -20,11 +24,11 @@ h1. Quick Start
 h2. Setup
 
 From any leiningen project file:
-<pre>[enfocus &#34;0.9.1-SNAPSHOT&#34;]
+<pre>[enfocus &#34;1.0.0-alpha1&#34;]
 </pre>
 Then make sure you have your lib folder on your classpath.
 
-For the best development experience, use "lein-cljsbuild":https://github.com/emezeske/lein-cljsbuild.  lein-cljsbuild 0.7.0 includes the third party google libraries needed for enfocus.  If you choose something else you will need to replace the goog.jar in your CLOJURESCRIPT_HOME/lib with the goog-jar.jar that comes down as a dependency with enfocus.
+For the best development experience, use "lein-cljsbuild":https://github.com/emezeske/lein-cljsbuild.  lein-cljsbuild 0.7.0 includes the third party google libraries needed for enfocus.  
 
 If you are using an older version of ClojureScript you will need to use [&#34;0.9.0-SNAPSHOT&#34;].
 
@@ -196,6 +200,7 @@ Supported Enlive Transformations
 
 New Transformations
 <pre>
+  set-prop           (set-prop :value "testing")
   set-style          (set-style :font-size "10px" :background "#fff")
   remove-style       (remove-style :font-size :background)
   listen             (listen :mouseover (fn [event] ...))
@@ -251,7 +256,7 @@ Open your browser to:
  
 h2. License
 
-Copyright (C) 2011 Creighton Kirkendall
+Copyright (C) 2012 Creighton Kirkendall
 
 Distributed under the Eclipse Public License, the same as Clojure.
 
