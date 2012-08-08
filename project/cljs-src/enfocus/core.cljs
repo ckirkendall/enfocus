@@ -16,7 +16,7 @@
             [domina :as domina]
             [domina.css :as dcss])
   (:require-macros [enfocus.macros :as em])) 
-(declare css-syms css-select create-sel-str)
+(declare css-syms css-select create-sel-str at from)
 
 
 ;#################################################### 
@@ -377,8 +377,8 @@
     (fn [pnod]
       (let [elem (dom/createElement (name elm))]
         (add-map-attrs elem mattr)
-        (em/at elem (em/content (.cloneNode pnod true)))
-        (em/at pnod (em/do-> (em/after elem)
+        (at elem (em/content (.cloneNode pnod true)))
+        (at pnod (em/do-> (em/after elem)
                              (em/remove-node)))))))
 
 (defn en-unwrap
@@ -569,9 +569,9 @@
 
 (defn en-get-data
   "returns the data on a selected node for a given key. If bubble is set will look at parent"
-  ([ky] (en-get-text ky false))
+  ([ky] (en-get-data ky false))
   ([ky bubble]
-     (ext-multi-node
+     (extr-multi-node
       (fn [node]
         (domina/get-data ky bubble))))) 
 
