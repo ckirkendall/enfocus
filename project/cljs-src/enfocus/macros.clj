@@ -33,7 +33,6 @@
 ;    effect
 ;##############################################
 
-
 (defmacro create-dom-action [sym nod args & forms]  
   (let [id-sym (gensym "id-sym")
         pnode-sym (gensym "pnod")
@@ -268,3 +267,7 @@
 
 (defmacro get-data [& forms]
   `(enfocus.core/en-get-data ~@forms))
+
+(defmacro trans [[nsym] & body]
+  `(enfocus.core/chainable-standard
+    (fn [~nsym] ~@body)))

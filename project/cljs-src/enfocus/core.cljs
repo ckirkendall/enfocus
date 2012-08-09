@@ -22,7 +22,7 @@
 ;#################################################### 
 ; Utility functions
 ;####################################################
-(def debug true)
+(def debug false)
 
 (defn log-debug [mesg] 
   (when (and debug (not (= (.-console js/window) js/undefined)))
@@ -295,10 +295,9 @@
 
 
 (defn en-set-prop [& forms]
-  (chainable-standard
-   (fn [node]
+  (em/trans [node]
      (let [h (mapcat (fn [[n v]](list (name n) v)) (partition 2 forms))]
-       (dom/setProperties node (apply js-obj h))))))
+       (dom/setProperties node (apply js-obj h)))))
 
 
 (defn- has-class 
@@ -330,9 +329,8 @@
 
 (defn en-do-> [ & forms]
   "Chains (composes) several transformations. Applies functions from left to right."
-  (chainable-standard  
-    (fn [pnod]
-      (doseq [fun forms] (fun pnod)))))
+  (em/trans [pnod]
+      (doseq [fun forms] (fun pnod))))
 
 (defn en-append
   "Appends the content of the element. Values can be nodes or collection of nodes."
@@ -373,22 +371,20 @@
 (defn en-wrap 
   "wrap and element in a new element defined as :div {:class 'temp'}"
   [elm mattr]
-  (chainable-standard
-    (fn [pnod]
-      (let [elem (dom/createElement (name elm))]
-        (add-map-attrs elem mattr)
-        (at elem (em/content (.cloneNode pnod true)))
-        (at pnod (em/do-> (em/after elem)
-                             (em/remove-node)))))))
+  (em/trans [pnod]
+    (let [elem (dom/createElement (name elm))]
+      (add-map-attrs elem mattr)
+      (at elem (em/content (.cloneNode pnod true)))
+      (at pnod (em/do-> (em/after elem)
+                        (em/remove-node))))))
 
 (defn en-unwrap
   "replaces a node with all its children"
   []
-  (chainable-standard
-    (fn [pnod]
-      (let [frag (. js/document (createDocumentFragment))]
-         (dom/append frag (.-childNodes pnod))
-         (dom/replaceNode frag pnod)))))
+  (em/trans [pnod]
+    (let [frag (. js/document (createDocumentFragment))]
+      (dom/append frag (.-childNodes pnod))
+      (dom/replaceNode frag pnod))))
   
 
 (defn en-set-style 
@@ -402,9 +398,8 @@
 (defn en-remove-style 
   "remove a list style elements from the selected nodes. note: you can only remove styles that are inline"
   [& values]
-  (chainable-standard  
-    (fn [pnod] 
-      (style-remove pnod values))))
+  (em/trans [pnod] 
+    (style-remove pnod values)))
 
 (defn en-set-data
   "addes key value pair of data to the selected nodes. Only use clojure data structures when setting"
