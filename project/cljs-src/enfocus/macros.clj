@@ -194,6 +194,12 @@
 (defmacro remove-style [& forms]
   `(enfocus.core/en-remove-style ~@forms))
 
+(defmacro focus []
+  `(enfocus.core/en-focus))
+
+(defmacro blur []
+  `(enfocus.core/en-blur))
+
 (defmacro listen [& forms]
   `(enfocus.core/en-listen ~@forms))
 

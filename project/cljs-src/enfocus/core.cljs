@@ -401,6 +401,19 @@
   (em/trans [pnod] 
     (style-remove pnod values)))
 
+(defn en-focus
+  "calls the focus function on the selected node"
+  []
+  (em/trans [node]
+    (.focus node)))
+
+(defn en-blur
+  "calls the blur function on the selected node"
+  []
+  (em/trans [node]
+    (.blur node)))
+
+
 (defn en-set-data
   "addes key value pair of data to the selected nodes. Only use clojure data structures when setting"
   [ky val]
