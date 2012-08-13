@@ -1,4 +1,4 @@
-(defproject enfocus "1.0.0-alpha2"
+(defproject enfocus "1.0.0-SNAPSHOT"
   :description "DOM manipulation tool for clojurescript inspired by Enlive"
   :source-path "cljs-src"
   :dependencies [[org.clojure/clojure "1.4.0"]
