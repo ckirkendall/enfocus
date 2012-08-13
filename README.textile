@@ -24,7 +24,7 @@ h1. Quick Start
 h2. Setup
 
 From any leiningen project file:
-<pre>[enfocus &#34;1.0.0-alpha1&#34;]
+<pre>[enfocus &#34;1.0.0-alpha2&#34;]
 </pre>
 Then make sure you have your lib folder on your classpath.
 
@@ -200,6 +200,8 @@ Supported Enlive Transformations
 
 New Transformations
 <pre>
+  focus              (focus)
+  blur               (blur)
   set-prop           (set-prop :value "testing")
   set-style          (set-style :font-size "10px" :background "#fff")
   remove-style       (remove-style :font-size :background)

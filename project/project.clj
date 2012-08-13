@@ -1,8 +1,7 @@
-(defproject enfocus "1.0.0-SNAPSHOT"
+(defproject enfocus "1.0.0-alpha2"
   :description "DOM manipulation tool for clojurescript inspired by Enlive"
   :source-path "cljs-src"
   :dependencies [[org.clojure/clojure "1.4.0"]
-                 ;[goog-jar "1.0.0"]
                  [domina "1.0.0" :exclusions [org.clojure/clojurescript]]]
   :dev-dependencies [[lein-eclipse "1.0.0"]
                      [lein-cljsbuild "0.2.5"]]
@@ -15,3 +14,4 @@
       :output-to "../sample/resources/public/cljs/enfocus.js",
       :optimizations :whitespace,
       :pretty-print true}}]})
+
