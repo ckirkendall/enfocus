@@ -36,13 +36,14 @@ If you are using an older version of ClojureScript you will need to use [&#34;0.
 h3. The Basics
 
 Every great journey starts with "Hello world!"
+
 <pre>(ns my.namespace
   (:require [enfocus.core :as ef])
   (:require-macros [enfocus.macros :as em]))
 
 (defn start [] 
   (em/at js/document
-    ["body"] (em/content "Hello world!"))
+    ["body"] (em/content "Hello world!")))
 
 (set! (.-onload js/window) start)         
 </pre>
@@ -51,10 +52,12 @@ h2. The @at@ form
 
 At the core to understanding Enfocus is the @at@ form used in the 
 "Hello world!" example above.  It comes in two basic flavors listed below:
-<pre>(at a-node (transform arg1 ...))
 
+<pre>(at a-node (transform arg1 ...))
+</pre>
 and
 
+<pre>
 (at a-node
     [selector1] (transform1 arg1 ...)
     [selector2] (transform2 arg1 ...))
@@ -77,6 +80,7 @@ A @selector@ is a string representing a "CSS3 compliant selector":http://www.w3s
 h3. Handling Events
 
 Enfocus has event handling.  Below is a simple example to add an @onclick@ event handler to a button.
+
 <pre>(em/defaction change [msg] 
   ["#button1"] (em/content msg))
 
@@ -177,6 +181,7 @@ A transformation is a function that returns either a node or collection of node.
 h3. Enfocus defines several helper functions:
 
 Supported Enlive Transformations 
+
 <pre>
   content            (content "xyz" a-node "abc")             
   html-content       (html-content "<blink>please no</blink>")
@@ -199,6 +204,7 @@ Supported Enlive Transformations
 </pre>
 
 New Transformations
+
 <pre>
   focus              (focus)
   blur               (blur)
@@ -225,6 +231,7 @@ New Transformations
 </pre>
 
 Currently there is one transformation that is supported by Enlive but not Enfocus. (Patches very welcome!!)
+
 <pre>
   move               (move [:.footnote] [:#footnotes] content) 
                      ;this will be called relocate in enfocus
