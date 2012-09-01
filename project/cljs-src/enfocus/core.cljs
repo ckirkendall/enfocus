@@ -525,7 +525,7 @@
   [wth hgt ttime callback accel]
   (chainable-effect
     (fn [pnod pcallback]
-      (let [csize (style/getSize pnod)
+      (let [csize (style/getContentBoxSize pnod)
             start (array (.-width csize) (.-height csize))
             wth (if (= :curwidth wth) (.-width csize) wth)
             hgt (if (= :curheight hgt) (.-height csize) hgt)
