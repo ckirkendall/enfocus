@@ -168,7 +168,7 @@
 
 (defn load-remote-dom 
   "loads a remote file into the cache, and masks the ids to avoid collisions"
-  [uri]
+  [uri dom-key]
   (when (nil? (@tpl-cache uri))
     (swap! tpl-load-cnt inc)
     (let [req (new goog.net.XhrIo)
@@ -176,7 +176,7 @@
                      (let [text (. req (getResponseText))
                            [sym txt] (replace-ids text)
                            data (dom/htmlToDocumentFragment txt)]
-                       (swap! tpl-cache assoc uri [sym data] )))]
+                       (swap! tpl-cache assoc dom-key [sym data] )))]
       (events/listen req goog.net.EventType/COMPLETE 
                      #(do 
                         (callback req) 
@@ -184,13 +184,13 @@
       (. req (send uri "GET")))))
 
 
-(defn get-cached-dom 
+(defn get-cached-dom  
   "returns and dom from the cache and symbol used to scope the ids"
   [uri]
   (let [nod (@tpl-cache uri)]   
      (when nod [(first nod) (. (second nod) (cloneNode true))]))) 
 
-(defn get-cached-snippet 
+(defn get-cached-snippet   
   "returns the cached snippet or creates one and adds it to the cache if needed"
   [uri sel]  
   (let [sel-str  (create-sel-str sel)

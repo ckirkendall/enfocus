@@ -65,33 +65,35 @@
 
 (defn load-local-dom
   "same as 'load-remote-dom', but work for local files"
-  [path]
+  [path dom-key]
   (let [text (slurp (io/reader (find-url path)))]
     `(when (nil? (@enfocus.core/tpl-cache ~path))
        (let [[sym# txt#] (enfocus.core/replace-ids ~text)
              data# (goog.dom/htmlToDocumentFragment txt#)]
-         (swap! enfocus.core/tpl-cache assoc ~path [sym# data#])))))
+         (swap! enfocus.core/tpl-cache assoc ~dom-key [sym# data#])))))
 
 (defmacro deftemplate [sym & body]
-  (let [[mode uri args & forms] (ensure-mode body)]
+  (let [[mode uri args & forms] (ensure-mode body)
+        dom-key (str (name sym) uri)]
     `(do
        ~(case mode
-          :remote   `(enfocus.core/load-remote-dom ~uri)
-          :compiled (load-local-dom uri))
+          :remote   `(enfocus.core/load-remote-dom ~uri ~dom-key)
+          :compiled (load-local-dom uri dom-key))
        (enfocus.macros/create-dom-action
         ~sym
-        #(enfocus.core/get-cached-dom ~uri)
+        #(enfocus.core/get-cached-dom ~dom-key)
         ~args ~@forms))))
 
 (defmacro defsnippet [sym & body]
-  (let [[mode uri sel args & forms] (ensure-mode body)]
+  (let [[mode uri sel args & forms] (ensure-mode body)
+        dom-key (str (name sym) uri)]
     `(do
        ~(case mode
-          :remote   `(enfocus.core/load-remote-dom ~uri)
-          :compiled (load-local-dom uri))
+          :remote   `(enfocus.core/load-remote-dom ~uri ~dom-key)
+          :compiled (load-local-dom uri dom-key))
        (enfocus.macros/create-dom-action
         ~sym
-        #(enfocus.core/get-cached-snippet ~uri ~sel)
+        #(enfocus.core/get-cached-snippet ~dom-key ~sel)
         ~args ~@forms))))
   
 (defmacro defaction [sym args & forms]
