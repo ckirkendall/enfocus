@@ -24,13 +24,11 @@ h1. Quick Start
 h2. Setup
 
 From any leiningen project file:
-<pre>[enfocus &#34;1.0.0-alpha2&#34;]
+<pre>[enfocus &#34;1.0.0-alpha3&#34;]
 </pre>
 Then make sure you have your lib folder on your classpath.
 
-For the best development experience, use "lein-cljsbuild":https://github.com/emezeske/lein-cljsbuild.  lein-cljsbuild 0.7.0 includes the third party google libraries needed for enfocus.  
-
-If you are using an older version of ClojureScript you will need to use [&#34;0.9.0-SNAPSHOT&#34;].
+For the best development experience, use "lein-cljsbuild":https://github.com/emezeske/lein-cljsbuild.  
 
 
 h3. The Basics
