@@ -22,7 +22,7 @@
 ;#################################################### 
 ; Utility functions
 ;####################################################
-(def debug false)
+(def debug true)
 
 (defn log-debug [mesg] 
   (when (and debug (not (= (.-console js/window) js/undefined)))
@@ -40,7 +40,9 @@
 (defn nodes->coll 
   "coverts a nodelist, node into a collection"
   [nl]
-  (domina/nodes nl))
+  (if (= nl js/window)
+    [nl]
+    (domina/nodes nl)))
 
 (defn- flatten-nodes-coll [values]
   "takes a set of nodes and nodelists and flattens them"
@@ -688,8 +690,6 @@
   js/Text
   (nodes [content] [content])
   (single-node [content] content))
-  
-
    
   
 
