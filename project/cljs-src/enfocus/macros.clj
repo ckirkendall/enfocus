@@ -68,9 +68,8 @@
   [path dom-key]
   (let [text (slurp (io/reader (find-url path)))]
     `(when (nil? (@enfocus.core/tpl-cache ~path))
-       (let [[sym# txt#] (enfocus.core/replace-ids ~text)
-             data# (goog.dom/htmlToDocumentFragment txt#)]
-         (swap! enfocus.core/tpl-cache assoc ~dom-key [sym# data#])))))
+       (let [[sym# txt#] (enfocus.core/replace-ids ~text)]
+         (swap! enfocus.core/tpl-cache assoc ~dom-key [sym# txt#])))))
 
 (defmacro deftemplate [sym & body]
   (let [[mode uri args & forms] (ensure-mode body)

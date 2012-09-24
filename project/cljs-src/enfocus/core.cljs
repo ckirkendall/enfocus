@@ -176,34 +176,41 @@
     (let [req (new goog.net.XhrIo)
           callback (fn [req] 
                      (let [text (. req (getResponseText))
-                           [sym txt] (replace-ids text)
-                           data (dom/htmlToDocumentFragment txt)]
-                       (swap! tpl-cache assoc dom-key [sym data] )))]
+                           [sym txt] (replace-ids text)]
+                       (swap! tpl-cache assoc dom-key [sym txt] )))]
       (events/listen req goog.net.EventType/COMPLETE 
                      #(do 
                         (callback req) 
                         (swap! tpl-load-cnt dec)))
       (. req (send uri "GET")))))
 
+(defn html-to-dom [html]
+  (let [dfa (nodes->coll (domina/html-to-dom html))
+        frag (. js/document (createDocumentFragment))] 
+    (log-debug (count dfa))
+    (doseq [df dfa]
+      (dom/append frag df))
+    frag))
+
 
 (defn get-cached-dom  
   "returns and dom from the cache and symbol used to scope the ids"
-  [uri]
+  [uri] 
   (let [nod (@tpl-cache uri)]   
-     (when nod [(first nod) (. (second nod) (cloneNode true))]))) 
+     (when nod [(first nod) (html-to-dom (second nod))]))) 
 
 (defn get-cached-snippet   
   "returns the cached snippet or creates one and adds it to the cache if needed"
   [uri sel]  
   (let [sel-str  (create-sel-str sel)
         cache (@tpl-cache (str uri sel-str))]
-    (if cache [(first cache) (. (second cache) (cloneNode true))]
+    (if cache [(first cache) (html-to-dom (second cache))]
         (let [[sym tdom] (get-cached-dom uri)  
               dom (create-hidden-dom tdom)
               tsnip (domina/nodes (css-select sym dom sel))
               snip (first tsnip)]
           (remove-node-return-child dom)
-          (swap! tpl-cache assoc (str uri sel-str) [sym snip])
+          (swap! tpl-cache assoc (str uri sel-str) [sym (.-outerHTML snip)])
           [sym snip]))))  
  
   
