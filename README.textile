@@ -24,7 +24,7 @@ h1. Quick Start
 h2. Setup
 
 From any leiningen project file:
-<pre>[enfocus &#34;1.0.0-alpha3&#34;]
+<pre>[enfocus &#34;1.0.0-beta1&#34;]
 </pre>
 Then make sure you have your lib folder on your classpath.
 
