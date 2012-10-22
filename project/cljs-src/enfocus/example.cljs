@@ -47,9 +47,9 @@
   ["thead tr > *:last-child"] (em/content "quantity")
   ["tbody > tr:not(:first-child)"] (em/remove-node)
   ["tbody"] #(em/at % ["tr:first-of-type"]
-                    (em/clone-for [fr (vec fruit-data)]
-                                  ["*:first-child"] (em/content (first fr))
-                                  ["*:last-child"] (em/content (str (second fr))))))
+                    (em/clone-for [[f q] (vec fruit-data)]
+                                  ["*:first-child"] (em/content f)
+                                  ["*:last-child"] (em/content (str q)))))
     
   
 (em/defsnippet success :compiled "enfocus/html/test-grid.html"
@@ -112,7 +112,7 @@
               ["#heading1"] (em/set-attr :id "new-heading1")
               ["#heading2"] (em/set-attr :id "new-heading2")
               ["#test-content2 tfoot tr > *:last-child"] (em/content (str 20))
-              ["#test-content3"] (em/content (template3 {"banana" 12 "apple" 6}))
+              ["#test-content3"] (em/content (template3 {"pear" 22 "banana" 12 "apple" 6}))
               ["#test-content4"] (em/set-style :background "#00dd00" :font-size "10px")
               ["#test-content5"] (em/set-style :background "#dd0000" :font-size "10px")
               ["#test-content5"] (em/remove-style :background :font-size)

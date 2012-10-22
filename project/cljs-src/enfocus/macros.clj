@@ -179,7 +179,7 @@
     (fn [pnod#]
       (let [div# (enfocus.core/create-hidden-dom 
                     (. js/document (~(symbol "createDocumentFragment"))))]
-        (doseq [~(symbol (name sym)) ~lst]
+        (doseq [~sym ~lst]
           (do 
             (enfocus.macros/at div#  (enfocus.macros/append (. pnod# (~(symbol "cloneNode") true))))
             (enfocus.macros/at (goog.dom/getLastElementChild div#) ~@forms)))
