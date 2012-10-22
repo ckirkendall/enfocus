@@ -129,7 +129,7 @@
    because css selectors do not work unless we have it in the main dom"
   [child]
   (let [div (dom/createDom "div" hide-style)]
-    (if (instance? js/DocumentFragment child) 
+    (if (= (.-nodeType child) 11) 
       (dom/appendChild div child)
       (do
         (log-debug (count (domina/nodes child))) 
