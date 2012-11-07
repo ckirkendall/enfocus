@@ -561,6 +561,21 @@
         (. anim (play))))
        callback))
   
+(defn en-scroll
+  "scrolls selected elements to a x and y in px optional time series data"
+  [xpos ypos ttime callback accel]
+  (ef/chainable-effect
+    (fn [pnod pcallback]
+      (let [start (array (.-scrollLeft pnod) (.-scrollTop pnod))
+            xpos (if (= :curx xpos) (.-scrollLeft pnod) xpos)
+            ypos (if (= :cury ypos) (.-scrollTop pnod) ypos)
+            end (array xpos ypos)
+            anim (fx-dom/Scroll. pnod start end ttime accel)]
+        (util/log (str start) (str end))
+        (when pcallback
+          (events/listen anim goog.fx.Animation.EventType/END pcallback))
+        (. anim (play))))
+       callback))
 
 ;##################################################################
 ; data extractors
