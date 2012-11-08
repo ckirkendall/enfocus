@@ -256,6 +256,16 @@
   ([xpos ypos ttime callback accel]
   `(enfocus.core/en-move ~xpos ~ypos ~ttime ~callback ~accel))) 
 
+(defmacro scroll 
+  ([xpos ypos] 
+    `(enfocus.core/en-scroll ~xpos ~ypos 0 nil nil))
+  ([xpos ypos ttime] 
+    `(enfocus.core/en-scroll ~xpos ~ypos ~ttime nil nil))
+  ([xpos ypos ttime callback]
+  `(enfocus.core/en-scroll ~xpos ~ypos ~ttime ~callback nil))
+  ([xpos ypos ttime callback accel]
+  `(enfocus.core/en-scroll ~xpos ~ypos ~ttime ~callback ~accel)))
+
 (defmacro chain [func & chains]
   (if (empty? chains)
     `(fn [pnod#] (~func pnod#))
