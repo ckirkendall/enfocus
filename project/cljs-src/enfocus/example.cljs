@@ -91,7 +91,10 @@
                                              (em/prepend (success)))
               ["#wrap-span"] (em/wrap :span {:class "success"})
               ["#test15 > *:last-child > .success > span"] (em/content "success")
-              ["#wrapper"] (em/unwrap)) 
+              ["#wrapper"] (em/unwrap)
+              (ef/xpath "//tr[@id='test17']/td[2]") (em/content (success))
+              ["#test18 > *:last-child"] (em/trans [node]
+                                                   (em/at node ef/this-node (em/content (success)))))    
 
 (defn fade-in [event]
   ((em/fade-in 500) (.-currentTarget event)))

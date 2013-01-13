@@ -14,15 +14,22 @@
             [goog.Timer :as timer]
             [clojure.string :as string]
             [domina :as domina]
-            [domina.css :as dcss])
+            [domina.css :as dcss]
+            [domina.xpath :as xpath])
   (:require-macros [enfocus.macros :as em])) 
 (declare css-syms css-select create-sel-str at from)
 
+;###################################################
+; Selector Protocol
+;###################################################
+(defprotocol ISelector
+  (select [this] [this root] [this root id-mask]
+    "takes root node and returns a domina node list"))
 
 ;#################################################### 
 ; Utility functions
 ;####################################################
-(def debug false)
+(def debug true)
 
 (defn log-debug [mesg] 
   (when (and debug (not (= (.-console js/window) js/undefined)))
@@ -691,7 +698,7 @@
   (if (= 1 (count trans))
     ((first trans) node)
     (doseq [[sel t] (partition 2 trans)]
-           ((nil-t t) (css-select id-mask node sel)))))
+           ((nil-t t) (select sel node id-mask)))))
 
 (defn at [node & trans]
   (apply i-at "" node trans)) 
@@ -701,10 +708,28 @@
     ((first trans) node)
     (apply hash-map
      (mapcat (fn [[ky sel ext]]
-               [ky (ext (css-select "" node sel))])
+               [ky (ext (select sel node ""))])
              (partition 3 trans)))))
 
  
+
+;##########################################
+; XPATH - allow (xpath "@id
+;##########################################
+(defn xpath [path]
+  (fn [root id-mask]
+    (if (empty? id-mask)
+      (xpath/xpath root path)
+      (let [tmp (.replace path "@ID='" (str "@ID='" id-mask))
+            mpath (.replace path "@id='" (str "@id='" id-mask))]
+        (xpath/xpath root mpath)))))
+    
+
+;#########################################
+; Special Selectors
+;#########################################
+(defn this-node [root id-mask] root)
+
 
 ;;domina extentions to work with enfocus
 
@@ -714,6 +739,19 @@
   (single-node [content] content))
    
   
-
+(extend-protocol ISelector
+  function
+  (select [this] (select this js/document ""))
+  (select [this root] (select this root ""))
+  (select [this root id-mask] (this root id-mask))
+  PersistentVector
+  (select [this] (select this js/document ""))
+  (select [this root] (select this root ""))
+  (select [this root id-mask] (css-select id-mask root this))
+  js/String
+  (select [this] (select this js/document ""))
+  (select [this root] (select this root ""))
+  (select [this root id-mask] (css-select id-mask root [this])))
+  
                
   
