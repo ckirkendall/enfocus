@@ -1,4 +1,5 @@
 (ns enfocus.macros
+  (:refer-clojure :exclude [filter delay])
   (:require [clojure.java.io :as io]))
 
 ;##############################################
