@@ -29,7 +29,7 @@
 ;#################################################### 
 ; Utility functions
 ;####################################################
-(def debug true)
+(def debug false)
 
 (defn log-debug [mesg] 
   (when (and debug (not (= (.-console js/window) js/undefined)))
