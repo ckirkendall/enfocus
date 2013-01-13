@@ -4,7 +4,7 @@
   :dependencies [[org.clojure/clojure "1.4.0"]
                  [domina "1.0.0" :exclusions [org.clojure/clojurescript]]]
   :dev-dependencies [[lein-eclipse "1.0.0"]
-                     [lein-cljsbuild "0.2.9"]]
+                     [lein-cljsbuild "0.2.10"]]
   :cljsbuild
   {:builds
    [{:builds nil,
