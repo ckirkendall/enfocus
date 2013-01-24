@@ -237,7 +237,7 @@ Currently there is one transformation that is supported by Enlive but not Enfocu
 
 h2. Selectors
 
-Enfocus supports both CSS3 and XPath Selectors below are examples of each:
+Enfocus supports both CSS3 and XPath selectors:
 
 <pre>
 (ns example
@@ -245,7 +245,7 @@ Enfocus supports both CSS3 and XPath Selectors below are examples of each:
   (:require-macros [enfocus.macros :as em]))
 
 (em/defaction action2 [] 
-             [".cool[foo=false]"] (em/content ....)) ;CSS2
+             [".cool[foo=false]"] (em/content ....)) ;CSS3
              (ef/xpath "//tr[@id='1']/th[2]") (em/set-attr :id "new-heading1")) ;XPATH
 </pre>
 
