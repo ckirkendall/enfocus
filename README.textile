@@ -24,7 +24,7 @@ h1. Quick Start
 h2. Setup
 
 From any leiningen project file:
-<pre>[enfocus &#34;1.0.0-beta2&#34;]
+<pre>[enfocus &#34;1.0.0-beta3&#34;]
 </pre>
 Then make sure you have your lib folder on your classpath.
 
@@ -234,6 +234,22 @@ Currently there is one transformation that is supported by Enlive but not Enfocu
   move               (move [:.footnote] [:#footnotes] content) 
                      ;this will be called relocate in enfocus
 </pre>
+
+h2. Selectors
+
+Enfocus supports both CSS3 and XPath Selectors below are examples of each:
+
+<pre>
+(ns example
+  (:require [enfocus.core :as ef])
+  (:require-macros [enfocus.macros :as em]))
+
+(em/defaction action2 [] 
+             [".cool[foo=false]"] (em/content ....)) ;CSS2
+             (ef/xpath "//tr[@id='1']/th[2]") (em/set-attr :id "new-heading1")) ;XPATH
+</pre>
+
+
 
 h2. Contributing
  * Download "lieningen":https://github.com/technomancy/leiningen
