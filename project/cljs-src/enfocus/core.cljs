@@ -142,7 +142,7 @@
         (log-debug (count (domina/nodes child))) 
         (doseq [node (domina/nodes child)]
           (dom/appendChild div node))))
-    (dom/appendChild (.-body (dom/getDocument)) div)
+    (dom/appendChild (.-documentElement (dom/getDocument)) div)
     div))   
     
 (defn remove-node-return-child 
