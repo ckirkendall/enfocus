@@ -215,10 +215,10 @@
         (let [[sym tdom] (get-cached-dom uri)  
               dom (create-hidden-dom tdom)
               tsnip (domina/nodes (css-select sym dom sel))
-              snip (first tsnip)]
+              html_snip (apply str (map #(.-outerHTML %) tsnip))]
           (remove-node-return-child dom)
-          (swap! tpl-cache assoc (str uri sel-str) [sym (.-outerHTML snip)])
-          [sym snip]))))  
+          (swap! tpl-cache assoc (str uri sel-str) [sym html_snip])
+          [sym (html-to-dom html_snip)]))))  
  
   
 
