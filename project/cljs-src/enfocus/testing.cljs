@@ -1,4 +1,4 @@
-(ns enfocus.example
+(ns enfocus.testing
   (:use [enfocus.enlive.syntax :only [attr=]])
   (:require [enfocus.core :as ef])
   (:require-macros [enfocus.macros :as em]))
@@ -42,7 +42,7 @@
                 ["tbody"] (em/content
                            (map #(snippet2 % (fruit-data %)) (keys fruit-data))))
 
-(em/deftemplate template3 :compiled "../sample/resources/public/templates/template1.html" [fruit-data]
+(em/deftemplate template3 :compiled "../testing/resources/public/templates/template1.html" [fruit-data]
   ["#heading1"] (em/content "fruit")
   ["thead tr > *:last-child"] (em/content "quantity")
   ["tbody > tr:not(:first-child)"] (em/remove-node)
