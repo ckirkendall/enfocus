@@ -13,3 +13,5 @@ testing/resources/public/cljs/
 *.*#
 .#*
 *.*~
+
+project/.lein-plugins
