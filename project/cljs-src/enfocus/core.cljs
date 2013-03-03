@@ -7,7 +7,6 @@
             [goog.dom :as dom]
             [goog.dom.classes :as classes]
             [goog.dom.ViewportSizeMonitor :as vsmonitor]
-            [goog.events :as events]
             [goog.fx :as fx]
             [goog.fx.dom :as fx-dom]
             [goog.async.Delay :as gdelay]
