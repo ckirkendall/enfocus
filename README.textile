@@ -24,7 +24,7 @@ h1. Quick Start
 h2. Setup
 
 From any leiningen project file:
-<pre>[enfocus &#34;1.0.1&#34;]
+<pre>[enfocus &#34;2.0.0-SNAPSHOT&#34;]
 </pre>
 Then make sure you have your lib folder on your classpath.
 
@@ -40,8 +40,8 @@ Every great journey starts with "Hello world!"
   (:require-macros [enfocus.macros :as em]))
 
 (defn start [] 
-  (em/at js/document
-    ["body"] (em/content "Hello world!")))
+  (ef/at js/document
+    ["body"] (ef/content "Hello world!")))
 
 (set! (.-onload js/window) start)         
 </pre>
@@ -80,10 +80,10 @@ h3. Handling Events
 Enfocus has event handling.  Below is a simple example to add an @onclick@ event handler to a button.
 
 <pre>(em/defaction change [msg] 
-  ["#button1"] (em/content msg))
+  ["#button1"] (ef/content msg))
 
 (em/defaction setup []
-  ["#button1"] (em/listen :click #(change "I have been clicked")))
+  ["#button1"] (ef/listen :click #(change "I have been clicked")))
 	
 (set! (.-onload js/window) setup)         
 </pre>
@@ -101,12 +101,12 @@ effects can be chained.
 
 <pre>
 (em/defaction resize-div [width] 
-  ["#rz-demo"] (em/chain 
-                 (em/resize width :curheight 500 20)
-                 (em/resize 5 :curheight 500 20)))
+  ["#rz-demo"] (ef/chain 
+                 (ef/resize width :curheight 500 20)
+                 (ef/resize 5 :curheight 500 20)))
 
 (em/defaction setup []
-  ["#button2"] (em/listen #(resize-div 200)))
+  ["#button2"] (ef/listen #(resize-div 200)))
 	
 (set! (.-onload js/window) setup)         
 </pre>
@@ -123,8 +123,8 @@ templates/template1.html and grabs the first row.  It then fills the content of 
 <pre>
   (em/defsnippet snippet2 "templates/template1.html" ["tbody > *:first-child"] 
                [fruit quantity] 
-               ["tr > *:first-child"] (em/content fruit)
-               ["tr > *:last-child"] (em/content (str quantity)))
+               ["tr > *:first-child"] (ef/content fruit)
+               ["tr > *:last-child"] (ef/content (str quantity)))
 </pre>
 
 
@@ -135,9 +135,9 @@ brought into the template.
 
 <pre>
   (em/deftemplate template2 "/templates/template1.html" [fruit-data] 
-                ["#heading1"] (em/content "fruit")  
-                ["thead tr > *:last-child"] (em/content "quantity")
-                ["tbody"] (em/content
+                ["#heading1"] (ef/content "fruit")  
+                ["thead tr > *:last-child"] (ef/content "quantity")
+                ["tbody"] (ef/content
                            (map #(snippit2 % (fruit-data %)) (keys fruit-data))))
 </pre>
 
@@ -147,9 +147,9 @@ at compile time:
 
 <pre>
   (em/deftemplate template2 :compiled "/templates/template1.html" [fruit-data] 
-                ["#heading1"] (em/content "fruit")  
-                ["thead tr > *:last-child"] (em/content "quantity")
-                ["tbody"] (em/content
+                ["#heading1"] (ef/content "fruit")  
+                ["thead tr > *:last-child"] (ef/content "quantity")
+                ["tbody"] (ef/content
                            (map #(snippit2 % (fruit-data %)) (keys fruit-data))))
 </pre>
 
@@ -167,8 +167,8 @@ definition of a an action.
 
 <pre>
 (em/defaction action2 [] 
-             [".cool[foo=false]"] (em/content (template2 {"banana" 5 "pineapple" 10}))
-             ["#heading1"] (em/set-attr :id "new-heading1"))
+             [".cool[foo=false]"] (ef/content (template2 {"banana" 5 "pineapple" 10}))
+             ["#heading1"] (ef/set-attr :id "new-heading1"))
 </pre>
 
 
@@ -245,8 +245,8 @@ Enfocus supports both CSS3 and XPath selectors:
   (:require-macros [enfocus.macros :as em]))
 
 (em/defaction action2 [] 
-             [".cool[foo=false]"] (em/content ....)) ;CSS3
-             (ef/xpath "//tr[@id='1']/th[2]") (em/set-attr :id "new-heading1")) ;XPATH
+             [".cool[foo=false]"] (ef/content ....)) ;CSS3
+             (ef/xpath "//tr[@id='1']/th[2]") (ef/set-attr :id "new-heading1")) ;XPATH
 </pre>
 
 
