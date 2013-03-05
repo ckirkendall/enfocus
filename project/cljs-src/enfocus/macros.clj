@@ -64,6 +64,7 @@
     body
     (cons :remote body)))
 
+
 (defn load-local-dom
   "same as 'load-remote-dom', but work for local files"
   [path dom-key]
@@ -71,6 +72,7 @@
     `(when (nil? (@enfocus.core/tpl-cache ~path))
        (let [[sym# txt#] (enfocus.core/replace-ids ~text)]
          (swap! enfocus.core/tpl-cache assoc ~dom-key [sym# txt#])))))
+
 
 (defmacro deftemplate [sym & body]
   (let [[mode uri args & forms] (ensure-mode body)
@@ -84,6 +86,7 @@
         #(enfocus.core/get-cached-dom ~dom-key)
         ~args ~@forms))))
 
+
 (defmacro defsnippet [sym & body]
   (let [[mode uri sel args & forms] (ensure-mode body)
         dom-key (str (name sym) uri)]
@@ -95,19 +98,16 @@
         ~sym
         #(enfocus.core/get-cached-snippet ~dom-key ~sel)
         ~args ~@forms))))
-  
+
+
 (defmacro defaction [sym args & forms]
   `(defn ~sym ~args (enfocus.core/at js/document ~@forms)))
 
-(defmacro at [& forms]
-    `(enfocus.core/at ~@forms))
-  
-(defmacro from [& forms]
-  `(enfocus.core/from ~@forms))
 
 (defmacro transform 
   ([nod trans] `(enfocus.core/at ~nod ~trans))
   ([nod sel trans] `(enfocus.core/at ~nod ~sel ~trans)))
+
 
 (defmacro wait-for-load [& forms]
 	`(enfocus.core/setTimeout (fn check# []
@@ -116,65 +116,6 @@
                       (enfocus.core/setTimeout #(check#) 10))) 0))   
   
 
-
-(defmacro select [& forms]
-  `(enfocus.core/css-select ~@forms))
-
-(defmacro filter [tst trans]
-  `(enfocus.core/en-filter ~tst ~trans))
-
-(defmacro content [& forms]
-  `(enfocus.core/en-content ~@forms))
-
-(defmacro html-content [& forms]
-  `(enfocus.core/en-html-content ~@forms))
-
-(defmacro set-attr [& forms] 
-  `(enfocus.core/en-set-attr ~@forms))
-
-(defmacro remove-attr [& forms] 
-  `(enfocus.core/en-remove-attr ~@forms))
-
-(defmacro set-prop [& forms]
-    `(enfocus.core/en-set-prop ~@forms))
-
-(defmacro add-class [& forms]
-  `(enfocus.core/en-add-class ~@forms))
-
-
-(defmacro remove-class [& forms]
-  `(enfocus.core/en-remove-class ~@forms))
-
-(defmacro set-class [& forms]
-  `(enfocus.core/en-set-class ~@forms))
-
-(defmacro do-> [& forms]
-  `(enfocus.core/en-do-> ~@forms))
-
-(defmacro append [& forms]
-  `(enfocus.core/en-append ~@forms))
-
-(defmacro prepend [& forms]
-  `(enfocus.core/en-prepend ~@forms))
-
-(defmacro after [& forms]
-  `(enfocus.core/en-after ~@forms))
-
-(defmacro before [& forms]
-  `(enfocus.core/en-before ~@forms))
-
-(defmacro substitute [& forms]
-  `(enfocus.core/en-substitute ~@forms))
-
-(defmacro remove-node [& forms]
-  `(enfocus.core/en-remove-node ~@forms))
-
-(defmacro wrap [elm mattrs]
-  `(enfocus.core/en-wrap ~elm ~mattrs))
-
-(defmacro unwrap []
-  `(enfocus.core/en-unwrap))
-
 (defmacro clone-for [[sym lst] & forms]
   `(enfocus.core/chainable-standard 
     (fn [pnod#]
@@ -182,109 +123,14 @@
                     (. js/document (~(symbol "createDocumentFragment"))))]
         (doseq [~sym ~lst]
           (do 
-            (enfocus.macros/at div#  (enfocus.macros/append (. pnod# (~(symbol "cloneNode") true))))
-            (enfocus.macros/at (goog.dom/getLastElementChild div#) ~@forms)))
+            (enfocus.core/at div#  (enfocus.core/append (. pnod# (~(symbol "cloneNode") true))))
+            (enfocus.core/at (goog.dom/getLastElementChild div#) ~@forms)))
         (enfocus.core/log-debug div#)
-        (enfocus.macros/at 
+        (enfocus.core/at 
           pnod# 
-          (enfocus.macros/do-> (enfocus.macros/after (enfocus.core/remove-node-return-child div#))
-                               (enfocus.macros/remove-node)))))))
+          (enfocus.core/do-> (enfocus.core/after (enfocus.core/remove-node-return-child div#))
+                               (enfocus.core/remove-node)))))))
 
-(defmacro set-style [& forms]
-  `(enfocus.core/en-set-style ~@forms))
-
-(defmacro remove-style [& forms]
-  `(enfocus.core/en-remove-style ~@forms))
-
-(defmacro focus []
-  `(enfocus.core/en-focus))
-
-(defmacro blur []
-  `(enfocus.core/en-blur))
-
-(defmacro listen [& forms]
-  `(enfocus.core/en-listen ~@forms))
-
-(defmacro unlisten [& forms]
-  `(enfocus.core/en-unlisten ~@forms))
-
-(defmacro remove-listener [& forms]
-  `(do
-     (enfocus.core/log-debug "this method is deprecated should use remove-listeners")
-     (enfocus.core/en-remove-listeners ~@forms)))
-
-(defmacro remove-listeners [& forms]
-  `(enfocus.core/en-remove-listeners ~@forms))
-
-(defmacro fade-out 
-  ([ttime] 
-    `(enfocus.core/en-fade-out ~ttime nil nil))
-  ([ttime callback]
-    `(enfocus.core/en-fade-out ~ttime ~callback nil))
-  ([ttime callback accel]
-    `(enfocus.core/en-fade-out ~ttime ~callback nil)))
-
-(defmacro delay [ttime & forms]
-  `(enfocus.core/chainable-standard 
-    (fn [pnod#] 
-      (enfocus.core/setTimeout #(enfocus.macros/at pnod# ~@forms) ~ttime))))
-
-(defmacro fade-in  
-  ([ttime] 
-    `(enfocus.core/en-fade-in ~ttime nil nil))
-  ([ttime callback]
-    `(enfocus.core/en-fade-in ~ttime ~callback nil))
-  ([ttime callback accel]
-    `(enfocus.core/en-fade-in ~ttime ~callback nil)))
-
-(defmacro resize 
-  ([width height]
-    `(enfocus.core/en-resize ~width ~height 0)) 
-  ([width height ttime]
-    `(enfocus.core/en-resize ~width ~height ~ttime nil nil))
-  ([width height ttime callback]
-    `(enfocus.core/en-resize ~width ~height ~ttime ~callback nil))
-  ([width height ttime callback accel]
-    `(enfocus.core/en-resize ~width ~height ~ttime ~callback ~accel))) 
-
-(defmacro move 
-  ([xpos ypos] 
-    `(enfocus.core/en-move ~xpos ~ypos 0 nil nil))
-  ([xpos ypos ttime] 
-    `(enfocus.core/en-move ~xpos ~ypos ~ttime nil nil))
-  ([xpos ypos ttime callback]
-  `(enfocus.core/en-move ~xpos ~ypos ~ttime ~callback nil))
-  ([xpos ypos ttime callback accel]
-  `(enfocus.core/en-move ~xpos ~ypos ~ttime ~callback ~accel))) 
-
-(defmacro scroll 
-  ([xpos ypos] 
-    `(enfocus.core/en-scroll ~xpos ~ypos 0 nil nil))
-  ([xpos ypos ttime] 
-    `(enfocus.core/en-scroll ~xpos ~ypos ~ttime nil nil))
-  ([xpos ypos ttime callback]
-  `(enfocus.core/en-scroll ~xpos ~ypos ~ttime ~callback nil))
-  ([xpos ypos ttime callback accel]
-  `(enfocus.core/en-scroll ~xpos ~ypos ~ttime ~callback ~accel)))
-
-(defmacro chain [func & chains]
-  (if (empty? chains)
-    `(fn [pnod#] (~func pnod#))
-    `(fn [pnod#] (~func pnod# (enfocus.macros/chain ~@chains)))))
-
-(defmacro get-attr [attr]
-  `(enfocus.core/en-get-attr ~attr))
-
-(defmacro get-text []
-  `(enfocus.core/en-get-text))
-
-(defmacro get-prop [prop]
-  `(enfocus.core/extr-multi-node
-     (fn [pnod#]
-       (~(symbol (str ".-" (name prop))) pnod#))))
-
-(defmacro get-data [& forms]
-  `(enfocus.core/en-get-data ~@forms))
 
 (defmacro trans [[nsym] & body]
   `(enfocus.core/chainable-standard

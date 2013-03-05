@@ -1,4 +1,5 @@
-(ns enfocus.core 
+(ns enfocus.core
+  (:refer-clojure :exclude [filter delay])
   (:require [enfocus.enlive.syntax :as en]
             [goog.net.XhrIo :as xhr]
             [goog.dom.query :as query]
@@ -16,7 +17,7 @@
             [domina.css :as dcss]
             [domina.xpath :as xpath])
   (:require-macros [enfocus.macros :as em])) 
-(declare css-syms css-select create-sel-str at from)
+(declare css-syms css-select select create-sel-str at from)
 
 ;###################################################
 ; Selector Protocol
@@ -283,33 +284,33 @@
 
 ;;TODO need to figure out how to make sure this stay just as
 ;;text and not convert to html.
-(defn en-content 
+(defn content 
   "Replaces the content of the element. Values can be nodes or collection of nodes."
   [& values]
   (domina-chain values #(do
                           (domina/destroy-children! %1)
                           (domina/append! %1 %2)))) 
   
-(defn en-html-content 
+(defn html-content 
   "Replaces the content of the element with the dom structure represented by the html string passed"
   [txt]
   (domina-chain #(domina/set-html! % txt)))
 
 
-(defn en-set-attr 
+(defn set-attr 
   "Assocs attributes and values on the selected element."
   [& values] 
   (let [pairs (partition 2 values)]
     (domina-chain
      #(doseq [[name value] pairs] (domina/set-attr! % name value)))))   
 
-(defn en-remove-attr 
+(defn remove-attr 
   "Dissocs attributes on the selected element."
   [& values]
   (domina-chain #(doseq [name values] (domina/remove-attr! % name))))
 
 
-(defn en-set-prop [& forms]
+(defn set-prop [& forms]
   (em/trans [node]
      (let [h (mapcat (fn [[n v]](list (name n) v)) (partition 2 forms))]
        (dom/setProperties node (apply js-obj h)))))
@@ -321,79 +322,79 @@
   (classes/hasClass el cls))
 
 
-(defn en-add-class 
+(defn add-class 
   "Adds the specified classes to the selected element." 
   [ & values]
   (domina-chain
     #(doseq [val values] (domina/add-class! % val))))
 
 
-(defn en-remove-class 
+(defn remove-class 
   "Removes the specified classes from the selected element." 
   [ & values]
   (domina-chain
     #(doseq [val values] (domina/remove-class! % val))))
 
 
-(defn en-set-class
+(defn set-class
   "Sets the specified classes on the selected element"
   [ & values]
   (domina-chain
    #(domina/set-classes! % values))) 
      
 
-(defn en-do-> [ & forms]
+(defn do-> [ & forms]
   "Chains (composes) several transformations. Applies functions from left to right."
   (em/trans [pnod]
       (doseq [fun forms] (fun pnod))))
 
-(defn en-append
+(defn append
   "Appends the content of the element. Values can be nodes or collection of nodes."
   [& values]
   (domina-chain values #(domina/append! %1 %2)))
 
 
-(defn en-prepend
+(defn prepend
   "Prepends the content of the element. Values can be nodes or collection of nodes."
   [& values]
   (domina-chain values #(domina/prepend! %1 %2)))
 
 
-(defn en-before
+(defn before
   "inserts the content before the selected node. Values can be nodes or collection of nodes"
   [& values]
   (domina-chain values #(domina/insert-before! %1 %2)))
   
 
-(defn en-after
+(defn after
   "inserts the content after the selected node. Values can be nodes or collection of nodes"
   [& values]
   (domina-chain values #(domina/insert-after! %1 %2)))
 
 
-(defn en-substitute
+(defn substitute
   "substitutes the content for the selected node. Values can be nodes or collection of nodes"
   [& values]
   (domina-chain values #(domina/swap-content! %1 %2)))
 
 
-(defn en-remove-node 
+(defn remove-node 
   "removes the selected nodes from the dom" 
   []
   (domina-chain #(domina/detach! %1)))
 
 
-(defn en-wrap 
+(defn wrap 
   "wrap and element in a new element defined as :div {:class 'temp'}"
   [elm mattr]
   (em/trans [pnod]
     (let [elem (dom/createElement (name elm))]
       (add-map-attrs elem mattr)
-      (at elem (em/content (.cloneNode pnod true)))
-      (at pnod (em/do-> (em/after elem)
-                        (em/remove-node))))))
+      (at elem (content (.cloneNode pnod true)))
+      (at pnod (do-> (after elem)
+                     (remove-node))))))
 
-(defn en-unwrap
+(defn unwrap
   "replaces a node with all its children"
   []
   (em/trans [pnod]
@@ -402,7 +403,7 @@
       (dom/replaceNode frag pnod))))
   
 
-(defn en-set-style 
+(defn set-style 
   "set a list of style elements from the selected nodes"
   [& values]
   (let [pairs (partition 2 values)]
@@ -410,29 +411,48 @@
       #(doseq [[name value] pairs] (domina/set-style! % name value)))))
 
 
-(defn en-remove-style 
+(defn remove-style 
   "remove a list style elements from the selected nodes. note: you can only remove styles that are inline"
   [& values]
   (em/trans [pnod] 
     (style-remove pnod values)))
 
-(defn en-focus
+(defn focus
   "calls the focus function on the selected node"
   []
   (em/trans [node]
     (.focus node)))
 
-(defn en-blur
+(defn blur
   "calls the blur function on the selected node"
   []
   (em/trans [node]
     (.blur node)))
 
 
-(defn en-set-data
+(defn set-data
   "addes key value pair of data to the selected nodes. Only use clojure data structures when setting"
   [ky val]
   (domina-chain #(domina/set-data! % ky val)))
+
+
+(defn delay
+  "delays and action by a set timeout, note this is an async operations"
+  [ttime & funcs]
+  (fn [pnod] (setTimeout #(apply at pnod funcs) ttime)))
+
+
+(defn chain
+  "chains a series of effects and trasforms in sequences"
+  [func & chains]
+  (if (empty? chains)
+    (fn [pnod] (func pnod))
+    (fn [pnod] (func pnod (apply chain chains)))))
+
+
+;####################################################
+; event based transforms
+;####################################################
 
 (def view-port-monitor (atom nil))
 
@@ -471,7 +491,7 @@
                        :mouseleave (gen-enter-leave-wrapper :mouseout)})
 
 
-(defn en-listen
+(defn listen
   "adding an event to the selected nodes"
   [event func]
   (let [wrapper (wrapper-register event)]
@@ -483,7 +503,7 @@
             (events/listen pnod (name event) func)
             (events/listenWithWrapper pnod wrapper func)))))))
 
-(defn en-remove-listeners 
+(defn remove-listeners 
   "removing all listeners of a given event type from the selected nodes"
   [& event-list]
   (let [get-name #(name (cond  
@@ -495,9 +515,9 @@
         (doseq [ev event-list] (events/removeAll pnod (get-name ev)))))))
 
 
-(defn en-unlisten 
+(defn unlisten 
   "removing a specific event from the selected nodes"
-  ([event] (en-remove-listeners event))
+  ([event] (remove-listeners event))
   ([event func]
      (let [wrapper (wrapper-register event)]
        (chainable-standard  
@@ -513,81 +533,94 @@
 ; effect based transforms
 ;####################################################
     
-(defn en-fade-out 
+(defn fade-out 
   "fade the selected nodes over a set of steps" 
-  [ttime callback accel]  
-  (chainable-effect
-    (fn [pnod pcallback]
-      (let [anim (fx-dom/FadeOut. pnod ttime accel)]
-        (when pcallback 
-          (events/listen anim goog.fx.Animation.EventType/END pcallback))
-        (. anim (play))))
-       callback))
+  ([ttime] (fade-out ttime nil nil))
+  ([ttime callback] (fade-out ttime callback nil))
+  ([ttime callback accel]  
+     (chainable-effect
+      (fn [pnod pcallback]
+        (let [anim (fx-dom/FadeOut. pnod ttime accel)]
+          (when pcallback 
+            (events/listen anim goog.fx.Animation.EventType/END pcallback))
+          (. anim (play))))
+      callback)))
 
-(defn en-fade-in  
+(defn fade-in  
   "fade the selected nodes over a set of steps" 
-  [ttime callback accel]
-  (chainable-effect
-    (fn [pnod pcallback]
-      (let [anim (fx-dom/FadeIn. pnod ttime accel)]
-        (when pcallback 
-          (events/listen anim goog.fx.Animation.EventType/END pcallback))
-        (. anim (play))))
-       callback))
+  ([ttime] (fade-out ttime nil nil))
+  ([ttime callback] (fade-out ttime callback nil))
+  ([ttime callback accel]
+     (chainable-effect
+      (fn [pnod pcallback]
+        (let [anim (fx-dom/FadeIn. pnod ttime accel)]
+          (when pcallback 
+            (events/listen anim goog.fx.Animation.EventType/END pcallback))
+          (. anim (play))))
+      callback)))
 
-(defn en-resize 
+(defn resize 
   "resizes the selected elements to a width and height in px optional time series data"
-  [wth hgt ttime callback accel]
-  (chainable-effect
-    (fn [pnod pcallback]
-      (let [csize (style/getContentBoxSize pnod)
-            start (array (.-width csize) (.-height csize))
-            wth (if (= :curwidth wth) (.-width csize) wth)
-            hgt (if (= :curheight hgt) (.-height csize) hgt)
-            end (array wth hgt)
-            anim (fx-dom/Resize. pnod start end ttime accel)]
-        (when pcallback 
-          (events/listen anim goog.fx.Animation.EventType/END pcallback))
-        (. anim (play))))
-       callback))
+  ([wth hgt] (resize wth hgt 0 nil nil))
+  ([wth hgt ttime] (resize wth hgt ttime nil nil))
+  ([wth hgt ttime callback] (resize wth hgt ttime callback nil))
+  ([wth hgt ttime callback accel]
+     (chainable-effect
+      (fn [pnod pcallback]
+        (let [csize (style/getContentBoxSize pnod)
+              start (array (.-width csize) (.-height csize))
+              wth (if (= :curwidth wth) (.-width csize) wth)
+              hgt (if (= :curheight hgt) (.-height csize) hgt)
+              end (array wth hgt)
+              anim (fx-dom/Resize. pnod start end ttime accel)]
+          (when pcallback 
+            (events/listen anim goog.fx.Animation.EventType/END pcallback))
+          (. anim (play))))
+      callback)))
   
-(defn en-move
+(defn move
   "moves the selected elements to a x and y in px optional time series data "
-  [xpos ypos ttime callback accel]
-  (chainable-effect
-    (fn [pnod pcallback]
-      (let [cpos (style/getPosition pnod)
-            start (array (.-x cpos) (.-y cpos))
-            xpos (if (= :curx xpos) (.-x cpos) xpos)
-            ypos (if (= :cury ypos) (.-y cpos) ypos)
-            end (array xpos ypos)
-            anim (fx-dom/Slide. pnod start end ttime accel)]
-        (when pcallback 
-          (events/listen anim goog.fx.Animation.EventType/END pcallback))
-        (. anim (play))))
-       callback))
+  ([xpos ypos] (move xpos ypos 0 nil nil))
+  ([xpos ypos ttime] (move xpos ypos ttime nil nil))
+  ([xpos ypos ttime callback] (move xpos ypos ttime callback nil))
+  ([xpos ypos ttime callback accel]
+     (chainable-effect
+      (fn [pnod pcallback]
+        (let [cpos (style/getPosition pnod)
+              start (array (.-x cpos) (.-y cpos))
+              xpos (if (= :curx xpos) (.-x cpos) xpos)
+              ypos (if (= :cury ypos) (.-y cpos) ypos)
+              end (array xpos ypos)
+              anim (fx-dom/Slide. pnod start end ttime accel)]
+          (when pcallback 
+            (events/listen anim goog.fx.Animation.EventType/END pcallback))
+          (. anim (play))))
+      callback)))
   
-(defn en-scroll
+(defn scroll
   "scrolls selected elements to a x and y in px optional time series data"
-  [xpos ypos ttime callback accel]
-  (ef/chainable-effect
-    (fn [pnod pcallback]
-      (let [start (array (.-scrollLeft pnod) (.-scrollTop pnod))
-            xpos (if (= :curx xpos) (.-scrollLeft pnod) xpos)
-            ypos (if (= :cury ypos) (.-scrollTop pnod) ypos)
-            end (array xpos ypos)
-            anim (fx-dom/Scroll. pnod start end ttime accel)]
-        (util/log (str start) (str end))
-        (when pcallback
-          (events/listen anim goog.fx.Animation.EventType/END pcallback))
-        (. anim (play))))
-       callback))
+  ([xpos ypos] (scroll xpos ypos 0 nil nil))
+  ([xpos ypos ttime] (scroll xpos ypos ttime nil nil))
+  ([xpos ypos ttime callback] (scroll xpos ypos ttime callback nil))
+  ([xpos ypos ttime callback accel]
+     (ef/chainable-effect
+      (fn [pnod pcallback]
+        (let [start (array (.-scrollLeft pnod) (.-scrollTop pnod))
+              xpos (if (= :curx xpos) (.-scrollLeft pnod) xpos)
+              ypos (if (= :cury ypos) (.-scrollTop pnod) ypos)
+              end (array xpos ypos)
+              anim (fx-dom/Scroll. pnod start end ttime accel)]
+          (util/log (str start) (str end))
+          (when pcallback
+            (events/listen anim goog.fx.Animation.EventType/END pcallback))
+          (. anim (play))))
+      callback)))
 
 ;##################################################################
 ; data extractors
 ;##################################################################
 
-(defn en-get-attr 
+(defn get-attr 
   "returns the attribute on the selected element or elements.
    in cases where more than one element is selected you will
    receive a list of values"
@@ -596,8 +629,8 @@
     (fn[pnod]
       (. pnod (getAttribute (name attr))))))
 
-(defn en-get-text
-  "returns the attribute on the selected element or elements.
+(defn get-text
+  "returns the text value of the selected element or elements.
    in cases where more than one element is selected you will
    receive a list of values"
   [] 
@@ -605,14 +638,23 @@
     (fn[pnod]
       (dom/getTextContent pnod))))
 
-(defn en-get-data
+(defn get-data
   "returns the data on a selected node for a given key. If bubble is set will look at parent"
-  ([ky] (en-get-data ky false))
+  ([ky] (get-data ky false))
   ([ky bubble]
      (extr-multi-node
       (fn [node]
         (domina/get-data ky bubble))))) 
 
+
+(defn get-prop
+  "returns the property on the selected element or elements.
+   in cases where more than one element is selected you will
+   receive a list of values"
+  [prop]
+  (extr-multi-node
+   (fn [pnod]
+     (aget (name prop) pnod))))
 
 ;##################################################################
 ; filtering - these funcitons are to make up for choosing
@@ -625,7 +667,7 @@
 ;registerd filter that can be refrenced by keyword
 (def reg-filt (atom {}))
 
-(defn en-filter 
+(defn filter 
   "filter allows you to apply function to futhur scope down what is returned by a selector"
   [tst trans]
   (fn filt
@@ -691,7 +733,7 @@
 ;###############################################
 
 (defn nil-t [func]
-  (or func en-remove-node))
+  (or func remove-node))
 
 (defn i-at [id-mask node & trans] 
   (if (= 1 (count trans))
