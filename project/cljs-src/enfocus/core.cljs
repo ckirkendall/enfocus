@@ -548,8 +548,8 @@
 
 (defn fade-in  
   "fade the selected nodes over a set of steps" 
-  ([ttime] (fade-out ttime nil nil))
-  ([ttime callback] (fade-out ttime callback nil))
+  ([ttime] (fade-in ttime nil nil))
+  ([ttime callback] (fade-in ttime callback nil))
   ([ttime callback accel]
      (chainable-effect
       (fn [pnod pcallback]
