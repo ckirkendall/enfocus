@@ -29,7 +29,7 @@
 ;#################################################### 
 ; Utility functions
 ;####################################################
-(def debug false)
+(def debug true)
 
 (defn log-debug [mesg] 
   (when (and debug (not (= (.-console js/window) js/undefined)))
@@ -644,7 +644,7 @@
   ([ky bubble]
      (extr-multi-node
       (fn [node]
-        (domina/get-data ky bubble))))) 
+        (domina/get-data node ky bubble))))) 
 
 
 (defn get-prop
@@ -654,7 +654,7 @@
   [prop]
   (extr-multi-node
    (fn [pnod]
-     (aget (name prop) pnod))))
+     (aget pnod (name prop)))))
 
 ;##################################################################
 ; filtering - these funcitons are to make up for choosing
@@ -675,7 +675,9 @@
     ([pnodes chain]
       (let [pnod-col (nodes->coll pnodes)
             ttest (if (keyword? tst) (@reg-filt tst) tst)
-            res (filter ttest pnod-col)]
+            res (clojure.core/filter ttest pnod-col)]
+        (log-debug (pr-str res))
+        (log-debug (pr-str pnod-col))
         (if (nil? chain) 
           (trans res)
           (trans res chain))))))
