@@ -246,7 +246,7 @@
     ([pnodes chain]
       (let [pnod-col (nodes->coll pnodes)] 
         (doall (map func pnod-col))
-        (when (not (nil? chain))
+        (when chain
           (chain pnodes))))))
 
 (defn chainable-effect
@@ -261,8 +261,8 @@
             partial-cback (fn []
                             (swap! cnt dec)
                             (when (= 0 @cnt) 
-                              (when (not (nil? callback)) (callback pnodes))
-                              (when (not (nil? chain)) (chain pnodes))))] 
+                              (when callback (callback pnodes))
+                              (when chain (chain pnodes))))] 
         (doseq [pnod pnod-col] (func pnod partial-cback))))))
 
 
@@ -273,14 +273,14 @@
        ([nodes] (trans nodes nil))
        ([nodes chain]
           (func nodes)
-          (when (not (nil? chain)) (chain nodes))))) 
+          (when chain (chain nodes))))) 
   ([values func]
      (fn trans
        ([nodes] (trans nodes nil))
        ([nodes chain]
           (let [vnodes (mapcat #(domina/nodes %) values)]
             (func nodes vnodes))
-          (when (not (nil? chain)) (chain nodes))))))
+          (when chain (chain nodes))))))
 
 ;;TODO need to figure out how to make sure this stay just as
 ;;text and not convert to html.
