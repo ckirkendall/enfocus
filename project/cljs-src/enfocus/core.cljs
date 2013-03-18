@@ -26,6 +26,10 @@
   (select [this] [this root] [this root id-mask]
     "takes root node and returns a domina node list"))
 
+(defprotocol ITransform
+  (apply-transform [this nodes] [this nodes callback]
+    "takes a set of nodes and performs a transform on them"))
+
 ;#################################################### 
 ; Utility functions
 ;####################################################
@@ -231,87 +235,95 @@
 (defn extr-multi-node 
   "wrapper function for extractors that maps the extraction to all nodes returned by the selector"
   [func]
-  (fn trans 
-    [pnodes] 
-    (let [pnod-col (nodes->coll pnodes)
-          result (map func pnod-col)] 
-      (if (<= (count result) 1) (first result) result))))
+  (let [trans (fn trans 
+                [pnodes] 
+                (let [pnod-col (nodes->coll pnodes)
+                      result (map func pnod-col)]
+                  (if (<= (count result) 1) (first result) result)))]
+    (reify ITransform
+      (apply-transform [_ nodes] (trans nodes nil))
+      (apply-transform [_ nodes chain] (trans nodes chain)))))
 
-(defn chainable-standard 
-  "wrapper function for transforms, maps the transform to all nodes returned
-   by the selector and provides the ability to chain transforms with the chain command."
-  [func]
-  (fn trans 
-    ([pnodes] (trans pnodes nil))
-    ([pnodes chain]
-      (let [pnod-col (nodes->coll pnodes)] 
-        (doall (map func pnod-col))
-        (when chain
-          (chain pnodes))))))
+;(defn chainable-standard 
+;  "wrapper function for transforms, maps the transform to all nodes returned
+;   by the selector and provides the ability to chain transforms with the chain command."
+;  [func]
+;  (let [trans (fn [pnodes chain]
+;                (let [pnod-col (nodes->coll pnodes)] 
+;                  (doall (map func pnod-col))
+;                  (when chain
+;                    (apply-transform chain pnodes))))]
+;    (reify ITransform
+;      (apply-transform [_ nodes] (trans nodes nil))
+;      (apply-transform [_ nodes chain] (trans nodes chain)))))
 
 (defn chainable-effect
   "wrapper function for effects, maps the effect to all nodes returned by the
    selector and provides chaining and callback functionality"
   [func callback]
-  (fn trans 
-    ([pnodes] (trans pnodes nil))
-    ([pnodes chain]
-      (let [pnod-col (nodes->coll pnodes)
-            cnt (atom (count pnod-col))
-            partial-cback (fn []
-                            (swap! cnt dec)
-                            (when (= 0 @cnt) 
-                              (when callback (callback pnodes))
-                              (when chain (chain pnodes))))] 
-        (doseq [pnod pnod-col] (func pnod partial-cback))))))
+  (let [trans (fn [pnodes chain]
+                (let [pnod-col (nodes->coll pnodes)
+                      cnt (atom (count pnod-col))
+                      partial-cback (fn []
+                                      (swap! cnt dec)
+                                      (when (= 0 @cnt) 
+                                        (when callback (apply-transform callback pnodes))
+                                        (when chain (apply-transform chain pnodes))))] 
+                  (doseq [pnod pnod-col] (apply-transform func pnod partial-cback))))]
+    (reify ITransform
+      (apply-transform [_ nodes] (trans nodes nil))
+      (apply-transform [_ nodes chain] (trans nodes chain)))))
 
 
-(defn domina-chain
+(defn multi-node-chain
   "Allows standard domina functions to be chainable"
   ([func]
-     (fn trans
-       ([nodes] (trans nodes nil))
-       ([nodes chain]
-          (func nodes)
-          (when chain (chain nodes))))) 
+     (let [trans (fn [nodes chain]
+                   (let [val (func nodes)]
+                   (if chain (apply-transform chain nodes) val)))]
+       (reify ITransform
+         (apply-transform [_ nodes] (trans nodes nil))
+         (apply-transform [_ nodes chain] (trans nodes chain)))))
   ([values func]
-     (fn trans
-       ([nodes] (trans nodes nil))
-       ([nodes chain]
-          (let [vnodes (mapcat #(domina/nodes %) values)]
-            (func nodes vnodes))
-          (when chain (chain nodes))))))
+     (let [trans (fn [nodes chain]
+                   (let [vnodes (mapcat #(domina/nodes %) values)
+                         val (func nodes vnodes)]
+                   (if chain (apply-transform chain nodes) val)))]
+       (reify ITransform
+         (apply-transform [_ nodes] (trans nodes nil))
+         (apply-transform [_ nodes chain] (trans nodes chain))))))
 
+     
 ;;TODO need to figure out how to make sure this stay just as
 ;;text and not convert to html.
 (defn content 
   "Replaces the content of the element. Values can be nodes or collection of nodes."
   [& values]
-  (domina-chain values #(do
+  (multi-node-chain values #(do
                           (domina/destroy-children! %1)
                           (domina/append! %1 %2)))) 
   
 (defn html-content 
   "Replaces the content of the element with the dom structure represented by the html string passed"
   [txt]
-  (domina-chain #(domina/set-html! % txt)))
+  (multi-node-chain #(domina/set-html! % txt)))
 
 
 (defn set-attr 
   "Assocs attributes and values on the selected element."
   [& values] 
   (let [pairs (partition 2 values)]
-    (domina-chain
+    (multi-node-chain
      #(doseq [[name value] pairs] (domina/set-attr! % name value)))))   
 
 (defn remove-attr 
   "Dissocs attributes on the selected element."
   [& values]
-  (domina-chain #(doseq [name values] (domina/remove-attr! % name))))
+  (multi-node-chain #(doseq [name values] (domina/remove-attr! % name))))
 
 
 (defn set-prop [& forms]
-  (em/trans [node]
+  (fn [node]
      (let [h (mapcat (fn [[n v]](list (name n) v)) (partition 2 forms))]
        (dom/setProperties node (apply js-obj h)))))
 
@@ -325,69 +337,67 @@
 (defn add-class 
   "Adds the specified classes to the selected element." 
   [ & values]
-  (domina-chain
+  (multi-node-chain
     #(doseq [val values] (domina/add-class! % val))))
 
 
 (defn remove-class 
   "Removes the specified classes from the selected element." 
   [ & values]
-  (domina-chain
+  (multi-node-chain
     #(doseq [val values] (domina/remove-class! % val))))
 
 
 (defn set-class
   "Sets the specified classes on the selected element"
   [ & values]
-  (domina-chain
-   #(domina/set-classes! % values))) 
+  (multi-node-chain #(domina/set-classes! % values))) 
      
 
 (defn do-> [ & forms]
   "Chains (composes) several transformations. Applies functions from left to right."
-  (em/trans [pnod]
-      (doseq [fun forms] (fun pnod))))
+  (fn [pnod] (doseq [fun forms] (apply-transform fun pnod))))
 
 (defn append
   "Appends the content of the element. Values can be nodes or collection of nodes."
   [& values]
-  (domina-chain values #(domina/append! %1 %2)))
+  (multi-node-chain values #(domina/append! %1 %2)))
 
 
 (defn prepend
   "Prepends the content of the element. Values can be nodes or collection of nodes."
   [& values]
-  (domina-chain values #(domina/prepend! %1 %2)))
+  (multi-node-chain values #(domina/prepend! %1 %2)))
 
 
 (defn before
   "inserts the content before the selected node. Values can be nodes or collection of nodes"
   [& values]
-  (domina-chain values #(domina/insert-before! %1 %2)))
+  (multi-node-chain values #(domina/insert-before! %1 %2)))
   
 
 (defn after
   "inserts the content after the selected node. Values can be nodes or collection of nodes"
   [& values]
-  (domina-chain values #(domina/insert-after! %1 %2)))
+  (multi-node-chain values #(domina/insert-after! %1 %2)))
 
 
 (defn substitute
   "substitutes the content for the selected node. Values can be nodes or collection of nodes"
   [& values]
-  (domina-chain values #(domina/swap-content! %1 %2)))
+  (multi-node-chain values #(domina/swap-content! %1 %2)))
 
 
 (defn remove-node 
   "removes the selected nodes from the dom" 
   []
-  (domina-chain #(domina/detach! %1)))
+  (multi-node-chain #(domina/detach! %1)))
 
 
 (defn wrap 
   "wrap and element in a new element defined as :div {:class 'temp'}"
   [elm mattr]
-  (em/trans [pnod]
+  (fn [pnod]
     (let [elem (dom/createElement (name elm))]
       (add-map-attrs elem mattr)
       (at elem (content (.cloneNode pnod true)))
@@ -397,7 +407,7 @@
 (defn unwrap
   "replaces a node with all its children"
   []
-  (em/trans [pnod]
+  (fn [pnod]
     (let [frag (. js/document (createDocumentFragment))]
       (dom/append frag (.-childNodes pnod))
       (dom/replaceNode frag pnod))))
@@ -407,33 +417,30 @@
   "set a list of style elements from the selected nodes"
   [& values]
   (let [pairs (partition 2 values)]
-    (domina-chain
+    (multi-node-chain
       #(doseq [[name value] pairs] (domina/set-style! % name value)))))
 
 
 (defn remove-style 
   "remove a list style elements from the selected nodes. note: you can only remove styles that are inline"
   [& values]
-  (em/trans [pnod] 
-    (style-remove pnod values)))
+  (fn [pnod] (style-remove pnod values)))
 
 (defn focus
   "calls the focus function on the selected node"
   []
-  (em/trans [node]
-    (.focus node)))
+  (fn [node] (.focus node)))
 
 (defn blur
   "calls the blur function on the selected node"
   []
-  (em/trans [node]
-    (.blur node)))
+  (fn [node] (.blur node)))
 
 
 (defn set-data
   "addes key value pair of data to the selected nodes. Only use clojure data structures when setting"
   [ky val]
-  (domina-chain #(domina/set-data! % ky val)))
+  (multi-node-chain #(domina/set-data! % ky val)))
 
 
 (defn delay
@@ -446,8 +453,8 @@
   "chains a series of effects and trasforms in sequences"
   [func & chains]
   (if (empty? chains)
-    (fn [pnod] (func pnod))
-    (fn [pnod] (func pnod (apply chain chains)))))
+    (fn [pnod] (apply-transform func pnod))
+    (fn [pnod] (apply-transform func pnod (apply chain chains)))))
 
 
 ;####################################################
@@ -494,14 +501,13 @@
 (defn listen
   "adding an event to the selected nodes"
   [event func]
-  (let [wrapper (wrapper-register event)]
-    (chainable-standard  
-      (fn [pnod]
-        (if (and (= :resize event) (identical? js/window pnod)) ;support window resize
-          (events/listen (get-vp-monitor) "resize" func)
-          (if (nil? wrapper)
-            (events/listen pnod (name event) func)
-            (events/listenWithWrapper pnod wrapper func)))))))
+  (let [wrapper (wrapper-register event)]  
+    (fn [pnod]
+      (if (and (= :resize event) (identical? js/window pnod)) ;support window resize
+        (events/listen (get-vp-monitor) "resize" func)
+        (if (nil? wrapper)
+          (events/listen pnod (name event) func)
+          (events/listenWithWrapper pnod wrapper func))))))
 
 (defn remove-listeners 
   "removing all listeners of a given event type from the selected nodes"
@@ -510,9 +516,8 @@
                           (= % :mouseenter) :mouseover
                           (= % :mouseleave) :mouseout
                           :else %))]
-    (chainable-standard  
-      (fn [pnod]
-        (doseq [ev event-list] (events/removeAll pnod (get-name ev)))))))
+    (fn [pnod]
+      (doseq [ev event-list] (events/removeAll pnod (get-name ev))))))
 
 
 (defn unlisten 
@@ -520,11 +525,10 @@
   ([event] (remove-listeners event))
   ([event func]
      (let [wrapper (wrapper-register event)]
-       (chainable-standard  
-        (fn [pnod]
-          (if (nil? wrapper) 
-            (events/unlisten pnod (name event) func)
-            (events/unlistenWithWrapper pnod wrapper func)))))))
+       (fn [pnod]
+         (if (nil? wrapper) 
+           (events/unlisten pnod (name event) func)
+           (events/unlistenWithWrapper pnod wrapper func))))))
   
 
 
@@ -670,17 +674,16 @@
 (defn filter 
   "filter allows you to apply function to futhur scope down what is returned by a selector"
   [tst trans]
-  (fn filt
-    ([pnodes] (filt pnodes nil))
-    ([pnodes chain]
-      (let [pnod-col (nodes->coll pnodes)
-            ttest (if (keyword? tst) (@reg-filt tst) tst)
-            res (clojure.core/filter ttest pnod-col)]
-        (log-debug (pr-str res))
-        (log-debug (pr-str pnod-col))
-        (if (nil? chain) 
-          (trans res)
-          (trans res chain))))))
+  (multi-node-chain
+   (fn filt
+     ([pnodes] (filt pnodes nil))
+     ([pnodes chain]
+        (let [pnod-col (nodes->coll pnodes)
+              ttest (if (keyword? tst) (@reg-filt tst) tst)
+              res (clojure.core/filter ttest pnod-col)]
+          (if (nil? chain) 
+            (apply-transform trans res)
+            (apply-transform trans res chain))))))) 
 
 (defn register-filter 
   "registers a filter for a given keyword"
@@ -722,10 +725,7 @@
   ([css-sel] (css-select "" js/document css-sel))
   ([dom-node css-sel] (css-select "" dom-node css-sel))
   ([id-mask-sym dom-node css-sel]
-     (log-debug dom-node)
-     (log-debug (pr-str css-sel))
-     ;(log-debug id-mask-sym)
-    (let [sel (string/trim (en/convert (create-sel-str id-mask-sym css-sel)))
+     (let [sel (string/trim (en/convert (create-sel-str id-mask-sym css-sel)))
           ret (dcss/sel dom-node sel)]
       ret)))
 
@@ -739,19 +739,20 @@
 
 (defn i-at [id-mask node & trans] 
   (if (= 1 (count trans))
-    ((first trans) node)
+    (apply-transform (first trans) node)
     (doseq [[sel t] (partition 2 trans)]
-           ((nil-t t) (select sel node id-mask)))))
+           (apply-transform (nil-t t) (select sel node id-mask)))))
 
 (defn at [node & trans]
   (apply i-at "" node trans)) 
  
 (defn from [node & trans] 
   (if (= 1 (count trans))
-    ((first trans) node)
+    (apply-transform (first trans) node)
+    
     (apply hash-map
-     (mapcat (fn [[ky sel ext]]
-               [ky (ext (select sel node ""))])
+           (mapcat (fn [[ky sel ext]]
+               [ky (apply-transform ext (select sel node ""))])
              (partition 3 trans)))))
 
  
@@ -796,5 +797,12 @@
   (select [this root] (select this root ""))
   (select [this root id-mask] (css-select id-mask root [this])))
   
-               
   
+(extend-protocol ITransform
+  function
+  (apply-transform [trans nodes] (doall (map trans (nodes->coll nodes))))
+  (apply-transform [trans nodes chain]
+    (let [pnod-col (nodes->coll nodes)] 
+      (doall (map trans pnod-col))
+      (when chain
+        (apply-transform chain nodes)))))

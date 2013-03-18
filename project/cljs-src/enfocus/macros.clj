@@ -117,21 +117,17 @@
   
 
 (defmacro clone-for [[sym lst] & forms]
-  `(enfocus.core/chainable-standard 
-    (fn [pnod#]
-      (let [div# (enfocus.core/create-hidden-dom 
-                    (. js/document (~(symbol "createDocumentFragment"))))]
-        (doseq [~sym ~lst]
-          (do 
-            (enfocus.core/at div#  (enfocus.core/append (. pnod# (~(symbol "cloneNode") true))))
-            (enfocus.core/at (goog.dom/getLastElementChild div#) ~@forms)))
-        (enfocus.core/log-debug div#)
-        (enfocus.core/at 
-          pnod# 
-          (enfocus.core/do-> (enfocus.core/after (enfocus.core/remove-node-return-child div#))
-                               (enfocus.core/remove-node)))))))
+  `(fn [pnod#]
+     (let [div# (enfocus.core/create-hidden-dom 
+                 (. js/document (~(symbol "createDocumentFragment"))))]
+       (doseq [~sym ~lst]
+         (do 
+           (enfocus.core/at div#  (enfocus.core/append (. pnod# (~(symbol "cloneNode") true))))
+           (enfocus.core/at (goog.dom/getLastElementChild div#) ~@forms)))
+       (enfocus.core/log-debug div#)
+       (enfocus.core/at 
+        pnod# 
+        (enfocus.core/do-> (enfocus.core/after (enfocus.core/remove-node-return-child div#))
+                           (enfocus.core/remove-node))))))
 
 
-(defmacro trans [[nsym] & body]
-  `(enfocus.core/chainable-standard
-    (fn [~nsym] ~@body)))

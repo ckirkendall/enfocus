@@ -93,25 +93,24 @@
               ["#test15 > *:last-child > .success > span"] (ef/content "success")
               ["#wrapper"] (ef/unwrap)
               (ef/xpath "//tr[@id='test17']/td[2]") (ef/content (success))
-              ["#test18 > *:last-child"] (em/trans [node]
-                                                   (ef/at node ef/this-node (ef/content (success))))
+              ["#test18 > *:last-child"] #(ef/at % ef/this-node (ef/content (success)))
               "#test19 > *:last-child" (ef/content (success)))    
 
 (defn fade-in [event]
-  ((ef/fade-in 500) (.-currentTarget event)))
+  (ef/at (.-currentTarget event) (ef/fade-in 500)))
 
 (defn fade-out [event]
-  ((ef/fade-out 500) (.-currentTarget event)))
+  (ef/at (.-currentTarget event) (ef/fade-out 500)))
   
 (em/defaction test-grid []    
               ["#test-content"] (ef/content (test-cases))
               ["#test-content tbody tr:nth-of-type(even)"] (ef/add-class "even")
               ["#test-content tbody tr"] (ef/listen 
                                            :mouseover 
-                                           #((ef/add-class "highlight") (.-currentTarget %)))
+                                           #(ef/at (.-currentTarget %) (ef/add-class "highlight")))
               ["#test-content tbody tr"] (ef/listen  
                                            :mouseout 
-                                           #((ef/remove-class "highlight") (.-currentTarget %)))
+                                           #(ef/at (.-currentTarget %) (ef/remove-class "highlight")))
               ["#test-content2"] (ef/content (template2 {"banana" 5 "pineapple" 10 "apple" 5}))
               ["#heading1"] (ef/set-attr :id "new-heading1")
               ["#heading2"] (ef/set-attr :id "new-heading2")
