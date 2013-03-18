@@ -244,19 +244,6 @@
       (apply-transform [_ nodes] (trans nodes nil))
       (apply-transform [_ nodes chain] (trans nodes chain)))))
 
-;(defn chainable-standard 
-;  "wrapper function for transforms, maps the transform to all nodes returned
-;   by the selector and provides the ability to chain transforms with the chain command."
-;  [func]
-;  (let [trans (fn [pnodes chain]
-;                (let [pnod-col (nodes->coll pnodes)] 
-;                  (doall (map func pnod-col))
-;                  (when chain
-;                    (apply-transform chain pnodes))))]
-;    (reify ITransform
-;      (apply-transform [_ nodes] (trans nodes nil))
-;      (apply-transform [_ nodes chain] (trans nodes chain)))))
-
 (defn chainable-effect
   "wrapper function for effects, maps the effect to all nodes returned by the
    selector and provides chaining and callback functionality"
