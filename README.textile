@@ -33,8 +33,10 @@ Then make sure you have your lib folder on your classpath.
 
 For the best development experience, use "lein-cljsbuild":https://github.com/emezeske/lein-cljsbuild.  
 
+h3. Where to Start
+Documentation on this readme is for the 2.x version.  Click "here":https://github.com/ckirkendall/enfocus/tree/1.x-branch to go to the readme for the 1.x release. 
 
-h3. The Basics
+h3. The Basics 
 
 Every great journey starts with "Hello world!"
 
@@ -44,7 +46,7 @@ Every great journey starts with "Hello world!"
 
 (defn start [] 
   (ef/at js/document
-    ["body"] (ef/content "Hello world!")))  ;note that for 1.x transform are in em
+    ["body"] (ef/content "Hello world!")))  
 
 (set! (.-onload js/window) start)         
 </pre>
