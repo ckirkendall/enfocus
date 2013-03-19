@@ -163,10 +163,10 @@
   "replaces all the ids in a string html fragement/template with a generated 
    symbol appended on to a existing id this is done to make sure we don't have
    id colisions during the transformation process"
-  [text]
-  (let [re (js/RegExp. "(<.*?\\sid=['\"])(.*?)(['\"].*?>)" "g")
-        sym (str (name (gensym "id")) "_")]
-    [(str sym) (.replace text re (fn [a b c d] (str b sym c d)))]))
+  ([text] (replace-ids (str (name (gensym "id")) "_") text))
+  ([id-mask text]
+  (let [re (js/RegExp. "(<.*?\\sid=['\"])(.*?)(['\"].*?>)" "g")]
+    [id-mask (.replace text re (fn [a b c d] (str b id-mask c d)))])))
 
 
 (defn reset-ids 
@@ -181,13 +181,13 @@
 
 (defn load-remote-dom 
   "loads a remote file into the cache, and masks the ids to avoid collisions"
-  [uri dom-key]
+  [uri dom-key id-mask]
   (when (nil? (@tpl-cache uri))
     (swap! tpl-load-cnt inc)
     (let [req (new goog.net.XhrIo)
           callback (fn [req] 
                      (let [text (. req (getResponseText))
-                           [sym txt] (replace-ids text)]
+                           [sym txt] (replace-ids id-mask text)]
                        (swap! tpl-cache assoc dom-key [sym txt] )))]
       (events/listen req goog.net.EventType/COMPLETE 
                      #(do 
@@ -256,7 +256,7 @@
                                       (when (= 0 @cnt) 
                                         (when callback (apply-transform callback pnodes))
                                         (when chain (apply-transform chain pnodes))))] 
-                  (doseq [pnod pnod-col] (apply-transform func pnod partial-cback))))]
+                  (doseq [pnod pnod-col] (func pnod partial-cback))))]
     (reify ITransform
       (apply-transform [_ nodes] (trans nodes nil))
       (apply-transform [_ nodes chain] (trans nodes chain)))))

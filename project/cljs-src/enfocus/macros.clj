@@ -65,21 +65,38 @@
     (cons :remote body)))
 
 
+(def url-cache (ref {}))
+
+(defn path-cached? [key]
+  (dosync
+   (if (@url-cache key)
+     false
+     (let [id  (str (gensym "en") "_")]
+       (alter url-cache assoc key id)
+       true))))
+
 (defn load-local-dom
   "same as 'load-remote-dom', but work for local files"
   [path dom-key]
-  (let [text (slurp (io/reader (find-url path)))]
-    `(when (nil? (@enfocus.core/tpl-cache ~path))
-       (let [[sym# txt#] (enfocus.core/replace-ids ~text)]
-         (swap! enfocus.core/tpl-cache assoc ~dom-key [sym# txt#])))))
+  (when (path-cached? dom-key)
+    (let [text (slurp (io/reader (find-url path)))
+          id-mask (@url-cache dom-key)]
+      `(when (nil? (@enfocus.core/tpl-cache ~dom-key))
+         (let [[sym# txt#] (enfocus.core/replace-ids ~id-mask ~text)]
+           (swap! enfocus.core/tpl-cache assoc ~dom-key [sym# txt#]))))))
 
+(defn load-remote-dom
+  "returns macro code for loading remote dom"
+  [uri dom-key]
+  (when (path-cached? dom-key)
+    `(enfocus.core/load-remote-dom ~uri ~dom-key ~(@url-cache dom-key))))
 
 (defmacro deftemplate [sym & body]
   (let [[mode uri args & forms] (ensure-mode body)
-        dom-key (str (name sym) uri)]
+        dom-key (str (name mode) uri)]
     `(do
        ~(case mode
-          :remote   `(enfocus.core/load-remote-dom ~uri ~dom-key)
+          :remote   (load-remote-dom uri dom-key)
           :compiled (load-local-dom uri dom-key))
        (enfocus.macros/create-dom-action
         ~sym
@@ -89,10 +106,10 @@
 
 (defmacro defsnippet [sym & body]
   (let [[mode uri sel args & forms] (ensure-mode body)
-        dom-key (str (name sym) uri)]
+        dom-key (str (name mode) uri)]
     `(do
        ~(case mode
-          :remote   `(enfocus.core/load-remote-dom ~uri ~dom-key)
+          :remote   (load-remote-dom uri dom-key)
           :compiled (load-local-dom uri dom-key))
        (enfocus.macros/create-dom-action
         ~sym
