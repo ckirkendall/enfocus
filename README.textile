@@ -41,7 +41,9 @@ h3. The Basics
 Every great journey starts with "Hello world!"
 
 <pre>(ns my.namespace
-  (:require [enfocus.core :as ef])
+  (:require [enfocus.core :as ef]
+            [enfocus.events :as events]
+	    [enfocus.effects :as effects])
   (:require-macros [enfocus.macros :as em]))
 
 (defn start [] 
@@ -88,7 +90,7 @@ Enfocus has event handling.  Below is a simple example to add an @onclick@ event
   ["#button1"] (ef/content msg))
 
 (em/defaction setup []
-  ["#button1"] (ef/listen :click #(change "I have been clicked")))
+  ["#button1"] (events/listen :click #(change "I have been clicked")))
 	
 (set! (.-onload js/window) setup)         
 </pre>
@@ -106,12 +108,12 @@ effects can be chained.
 
 <pre>
 (em/defaction resize-div [width] 
-  ["#rz-demo"] (ef/chain 
-                 (ef/resize width :curheight 500 20)
-                 (ef/resize 5 :curheight 500 20)))
+  ["#rz-demo"] (effects/chain 
+                 (effects/resize width :curheight 500 20)
+                 (effects/resize 5 :curheight 500 20)))
 
 (em/defaction setup []
-  ["#button2"] (ef/listen #(resize-div 200)))
+  ["#button2"] (events/listen #(resize-div 200)))
 	
 (set! (.-onload js/window) setup)         
 </pre>
@@ -227,6 +229,9 @@ New Transformations
   move               (move x y ttime)
                      or (move x y ttime callback)
                      or (move x y ttime callback accelerator)
+  scroll             (scroll x y ttime)
+  		     or (scroll x y ttime callback)
+		     or (scroll x y ttime callback accelerator)
   chain              (chain (fade-in ttime) ;serialize async effects
                             (move x y ttime)
                             (fade-out ttime)
