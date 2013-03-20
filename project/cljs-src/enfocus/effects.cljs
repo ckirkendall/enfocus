@@ -133,7 +133,7 @@
   (let [nt (* t 2)]
     (if (< nt 1)
       (* .5 nt nt)
-      (* -.5 (- (* (- nt 1) (- nt 2)) 1)))))
+      (* -0.5 (- (* (- nt 1) (- nt 2)) 1)))))
 (defn ease-in-cubic [t] (* t t t))
 (defn ease-out-cubic [t]
   (let [nt (- t 1)]
