@@ -1,6 +1,8 @@
 (ns enfocus.testing
   (:use [enfocus.enlive.syntax :only [attr=]])
-  (:require [enfocus.core :as ef])
+  (:require [enfocus.core :as ef]
+            [enfocus.effects :as effects]
+            [enfocus.events :as events])
   (:require-macros [enfocus.macros :as em]))
   
 
@@ -97,18 +99,18 @@
               "#test19 > *:last-child" (ef/content (success)))    
 
 (defn fade-in [event]
-  (ef/at (.-currentTarget event) (ef/fade-in 500)))
+  (ef/at (.-currentTarget event) (effects/fade-in 500)))
 
 (defn fade-out [event]
-  (ef/at (.-currentTarget event) (ef/fade-out 500)))
+  (ef/at (.-currentTarget event) (effects/fade-out 500)))
   
 (em/defaction test-grid []    
               ["#test-content"] (ef/content (test-cases))
               ["#test-content tbody tr:nth-of-type(even)"] (ef/add-class "even")
-              ["#test-content tbody tr"] (ef/listen 
+              ["#test-content tbody tr"] (events/listen 
                                            :mouseover 
                                            #(ef/at (.-currentTarget %) (ef/add-class "highlight")))
-              ["#test-content tbody tr"] (ef/listen  
+              ["#test-content tbody tr"] (events/listen  
                                            :mouseout 
                                            #(ef/at (.-currentTarget %) (ef/remove-class "highlight")))
               ["#test-content2"] (ef/content (template2 {"banana" 5 "pineapple" 10 "apple" 5}))
@@ -119,40 +121,40 @@
               ["#test-content4"] (ef/set-style :background "#00dd00" :font-size "10px")
               ["#test-content5"] (ef/set-style :background "#dd0000" :font-size "10px")
               ["#test-content5"] (ef/remove-style :background :font-size)
-              ["#test-content6"] (ef/listen :mouseover fade-out)
-              ["#test-content6"] (ef/listen :mouseout fade-in)
-              ["#test-remove-listeners"] (ef/listen  
+              ["#test-content6"] (events/listen :mouseover fade-out)
+              ["#test-content6"] (events/listen :mouseout fade-in)
+              ["#test-remove-listeners"] (events/listen  
                                    :click 
                                    #(ef/at js/document 
-                                           ["#test-content6"] (ef/remove-listeners :mouseover :mouseout)))
-              ["#test-content6_5"] (ef/listen :mouseenter fade-out)
-              ["#test-content6_5"] (ef/listen :mouseleave  fade-in)
-              ["#test-unlisten"] (ef/listen  
+                                           ["#test-content6"] (events/remove-listeners :mouseover :mouseout)))
+              ["#test-content6_5"] (events/listen :mouseenter fade-out)
+              ["#test-content6_5"] (events/listen :mouseleave  fade-in)
+              ["#test-unlisten"] (events/listen  
                                    :click 
                                    #(ef/at js/document  
                                            ["#test-content6_5"] (ef/do->
-                                                                  (ef/unlisten :mouseenter fade-out)
-                                                                  (ef/unlisten :mouseleave fade-in))))
-              ["#click"] (ef/listen
+                                                                  (events/unlisten :mouseenter fade-out)
+                                                                  (events/unlisten :mouseleave fade-in))))
+              ["#click"] (events/listen
                           :click 
                           #(ef/at js/document
-                               ["#sz-tst"] (ef/chain 
-                                             (ef/resize 2 30 500)
-                                             (ef/resize 200 30 500 test-callback))))
-              ["#delay-click"] (ef/listen
+                               ["#sz-tst"] (effects/chain 
+                                             (effects/resize 2 30 500)
+                                             (effects/resize 200 30 500 test-callback))))
+              ["#delay-click"] (events/listen
                           :click 
                           #(ef/at js/document
-                               ["#dly-tst"] (ef/chain 
-                                             (ef/resize 2 30 500)
-                                             (ef/delay 2000 (ef/resize 200 30 500)))))
-              ["#mclick"] (ef/listen  
+                               ["#dly-tst"] (effects/chain 
+                                             (effects/resize 2 30 500)
+                                             (ef/delay 2000 (effects/resize 200 30 500)))))
+              ["#mclick"] (events/listen  
                           :click 
                           #(ef/at js/document 
-                               ["#mv-tst"] (ef/move 300 305 500 
-                                                    (ef/move 0 0 500))))
+                               ["#mv-tst"] (effects/move 300 305 500 
+                                                    (effects/move 0 0 500))))
               ["#ftest2"] (ef/focus)
-              ["#test-from"] (ef/listen :click test-from)
-              ["#test-get-text"] (ef/listen :click test-get-text)
+              ["#test-from"] (events/listen :click test-from)
+              ["#test-get-text"] (events/listen :click test-get-text)
               ["#cb1"] (ef/set-prop :checked true))
     
 ;(ef/defaction test-suite [])
@@ -160,7 +162,7 @@
   
  
 (defn funtimes [msg]
-  (ef/at js/window (ef/listen :resize #(ef/log-debug (str "you resized your window:" %))))
+  (ef/at js/window (events/listen :resize #(ef/log-debug (str "you resized your window:" %))))
   (ef/at js/document
       [:.heading (attr= :foo "true")] (ef/content msg))
   (em/wait-for-load (test-grid)))   
