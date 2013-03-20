@@ -140,9 +140,27 @@
     (+ (* nt nt nt) 1)))
 (defn ease-in-out-cubic [t]
   (let [nt (* t 2)]
-    (if (nt < 1)
+    (if (< nt 1)
       (* .5 nt nt nt)
       (let [mt (- t 2)]
         (* .5 (+ 2 (* mt mt mt)))))))
-
-    
+(defn ease-in-quart [t] (* t t t t))
+(defn ease-out-quart [t]
+  (let [nt (- t 1)]
+    (* -1 (- (* nt nt nt nt) 1))))
+(defn ease-in-out-quart [t]
+  (let [nt (* t 2)]
+    (if (< nt 1)
+      (* .5 nt nt nt nt)
+      (let [mt (- t 2)]
+        (* .5 (+ 2 (* mt mt mt mt)))))))
+(defn ease-in-quint [t] (* t t t t))
+(defn ease-out-quint [t]
+  (let [nt (- t 1)]
+    (+ (* nt nt nt nt) 1)))
+(defn ease-in-out-quint [t]
+  (let [nt (* t 2)]
+    (if (< nt 1)
+      (* .5 nt nt nt nt nt)
+      (let [mt (- t 2)]
+        (* .5 (+ 2 (* mt mt mt mt mt)))))))
