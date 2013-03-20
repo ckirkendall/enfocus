@@ -142,7 +142,7 @@
   (let [nt (* t 2)]
     (if (< nt 1)
       (* .5 nt nt nt)
-      (let [mt (- t 2)]
+      (let [mt (- nt 2)]
         (* .5 (+ 2 (* mt mt mt)))))))
 (defn ease-in-quart [t] (* t t t t))
 (defn ease-out-quart [t]
@@ -152,7 +152,7 @@
   (let [nt (* t 2)]
     (if (< nt 1)
       (* .5 nt nt nt nt)
-      (let [mt (- t 2)]
+      (let [mt (- nt 2)]
         (* .5 (+ 2 (* mt mt mt mt)))))))
 (defn ease-in-quint [t] (* t t t t))
 (defn ease-out-quint [t]
@@ -162,5 +162,32 @@
   (let [nt (* t 2)]
     (if (< nt 1)
       (* .5 nt nt nt nt nt)
-      (let [mt (- t 2)]
+      (let [mt (- nt 2)]
         (* .5 (+ 2 (* mt mt mt mt mt)))))))
+(defn sign-in [t]
+  (+ (* -1 (.cos js/Math (* 0.5 (.-PI js/Math) t))) 1))
+(defn sign-out [t]
+  (.sin js/Math (* t (.-PI js/Math) 0.5)))
+(defn sign-in-out [t]
+  (* -0.5 (- (.cos js/Math (* (.-PI js/Math) t)) 1)))
+(defn expo-in [t]
+  (if (= t 0) 0 (.pow js/Math 2 (* 10 (- t 1)))))
+(defn expo-out [t]
+  (if (= t 0) 1 (+ (* -1 (.pow js/Math 2 (* -10 t))) 1)))
+(defn expo-in-out [t]
+  (cond
+   (= t 0) 0
+   (= t 1) 1
+   (< t 1) (* 0.5 (.pow js/Math 2 (* 10 (- t 1))))
+   :else (* 0.5 (+ (* -1 (.pow js/Math 2 (* -10 (dec t)))) 2))))
+(defn circular-in [t]
+  (* -1 (- (.sqrt js/Math (- 1 (.pow js/Math t 2))) 1)))
+(defn circular-out [t]
+  (let [nt (- t 1)]
+    (.sqrt js/Math (- 1 (.pow js/Math nt 2)))))
+(defn circular-in-out [t]
+  (let [nt (* t 2)]
+    (if (< t 1)
+      (* -0.5 (- (.sqrt js/Math (- 1 (.pow js/Math nt 2))) 1))
+      (let [mt (- nt 2)]
+        (* -0.5 (+ (.sqrt js/Math (- 1 (.pow js/Math nt 2))) 1))))))
