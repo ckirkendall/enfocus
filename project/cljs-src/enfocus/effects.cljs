@@ -120,3 +120,29 @@
             (events/listen anim goog.fx.Animation.EventType/END pcallback))
           (. anim (play))))
       callback)))
+
+
+;#############################################
+; basic accelerators/easing functions
+;#############################################
+
+(defn liner [t] t)
+(defn ease-in-quad [t] (* t t))
+(defn ease-out-quad [t] (* -1 (* t (- t 2))))
+(defn ease-in-out-quad [t]
+  (let [nt (* t 2)]
+    (if (< nt 1)
+      (* .5 nt nt)
+      (* -.5 (- (* (- nt 1) (- nt 2)) 1)))))
+(defn ease-in-cubic [t] (* t t t))
+(defn ease-out-cubic [t]
+  (let [nt (- t 1)]
+    (+ (* nt nt nt) 1)))
+(defn ease-in-out-cubic [t]
+  (let [nt (* t 2)]
+    (if (nt < 1)
+      (* .5 nt nt nt)
+      (let [mt (- t 2)]
+        (* .5 (+ 2 (* mt mt mt)))))))
+
+    
