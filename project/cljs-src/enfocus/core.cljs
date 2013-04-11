@@ -14,7 +14,8 @@
             [domina :as domina]
             [domina.css :as dcss]
             [domina.xpath :as xpath])
-  (:require-macros [enfocus.macros :as em])) 
+  (:require-macros [enfocus.macros :as em]
+                   [domina.mcros :as dm)) 
 (declare css-syms css-select select create-sel-str at from)
 
 ;###################################################
@@ -78,28 +79,6 @@
   (str "__ef_effect_" etype))
 
 (defn get-mills [] (. (js/Date.) (getMilliseconds)))
-
-
-(defn child-of? 
-  "returns true if the node(child) is a child of parent"
-  [parent child]
-  (cond 
-    (not child) false
-    (identical? parent child) false
-    (identical? (.-parentNode child) parent) true
-    :else (recur parent (.-parentNode child))))
-    
-
-(defn mouse-enter-leave 
-  "this is used to build cross browser versions of :mouseenter and :mouseleave events"
-  [func]
-  (fn [e]
-    (let [re (.-relatedTarget e)
-          this (.-currentTarget e)]
-      (when (and
-              (not (identical? re this))
-              (not (child-of? this re)))
-        (func e)))))
 
 (defn pix-round [step]
   (if (neg? step) (Math/floor step) (Math/ceil step)))
@@ -572,11 +551,11 @@
 
 
 ;;domina extentions to work with enfocus
-
-(extend-protocol domina/DomContent
-  js/Text
-  (nodes [content] [content])
-  (single-node [content] content))
+(if (dm/defined? js/Text)
+  (extend-protocol domina/DomContent
+    js/Text
+    (nodes [content] [content])
+    (single-node [content] content)))
    
   
 (extend-protocol ISelector

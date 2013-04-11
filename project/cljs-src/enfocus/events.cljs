@@ -50,7 +50,7 @@
   [event func]
   (let [wrapper (wrapper-register event)]  
     (fn [pnod]
-      (if (and (= :resize event) (identical? js/window pnod)) ;support window resize
+      (if (and (= :resize event) (identical? js/window pnod)) 
         (events/listen (get-vp-monitor) "resize" func)
         (if (nil? wrapper)
           (events/listen pnod (name event) func)
