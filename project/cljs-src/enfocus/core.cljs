@@ -15,7 +15,7 @@
             [domina.css :as dcss]
             [domina.xpath :as xpath])
   (:require-macros [enfocus.macros :as em]
-                   [domina.mcros :as dm)) 
+                   [domina.macros :as dm]))
 (declare css-syms css-select select create-sel-str at from)
 
 ;###################################################
