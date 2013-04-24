@@ -2,37 +2,6 @@
   (:refer-clojure :exclude [filter delay])
   (:require [clojure.java.io :as io]))
 
-;##############################################
-; All main transformations and functions are 
-; represented here in order to give a single 
-; entry point to the main protocol.  Many of
-; these are just pass throughs but some 
-; transforms require a macro.
-;
-; macros include:                            
-;    defsnippet
-;    deftemplate
-;    defaction
-;    at
-;    wait-for-load
-;    content
-;    set-attr
-;    remove-attr
-;    add-class
-;    remove-class
-;    do->
-;    append
-;    prepend
-;    after 
-;    before
-;    substitute
-;    remove-node
-;    set-style
-;    remove-style
-;    add-event
-;    remove-event
-;    effect
-;##############################################
 
 (defmacro create-dom-action [sym nod args & forms]  
   (let [id-sym (gensym "id-sym")

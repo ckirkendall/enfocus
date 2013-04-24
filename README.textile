@@ -162,7 +162,7 @@ at compile time:
 
 If, snippets and/or templates are loaded via AJAX it is important to make sure the
 content has been loaded before calling the template or snippit function.  Enfocus 
-provides a convient macros that works like an onload callback but for AJAX driven
+provides a convient macro that works like an onload callback but for AJAX driven
 snippets and templates.  
 
 <pre>
