@@ -10,7 +10,7 @@
 ; transforms require a macro.
 ;
 ; macros include:                            
-;    defsnippit
+;    defsnippet
 ;    deftemplate
 ;    defaction
 ;    at
