@@ -418,10 +418,10 @@
             attrs (when-not (empty? classes)
                     (assoc attrs "class" (apply str (interpose " " classes))))
             content (flatten (map html (if (map? m) ms more)))
-            node (.createElement js/document tag)]
+            node (.createElement js/document tag-name)]
         (doseq [[name val] attrs]
           (.setAttribute node name val))
-        (when content (.append node content)))
+        (when content (domina/append! node content)))
     (sequential? node-spec) (flatten (map html node-spec))
     :else (.createTextNode js/document (str node-spec))))
   
