@@ -159,7 +159,7 @@
 (defn load-remote-dom 
   "loads a remote file into the cache, and masks the ids to avoid collisions"
   [uri dom-key id-mask]
-  (when (nil? (@tpl-cache uri))
+  (when (nil? (@tpl-cache dom-key))
     (swap! tpl-load-cnt inc)
     (let [req (new goog.net.XhrIo)
           callback (fn [req] 
