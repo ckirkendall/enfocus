@@ -396,6 +396,38 @@
 
 
 ;##################################################################
+; hiccup style emitter
+;##################################################################
+
+
+(defn html
+  "takes clojure data structure and emits a document element"
+  [node-spec]
+  (cond
+    (string? node-spec) (.createTextNode js/document node-spec)
+    (vector? node-spec) 
+      (let [[tag & [m & ms :as more]] node-spec 
+            [tag-name & segments] (.split (name tag) #"(?=[#.])")
+            id (some (fn [seg]
+                       (when (= \# (.charAt seg 0)) (subs seg 1))) segments)
+            classes (keep (fn [seg]
+                            (when (= \. (.charAt seg 0)) (subs seg 1)))
+                          segments)
+            attrs (if (map? m) m {})
+            attrs (when id (assoc attrs "id" id))
+            attrs (when-not (empty? classes)
+                    (assoc attrs "class" (apply str (interpose " " classes))))
+            content (flatten (map html (if (map? m) ms more)))
+            node (.createElement js/document tag)]
+        (doseq [[name val] attrs]
+          (.setAttribute node name val))
+        (when content (.append node content)))
+    (sequential? node-spec) (flatten (map html node-spec))
+    :else (.createTextNode js/document (str node-spec))))
+  
+
+
+;##################################################################
 ; data extractors
 ;##################################################################
 
