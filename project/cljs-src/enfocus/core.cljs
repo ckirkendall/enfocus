@@ -254,6 +254,13 @@
   [txt]
   (multi-node-chain #(domina/set-html! % txt)))
 
+(defn set-data
+  "Sets a data sttribute on the selected element."
+  [data-name data-value]
+  (fn [node]
+    (aset (.-dataset (domina/single-node node))
+          (name data-name)
+          data-value)))
 
 (defn set-attr
   "Assocs attributes and values on the selected element."

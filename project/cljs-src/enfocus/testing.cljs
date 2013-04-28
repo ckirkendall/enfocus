@@ -5,6 +5,9 @@
             [enfocus.events :as events])
   (:require-macros [enfocus.macros :as em]))
 
+(defn test-data []
+  (ef/at js/document
+         ["body"] (ef/set-data :foo "bar")))
 
 (defn test-from []
   (let [form-vals (ef/from js/document

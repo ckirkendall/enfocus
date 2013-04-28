@@ -236,6 +236,7 @@ New Transformations
                             (move x y ttime)
                             (fade-out ttime)
                             ...)
+  set-data           (set-data :name value)
 </pre>
 
 Currently there is one transformation that is supported by Enlive but not Enfocus. (Patches very welcome!!)
