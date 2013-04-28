@@ -29,25 +29,25 @@
   (apply-transform [this nodes] [this nodes callback]
     "takes a set of nodes and performs a transform on them"))
 
-;#################################################### 
+;####################################################
 ; Utility functions
 ;####################################################
 (def debug true)
 
-(defn log-debug [mesg] 
+(defn log-debug [mesg]
   (when (and debug (not (= (.-console js/window) js/undefined)))
     (.log js/console mesg)))
 
 (defn setTimeout [func ttime]
-  (timer/callOnce func ttime)) 
+  (timer/callOnce func ttime))
 
-(defn node? [tst]  
-  (dom/isNodeLike tst))  
+(defn node? [tst]
+  (dom/isNodeLike tst))
 
 (defn nodelist? [tst]
   (instance? js/NodeList tst))
 
-(defn nodes->coll 
+(defn nodes->coll
   "coverts a nodelist, node into a collection"
   [nl]
   (if (= nl js/window)
@@ -71,7 +71,7 @@
   "removes the property value from an elements style obj."
   [obj values]
   (doseq [attr values]
-    (if (.-IE goog/userAgent) 
+    (if (.-IE goog/userAgent)
       (style/setStyle obj (name attr) "")
       (.  (.-style obj) (removeProperty (name attr))))))
 
@@ -83,9 +83,9 @@
 (defn pix-round [step]
   (if (neg? step) (Math/floor step) (Math/ceil step)))
 
-(defn add-map-attrs 
+(defn add-map-attrs
   ([elem ats]
-   (when elem 
+   (when elem
      (when (map? ats)
        (do
          (doseq [[k v] ats]
@@ -100,33 +100,33 @@
 ; emote dom features for templates and snippets
 ;####################################################
 
-(def tpl-load-cnt 
+(def tpl-load-cnt
   "this is incremented everytime a remote template is loaded and decremented when
    it is added to the dom cache"
   (atom 0))
-     
 
-(def tpl-cache 
+
+(def tpl-cache
   "cache for the remote templates"
   (atom {}))
 
 (def hide-style (.-strobj {"style" "display: none; width: 0px; height: 0px"}))
 
-(defn create-hidden-dom 
+(defn create-hidden-dom
   "Add a hidden div to hold the dom as we are transforming it this has to be done
    because css selectors do not work unless we have it in the main dom"
   [child]
   (let [div (dom/createDom "div" hide-style)]
-    (if (= (.-nodeType child) 11) 
+    (if (= (.-nodeType child) 11)
       (dom/appendChild div child)
       (do
-        (log-debug (count (domina/nodes child))) 
+        (log-debug (count (domina/nodes child)))
         (doseq [node (domina/nodes child)]
           (dom/appendChild div node))))
     (dom/appendChild (.-documentElement (dom/getDocument)) div)
-    div))   
-    
-(defn remove-node-return-child 
+    div))
+
+(defn remove-node-return-child
   "removes the hidden div and returns the children"
   [div]
   (let [child (.-childNodes div)
@@ -135,9 +135,9 @@
     (dom/removeNode div)
     frag))
 
-  
-(defn replace-ids 
-  "replaces all the ids in a string html fragement/template with a generated 
+
+(defn replace-ids
+  "replaces all the ids in a string html fragement/template with a generated
    symbol appended on to a existing id this is done to make sure we don't have
    id colisions during the transformation process"
   ([text] (replace-ids (str (name (gensym "id")) "_") text))
@@ -146,62 +146,62 @@
     [id-mask (.replace text re (fn [a b c d] (str b id-mask c d)))])))
 
 
-(defn reset-ids 
+(defn reset-ids
   "before adding the dom back into the live dom we reset the masked ids to orig vals"
   [sym nod]
   (let [id-nodes (css-select nod "*[id]")
         nod-col (nodes->coll id-nodes)]
     (doall (map #(let [id (. % (getAttribute "id"))
                        rid (. id (replace sym ""))]
-                   (. % (setAttribute "id" rid))) nod-col))))  
+                   (. % (setAttribute "id" rid))) nod-col))))
 
 
-(defn load-remote-dom 
+(defn load-remote-dom
   "loads a remote file into the cache, and masks the ids to avoid collisions"
   [uri dom-key id-mask]
   (when (nil? (@tpl-cache dom-key))
     (swap! tpl-load-cnt inc)
     (let [req (new goog.net.XhrIo)
-          callback (fn [req] 
+          callback (fn [req]
                      (let [text (. req (getResponseText))
                            [sym txt] (replace-ids id-mask text)]
                        (swap! tpl-cache assoc dom-key [sym txt] )))]
-      (events/listen req goog.net.EventType/COMPLETE 
-                     #(do 
-                        (callback req) 
+      (events/listen req goog.net.EventType/COMPLETE
+                     #(do
+                        (callback req)
                         (swap! tpl-load-cnt dec)))
       (. req (send uri "GET")))))
 
 (defn html-to-dom [html]
   (let [dfa (nodes->coll (domina/html-to-dom html))
-        frag (. js/document (createDocumentFragment))] 
+        frag (. js/document (createDocumentFragment))]
     (log-debug (count dfa))
     (doseq [df dfa]
       (dom/append frag df))
     frag))
 
 
-(defn get-cached-dom  
+(defn get-cached-dom
   "returns and dom from the cache and symbol used to scope the ids"
-  [uri] 
-  (let [nod (@tpl-cache uri)]   
-     (when nod [(first nod) (html-to-dom (second nod))]))) 
+  [uri]
+  (let [nod (@tpl-cache uri)]
+     (when nod [(first nod) (html-to-dom (second nod))])))
 
-(defn get-cached-snippet   
+(defn get-cached-snippet
   "returns the cached snippet or creates one and adds it to the cache if needed"
-  [uri sel]  
+  [uri sel]
   (let [sel-str  (create-sel-str sel)
         cache (@tpl-cache (str uri sel-str))]
     (if cache [(first cache) (html-to-dom (second cache))]
-        (let [[sym tdom] (get-cached-dom uri)  
+        (let [[sym tdom] (get-cached-dom uri)
               dom (create-hidden-dom tdom)
               tsnip (domina/nodes (css-select sym dom sel))
               html_snip (apply str (map #(.-outerHTML %) tsnip))]
           (remove-node-return-child dom)
           (swap! tpl-cache assoc (str uri sel-str) [sym html_snip])
-          [sym (html-to-dom html_snip)]))))  
- 
-  
+          [sym (html-to-dom html_snip)]))))
+
+
 
 ;####################################################
 ; The following functions are used to transform the
@@ -209,11 +209,11 @@
 ; taking the a set of nodes from a selector
 ;####################################################
 
-(defn extr-multi-node 
+(defn extr-multi-node
   "wrapper function for extractors that maps the extraction to all nodes returned by the selector"
   [func]
-  (let [trans (fn trans 
-                [pnodes] 
+  (let [trans (fn trans
+                [pnodes]
                 (let [pnod-col (nodes->coll pnodes)
                       result (map func pnod-col)]
                   (if (<= (count result) 1) (first result) result)))]
@@ -239,30 +239,37 @@
          (apply-transform [_ nodes] (trans nodes nil))
          (apply-transform [_ nodes chain] (trans nodes chain))))))
 
-     
+
 ;;TODO need to figure out how to make sure this stay just as
 ;;text and not convert to html.
-(defn content 
+(defn content
   "Replaces the content of the element. Values can be nodes or collection of nodes."
   [& values]
   (multi-node-chain values #(do
                           (domina/destroy-children! %1)
-                          (domina/append! %1 %2)))) 
-  
-(defn html-content 
+                          (domina/append! %1 %2))))
+
+(defn html-content
   "Replaces the content of the element with the dom structure represented by the html string passed"
   [txt]
   (multi-node-chain #(domina/set-html! % txt)))
 
+(defn set-data
+  "Sets a data sttribute on the selected element."
+  [data-name data-value]
+  (fn [node]
+    (aset (.-dataset (domina/single-node node))
+          (name data-name)
+          data-value)))
 
-(defn set-attr 
+(defn set-attr
   "Assocs attributes and values on the selected element."
-  [& values] 
+  [& values]
   (let [pairs (partition 2 values)]
     (multi-node-chain
-     #(doseq [[name value] pairs] (domina/set-attr! % name value)))))   
+     #(doseq [[name value] pairs] (domina/set-attr! % name value)))))
 
-(defn remove-attr 
+(defn remove-attr
   "Dissocs attributes on the selected element."
   [& values]
   (multi-node-chain #(doseq [name values] (domina/remove-attr! % name))))
@@ -274,21 +281,21 @@
        (dom/setProperties node (apply js-obj h)))))
 
 
-(defn- has-class 
+(defn- has-class
   "returns true if the element has a given class"
   [el cls]
   (classes/hasClass el cls))
 
 
-(defn add-class 
-  "Adds the specified classes to the selected element." 
+(defn add-class
+  "Adds the specified classes to the selected element."
   [ & values]
   (multi-node-chain
     #(doseq [val values] (domina/add-class! % val))))
 
 
-(defn remove-class 
-  "Removes the specified classes from the selected element." 
+(defn remove-class
+  "Removes the specified classes from the selected element."
   [ & values]
   (multi-node-chain
     #(doseq [val values] (domina/remove-class! % val))))
@@ -297,8 +304,8 @@
 (defn set-class
   "Sets the specified classes on the selected element"
   [ & values]
-  (multi-node-chain #(domina/set-classes! % values))) 
-     
+  (multi-node-chain #(domina/set-classes! % values)))
+
 
 (defn do-> [ & forms]
   "Chains (composes) several transformations. Applies functions from left to right."
@@ -320,7 +327,7 @@
   "inserts the content before the selected node. Values can be nodes or collection of nodes"
   [& values]
   (multi-node-chain values #(domina/insert-before! %1 %2)))
-  
+
 
 (defn after
   "inserts the content after the selected node. Values can be nodes or collection of nodes"
@@ -334,13 +341,13 @@
   (multi-node-chain values #(domina/swap-content! %1 %2)))
 
 
-(defn remove-node 
-  "removes the selected nodes from the dom" 
+(defn remove-node
+  "removes the selected nodes from the dom"
   []
   (multi-node-chain #(domina/detach! %1)))
 
 
-(defn wrap 
+(defn wrap
   "wrap and element in a new element defined as :div {:class 'temp'}"
   [elm mattr]
   (fn [pnod]
@@ -357,9 +364,9 @@
     (let [frag (. js/document (createDocumentFragment))]
       (dom/append frag (.-childNodes pnod))
       (dom/replaceNode frag pnod))))
-  
 
-(defn set-style 
+
+(defn set-style
   "set a list of style elements from the selected nodes"
   [& values]
   (let [pairs (partition 2 values)]
@@ -367,7 +374,7 @@
       #(doseq [[name value] pairs] (domina/set-style! % name value)))))
 
 
-(defn remove-style 
+(defn remove-style
   "remove a list style elements from the selected nodes. note: you can only remove styles that are inline"
   [& values]
   (fn [pnod] (style-remove pnod values)))
@@ -405,8 +412,8 @@
   [node-spec]
   (cond
     (string? node-spec) (.createTextNode js/document node-spec)
-    (vector? node-spec) 
-      (let [[tag & [m & ms :as more]] node-spec 
+    (vector? node-spec)
+      (let [[tag & [m & ms :as more]] node-spec
             [tag-name & segments] (.split (name tag) #"(?=[#.])")
             id (some (fn [seg]
                        (when (= \# (.charAt seg 0)) (subs seg 1))) segments)
@@ -424,19 +431,19 @@
         (when content (domina/append! node content)))
     (sequential? node-spec) (flatten (map html node-spec))
     :else (.createTextNode js/document (str node-spec))))
-  
+
 
 
 ;##################################################################
 ; data extractors
 ;##################################################################
 
-(defn get-attr 
+(defn get-attr
   "returns the attribute on the selected element or elements.
    in cases where more than one element is selected you will
    receive a list of values"
-  [attr] 
-  (extr-multi-node 
+  [attr]
+  (extr-multi-node
     (fn[pnod]
       (. pnod (getAttribute (name attr))))))
 
@@ -444,8 +451,8 @@
   "returns the text value of the selected element or elements.
    in cases where more than one element is selected you will
    receive a list of values"
-  [] 
-  (extr-multi-node 
+  []
+  (extr-multi-node
     (fn[pnod]
       (dom/getTextContent pnod))))
 
@@ -455,7 +462,7 @@
   ([ky bubble]
      (extr-multi-node
       (fn [node]
-        (domina/get-data node ky bubble))))) 
+        (domina/get-data node ky bubble)))))
 
 
 (defn get-prop
@@ -469,7 +476,7 @@
 
 ;##################################################################
 ; filtering - these funcitons are to make up for choosing
-; css3 selectors as our selectors, not everything can 
+; css3 selectors as our selectors, not everything can
 ; be selected with css selectors in all browser so this
 ; provides an abstract way to add additional selection
 ; criteria
@@ -478,7 +485,7 @@
 ;registerd filter that can be refrenced by keyword
 (def reg-filt (atom {}))
 
-(defn filter 
+(defn filter
   "filter allows you to apply function to futhur scope down what is returned by a selector"
   [tst trans]
   (multi-node-chain
@@ -488,21 +495,21 @@
         (let [pnod-col (nodes->coll pnodes)
               ttest (if (keyword? tst) (@reg-filt tst) tst)
               res (clojure.core/filter ttest pnod-col)]
-          (if (nil? chain) 
+          (if (nil? chain)
             (apply-transform trans res)
-            (apply-transform trans res chain))))))) 
+            (apply-transform trans res chain)))))))
 
-(defn register-filter 
+(defn register-filter
   "registers a filter for a given keyword"
   [ky func]
   (swap! reg-filt assoc ky func))
 
-(defn selected-options 
+(defn selected-options
   "takes a list of options and returns the selected ones. "
   [pnod]
   (.-selected pnod))
 
-(defn checked-radio-checkbox 
+(defn checked-radio-checkbox
   "takes a list of radio or checkboxes and returns the checked ones"
   [pnod]
   (.-checked pnod))
@@ -513,21 +520,21 @@
 ;##################################################################
 ; functions involved in processing the selectors
 ;##################################################################
-  
-(defn- create-sel-str 
-  "converts keywords, symbols and strings used in the enlive selector 
+
+(defn- create-sel-str
+  "converts keywords, symbols and strings used in the enlive selector
    syntax to a string representing a standard css selector.  It also
    applys id masking if mask provided"
   ([css-sel] (create-sel-str "" css-sel))
   ([id-mask-sym css-sel]
-    (apply str (map #(cond 
+    (apply str (map #(cond
                        (symbol? %) (css-syms %)
                        (keyword? %) (str " " (. (name %) (replace "#" (str "#" id-mask-sym))))
                        (vector? %) (create-sel-str %)
-                       (string? %) (.replace %  "#" (str "#" id-mask-sym))) 
+                       (string? %) (.replace %  "#" (str "#" id-mask-sym)))
                     css-sel))))
 
-(defn css-select 
+(defn css-select
   "takes either an enlive selector or a css3 selector and returns a set of nodes that match the selector"
   ([css-sel] (css-select "" js/document css-sel))
   ([dom-node css-sel] (css-select "" dom-node css-sel))
@@ -544,25 +551,25 @@
 (defn nil-t [func]
   (or func remove-node))
 
-(defn i-at [id-mask node & trans] 
+(defn i-at [id-mask node & trans]
   (if (= 1 (count trans))
     (apply-transform (first trans) node)
     (doseq [[sel t] (partition 2 trans)]
            (apply-transform (nil-t t) (select sel node id-mask)))))
 
 (defn at [node & trans]
-  (apply i-at "" node trans)) 
- 
-(defn from [node & trans] 
+  (apply i-at "" node trans))
+
+(defn from [node & trans]
   (if (= 1 (count trans))
     (apply-transform (first trans) node)
-    
+
     (apply hash-map
            (mapcat (fn [[ky sel ext]]
                [ky (apply-transform ext (select sel node ""))])
              (partition 3 trans)))))
 
- 
+
 
 ;##########################################
 ; XPATH - allow (xpath "@id
@@ -574,7 +581,7 @@
       (let [tmp (.replace path "@ID='" (str "@ID='" id-mask))
             mpath (.replace path "@id='" (str "@id='" id-mask))]
         (xpath/xpath root mpath)))))
-    
+
 
 ;#########################################
 ; Special Selectors
@@ -588,8 +595,8 @@
     js/Text
     (nodes [content] [content])
     (single-node [content] content)))
-   
-  
+
+
 (extend-protocol ISelector
   function
   (select [this] (select this js/document ""))
@@ -603,13 +610,13 @@
   (select [this] (select this js/document ""))
   (select [this root] (select this root ""))
   (select [this root id-mask] (css-select id-mask root [this])))
-  
-  
+
+
 (extend-protocol ITransform
   function
   (apply-transform [trans nodes] (doall (map trans (nodes->coll nodes))))
   (apply-transform [trans nodes chain]
-    (let [pnod-col (nodes->coll nodes)] 
+    (let [pnod-col (nodes->coll nodes)]
       (doall (map trans pnod-col))
       (when chain
         (apply-transform chain nodes)))))
