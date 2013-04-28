@@ -183,7 +183,7 @@ h2. Transformations
 
 A transformation is a function that returns either a node or collection of node.
 
-h3. Enfocus defines several helper functions:
+h3. Enfocus defines several helper functions for transformations:
 
 Supported Enlive Transformations 
 
@@ -236,6 +236,7 @@ New Transformations
                             (move x y ttime)
                             (fade-out ttime)
                             ...)
+  set-data           (set-data key value) 
 </pre>
 
 Currently there is one transformation that is supported by Enlive but not Enfocus. (Patches very welcome!!)
@@ -244,6 +245,7 @@ Currently there is one transformation that is supported by Enlive but not Enfocu
   move               (move [:.footnote] [:#footnotes] content) 
                      ;this will be called relocate in enfocus
 </pre>
+
 
 h2. Selectors
 
@@ -259,6 +261,37 @@ Enfocus supports both CSS3 and XPath selectors:
              (ef/xpath "//tr[@id='1']/th[2]") (ef/set-attr :id "new-heading1")) ;XPATH
 </pre>
 
+
+h2. The @from@ form
+
+The @from@ form is how we data from the dom in enfocus.  It comes in two basic flavors listed below:
+
+This form returns the result of the extractor.
+<pre>(from a-node (extractor arg1 ...))
+</pre>
+and
+
+This form returns a map of the form {:key1 result1 :key2 result2}
+<pre>(from a-node
+    :key1 [selector1] (extractor arg1 ...)
+    :key2 [selector2] (extractor arg1 ...))
+</pre>
+
+
+h2. Extractors
+
+An extractor is a function that takes a node and returns information about.
+
+h3. Enfocus defines several helper fuctions for extractors:
+
+An extractor is a funciton that takes a node and returns information about it.
+
+<pre>
+  get-attr           (get-attr :attr1 :attr2)
+  get-text           (get-text)
+  get-prop           (get-prop :value)
+  get-data           (get-data :key1)
+</pre>
 
 
 h2. Contributing
