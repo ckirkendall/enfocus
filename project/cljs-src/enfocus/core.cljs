@@ -395,6 +395,25 @@
   (fn [pnod] (setTimeout #(apply at pnod funcs) ttime)))
 
 
+(defn replace-vars
+  "replaces entries like the following ${var1} in attributes and text"
+  [vars]
+  (letfn [(rep-str [text]
+            (.replace text #"\$\{\s*(\S+)\s*}" #(do (log-debug (pr-str %1 %2 %3))
+                                                  (vars (keyword %2)))))]
+    (fn rep-node [pnod]
+      (when (.-attributes pnod)
+        (doseq [idx (range (.-length (.-attributes pnod)))]
+          (let [attr (.item (.-attributes pnod) idx)]
+            (when (.-specified attr)
+              (set! (.-value attr) (rep-str (.-value attr)))))))
+      (if (= (.-nodeType pnod) 3)
+       (set! (.-nodeValue pnod) (rep-str (.-nodeValue pnod)))
+       (doseq [cnode (nodes->coll (.-childNodes pnod))]
+         (rep-node cnode))))))
+       
+      
+      
 ;##################################################################
 ; hiccup style emitter
 ;##################################################################
@@ -406,24 +425,26 @@
   (cond
     (string? node-spec) (.createTextNode js/document node-spec)
     (vector? node-spec) 
-      (let [[tag & [m & ms :as more]] node-spec 
-            [tag-name & segments] (.split (name tag) #"(?=[#.])")
-            id (some (fn [seg]
-                       (when (= \# (.charAt seg 0)) (subs seg 1))) segments)
-            classes (keep (fn [seg]
-                            (when (= \. (.charAt seg 0)) (subs seg 1)))
-                          segments)
-            attrs (if (map? m) m {})
-            attrs (when id (assoc attrs "id" id))
-            attrs (when-not (empty? classes)
-                    (assoc attrs "class" (apply str (interpose " " classes))))
-            content (flatten (map html (if (map? m) ms more)))
-            node (.createElement js/document tag-name)]
-        (doseq [[name val] attrs]
-          (.setAttribute node name val))
-        (when content (domina/append! node content)))
+    (let [[tag & [m & ms :as more]] node-spec
+          _ (log-debug (pr-str tag m ms))
+          [tag-name & segments] (.split (name tag) #"(?=[#.])")
+          id (some (fn [seg]
+                     (when (= \# (.charAt seg 0)) (subs seg 1))) segments)
+          classes (keep (fn [seg]
+                          (when (= \. (.charAt seg 0)) (subs seg 1)))
+                        segments)
+          attrs (if (map? m) m {})
+          attrs (if id (assoc attrs :id id) attrs)
+          attrs (if-not (empty? classes)
+                  (assoc attrs :class (apply str (interpose " " classes)))
+                  attrs)
+          content (flatten (map html (if (map? m) ms more)))
+          node (.createElement js/document tag-name)]
+      (doseq [[key val] attrs]
+        (.setAttribute node (name key) val))
+      (when content (domina/append! node content)))
     (sequential? node-spec) (flatten (map html node-spec))
-    :else (.createTextNode js/document (str node-spec))))
+    :else (.createTextNode js/document (str node-spec)))) 
   
 
 

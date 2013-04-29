@@ -156,7 +156,9 @@
               ["#test-from"] (events/listen :click test-from)
               ["#test-get-text"] (events/listen :click test-get-text)
               ["#cb1"] (ef/set-prop :checked true)
-              ["#test-content tbody"] (ef/append (ef/html [:tr#test20.even '([:td "hiccup emmiter"] [:td.success "success"])])))
+              ["#test-content tbody"] (ef/append (ef/html [:tr#test20.even '([:td "hiccup emmiter"] [:td.success "success"])]))
+              ["#test-content tbody"] (ef/append (ef/html [:tr#test21.odd '([:td "replace-vars"] [:td {:class "${val}"} "${val}"])]))
+              ["#test21"] (ef/replace-vars {:val "success"}))
     
 ;(ef/defaction test-suite [])
    
