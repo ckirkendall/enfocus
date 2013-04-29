@@ -178,6 +178,14 @@ definition of a an action.
              ["#heading1"] (ef/set-attr :id "new-heading1"))
 </pre>
 
+Enfocus also support hiccup style emitters introduced in enlive 1.1.0.
+
+<pre>
+(defn hiccup-template [arg1]
+  (ef/html
+    [:h1#hiccup.clazz {:width arg1} "Hiccup Emitters are Cool"]))
+</pre> 
+
 
 h2. Transformations
 
@@ -206,6 +214,7 @@ Supported Enlive Transformations
                           selector2 transformation2)
   wrap               (wrap :div) or (wrap :div {:class "foo"}) 
   unwrap             (unwrap)
+  replace-vars       (replace-vars {:var1 "value" :var2 "value")
 </pre>
 
 New Transformations
