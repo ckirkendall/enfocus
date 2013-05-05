@@ -47,18 +47,19 @@
 (defn load-local-dom
   "same as 'load-remote-dom', but work for local files"
   [path dom-key]
-  (when (path-cached? dom-key)
-    (let [text (slurp (io/reader (find-url path)))
-          id-mask (@url-cache dom-key)]
-      `(when (nil? (@enfocus.core/tpl-cache ~dom-key))
-         (let [[sym# txt#] (enfocus.core/replace-ids ~id-mask ~text)]
-           (swap! enfocus.core/tpl-cache assoc ~dom-key [sym# txt#]))))))
+  (let [text (slurp (io/reader (find-url path)))
+        id-mask (@url-cache dom-key)]
+    `(when (nil? (@enfocus.core/tpl-cache ~dom-key))
+       (let [[sym# txt#] (enfocus.core/replace-ids ~id-mask ~text)]
+         (swap! enfocus.core/tpl-cache assoc ~dom-key [sym# txt#])))))
 
 (defn load-remote-dom
   "returns macro code for loading remote dom"
   [uri dom-key]
-  (when (path-cached? dom-key)
-    `(enfocus.core/load-remote-dom ~uri ~dom-key ~(@url-cache dom-key))))
+  `(do
+     (enfocus.core/load-remote-dom ~uri ~dom-key ~(@url-cache dom-key))
+     (when (nil? (@enfocus.core/tpl-cache ~dom-key))
+       (swap! enfocus.core/tpl-cache assoc ~dom-key ["" "NOT_LOADED"]))))
 
 (defmacro deftemplate [sym & body]
   (let [[mode uri args & forms] (ensure-mode body)
