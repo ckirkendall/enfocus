@@ -36,19 +36,18 @@
 
 (def url-cache (ref {}))
 
-(defn path-cached? [key]
+(defn get-key [key]
   (dosync
-   (if (@url-cache key)
-     false
+   (when-not (@url-cache key)
      (let [id  (str (gensym "en") "_")]
-       (alter url-cache assoc key id)
-       true))))
+       (alter url-cache assoc key id))))
+  (@url-cache key))
 
 (defn load-local-dom
   "same as 'load-remote-dom', but work for local files"
   [path dom-key]
   (let [text (slurp (io/reader (find-url path)))
-        id-mask (@url-cache dom-key)]
+        id-mask (get-key dom-key)]
     `(when (nil? (@enfocus.core/tpl-cache ~dom-key))
        (let [[sym# txt#] (enfocus.core/replace-ids ~id-mask ~text)]
          (swap! enfocus.core/tpl-cache assoc ~dom-key [sym# txt#])))))
@@ -57,7 +56,7 @@
   "returns macro code for loading remote dom"
   [uri dom-key]
   `(do
-     (enfocus.core/load-remote-dom ~uri ~dom-key ~(@url-cache dom-key))
+     (enfocus.core/load-remote-dom ~uri ~dom-key ~(get-key dom-key))
      (when (nil? (@enfocus.core/tpl-cache ~dom-key))
        (swap! enfocus.core/tpl-cache assoc ~dom-key ["" "NOT_LOADED"]))))
 
