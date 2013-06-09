@@ -1,15 +1,30 @@
 (ns enfocus.enlive.syntax)
+(declare sel-to-string)
 
-(defn sel-to-string [item]
-  (cond
-   (keyword? item) (name item)
-   (string? item) item
-   (coll? item) (apply str (map #(sel-to-string %) item))))
+(defn sel-to-str [input]
+  (let [item (first input)
+        rest (rest input)
+        end (if (empty? rest) '(()) (sel-to-str rest))]
+    (cond
+     (keyword? item) (map #(conj % (name item)) end)
+     (string? item) (map #(conj % item) end)
+     (set? item) (reduce (fn [r1 it]
+                           (concat r1 (map #(conj % it) end)))
+                         [] (flatten (sel-to-str item)))
+     (coll? item) (let [x1 (sel-to-str item)
+                        sub (map #(apply str %) (sel-to-str item))]
+                    (println x1)
+                    (println sub)
+                    (println end)
+                     (for [s sub e end]
+                         (do (println s e)
+                             (conj e s)))))))
 
 (defn convert [sel]
   (if (string? sel)
     sel
-    (apply str (interpose " " (map sel-to-string sel)))))
+    (let [ors (sel-to-str sel)]
+      (apply str (interpose " " (apply concat (interpose "," ors)))))))
 
 (defn- attr-pairs [op elms]
  (let [ts (fn [[x y]] (str "[" (name x) op "='" y "']"))]
