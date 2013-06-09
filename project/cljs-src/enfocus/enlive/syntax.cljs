@@ -13,9 +13,6 @@
                          [] (flatten (sel-to-str item)))
      (coll? item) (let [x1 (sel-to-str item)
                         sub (map #(apply str %) (sel-to-str item))]
-                    (println x1)
-                    (println sub)
-                    (println end)
                      (for [s sub e end]
                          (do (println s e)
                              (conj e s)))))))
