@@ -1,6 +1,8 @@
 (ns enfocus.macros
   (:refer-clojure :exclude [filter delay])
-  (:require [clojure.java.io :as io]))
+  (:require [clojure.java.io :as io]
+            [enfocus.enlive.syntax :as syn])
+  (:import [org.jsoup.Jsoup]))
 
 
 (defmacro create-dom-action [sym nod args & forms]  
@@ -43,14 +45,22 @@
        (alter url-cache assoc key id))))
   (@url-cache key))
 
+
+
 (defn load-local-dom
   "same as 'load-remote-dom', but work for local files"
-  [path dom-key]
-  (let [text (slurp (io/reader (find-url path)))
-        id-mask (get-key dom-key)]
-    `(when (nil? (@enfocus.core/tpl-cache ~dom-key))
-       (let [[sym# txt#] (enfocus.core/replace-ids ~id-mask ~text)]
-         (swap! enfocus.core/tpl-cache assoc ~dom-key [sym# txt#])))))
+  ([path dom-key] (load-local-dom path dom-key nil))
+  ([path dom-key sel]
+     (let [text (slurp (io/reader (find-url path)))
+           id-mask (get-key dom-key)
+           text (if sel 
+                   (-> (org.jsoup.Jsoup/parse text)
+                       (.select (syn/convert sel))
+                       (.outerHtml))
+                   text)] 
+       `(when (nil? (@enfocus.core/tpl-cache ~dom-key))
+          (let [[sym# txt#] (enfocus.core/replace-ids ~id-mask ~text)]
+            (swap! enfocus.core/tpl-cache assoc ~dom-key [sym# txt#]))))))
 
 (defn load-remote-dom
   "returns macro code for loading remote dom"
@@ -75,14 +85,18 @@
 
 (defmacro defsnippet [sym & body]
   (let [[mode uri sel args & forms] (ensure-mode body)
-        dom-key (str (name mode) uri)]
+        dom-key (case mode
+                   :remote (str (name mode) uri)
+                   :compiled (str (name mode) uri sel))]
     `(do
        ~(case mode
           :remote   (load-remote-dom uri dom-key)
-          :compiled (load-local-dom uri dom-key))
+          :compiled (load-local-dom uri dom-key sel))
        (enfocus.macros/create-dom-action
         ~sym
-        #(enfocus.core/get-cached-snippet ~dom-key ~sel)
+        ~(case mode
+           :remote  `(fn [] (enfocus.core/get-cached-snippet ~dom-key ~sel))
+           :compiled `(fn [] (enfocus.core/get-cached-dom ~dom-key))) 
         ~args ~@forms))))
 
 

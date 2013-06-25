@@ -6,7 +6,7 @@
   (:require-macros [enfocus.macros :as em]))
   
 
-
+ 
 (defn test-from []
   (let [form-vals (ef/from js/document
                         :test1 ["#ftest1"] (ef/get-prop :value) 
@@ -114,7 +114,7 @@
                                            :mouseout 
                                            #(ef/at (.-currentTarget %) (ef/remove-class "highlight")))
               ["#test-content2"] (ef/content (template2 {"banana" 5 "pineapple" 10 "apple" 5}))
-              ["#heading1"] (ef/set-attr :id "new-heading1")
+              ["#heading1"] (ef/set-attr :id "new-heading1") 
               ["#heading2"] (ef/set-attr :id "new-heading2")
               ["#test-content2 tfoot tr > *:last-child"] (ef/content (str 20))
               ["#test-content3"] (ef/content (template3 {"pear" 22 "banana" 12 "apple" 6}))
@@ -134,7 +134,7 @@
                                    #(ef/at js/document  
                                            ["#test-content6_5"] (ef/do->
                                                                   (events/unlisten :mouseenter fade-out)
-                                                                  (events/unlisten :mouseleave fade-in))))
+                                                                  (events/unlisten :mouseleave fade-in))))  
               ["#click"] (events/listen
                           :click 
                           #(ef/at js/document
@@ -152,7 +152,7 @@
                           #(ef/at js/document 
                                ["#mv-tst"] (effects/move 300 305 500 
                                                     (effects/move 0 0 500))))
-              ["#ftest2"] (ef/focus)
+              ["#ftest2"] (ef/focus) 
               ["#test-from"] (events/listen :click test-from)
               ["#test-get-text"] (events/listen :click test-get-text)
               ["#cb1"] (ef/set-prop :checked true)
