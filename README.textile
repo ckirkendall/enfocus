@@ -312,13 +312,14 @@ h4. Compile ClojureScript
  git clone git://github.com/ckirkendall/enfocus.git
  cd enfocus/project
  lein deps
+ lein cljx
  lein cljsbuild once
 </pre>
 
 h4. Viewing the Test Page
 
 <pre>
- cd enfocus/sample
+ cd enfocus/testing
  lein deps
  lein repl
  =>(use 'ring.adapter.jetty)  
