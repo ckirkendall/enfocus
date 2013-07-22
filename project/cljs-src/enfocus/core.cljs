@@ -1,3 +1,4 @@
+
 (ns enfocus.core
   (:refer-clojure :exclude [filter delay])
   (:require [enfocus.enlive.syntax :as en]
@@ -565,23 +566,35 @@
 (defn nil-t [func]
   (or func remove-node))
 
-(defn i-at [id-mask node & trans] 
-  (if (= 1 (count trans))
-    (apply-transform (first trans) node)
-    (doseq [[sel t] (partition 2 trans)]
-           (apply-transform (nil-t t) (select sel node id-mask)))))
+(defn i-at [id-mask node & trans]
+  (let [cnt (count trans)
+        sel? (satisfies? ISelector node)]
+    (if (and (not sel?) (= 1 cnt))
+      (apply-transform (first trans) node)
+      (let [[node trans] (if sel?
+                           (list js/document (conj trans node))
+                           (list node trans))]
+        (doseq [[sel t] (partition 2 trans)]
+          (apply-transform (nil-t t) (select sel node id-mask)))))))
+
 
 (defn at [node & trans]
   (apply i-at "" node trans)) 
- 
-(defn from [node & trans] 
-  (if (= 1 (count trans))
-    (apply-transform (first trans) node)
-    
-    (apply hash-map
-           (mapcat (fn [[ky sel ext]]
-               [ky (apply-transform ext (select sel node ""))])
-             (partition 3 trans)))))
+
+
+(defn from [node & trans]
+  (let [cnt (count trans)
+        sel? (satisfies? ISelector node)]
+    (cond
+     (and sel? (= 1 cnt))  (apply-transform (first trans) (select node))
+     (= 1 cnt) (apply-transform (first trans) node)
+     :else (let [[node trans] (if sel?
+                                (list js/document (conj trans node))
+                                (list node trans))]
+             (apply hash-map
+                    (mapcat (fn [[ky sel ext]]
+                              [ky (apply-transform ext (select sel node ""))])
+                            (partition 3 trans)))))))
 
  
 
