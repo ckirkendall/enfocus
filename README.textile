@@ -78,7 +78,7 @@ and a series of transforms
     [selector2] (transform2 arg1 ...))
 </pre>
 
-In the first case @at@ is passed a node or node set and a transform.  This form of @at@
+In the first case @at@ is passed a node, node set or selector and a transform.  This form of @at@
 calls the transform on each element in the node set. 
  
 A @transform@ is nothing more than a function that takes a set of arguments and returns a function 
@@ -86,9 +86,9 @@ that takes a set of nodes.  In case of the "Hello World!" example above, we see 
 (em/content "Hello world!") this call returns a function that takes node or node set
 and replaces the content with "Hello world!"
 
-In the second case, we see @at@ is passed a node or node set and a set of 
-selector/transform pairs. The selectors are scoped by the node or node set passed in and 
-the results of each selector is passed on to its partner transformation.
+In the second case, we see @at@ is optionally passed a node or node set and a set of 
+selector/transform pairs. The selectors are scoped by the node, node set or js/document, 
+if a node is not passed in, and the results of each selector is passed on to its partner transformation.
   
 A @selector@ is a string representing a "CSS3 compliant selector":http://www.w3schools.com/cssref/css_selectors.asp
 
