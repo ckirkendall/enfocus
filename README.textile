@@ -56,9 +56,9 @@ Every great journey starts with "Hello world!"
 h2. The @at@ form
 
 At the core to understanding Enfocus is the @at@ form used in the 
-"Hello world!" example above.  It comes in few basic flavors listed below:
+"Hello world!" example above.  It comes in two basic flavors listed below:
 
-Simple Transform
+A single transform
 <pre>
 (at a-node (transform arg1 ...))
 
@@ -66,9 +66,7 @@ Simple Transform
 
 (at selector (transform arg1 ...))     
 </pre>
-and
-
-Series Transform
+and a series of transforms
 <pre>
 (at a-node
     [selector1] (transform1 arg1 ...)
