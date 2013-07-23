@@ -31,7 +31,9 @@
     "takes a set of nodes and performs a transform on them"))
 
 ;#################################################### 
-; Utility functions
+
+                                        ;
+Utility functions
 ;####################################################
 (def debug true)
 
@@ -489,6 +491,57 @@
    (fn [pnod]
      (aget pnod (name prop)))))
 
+
+(defn- merge-form-val
+  "this function takes a map, key and value.  It will check if
+   the value exists and create a seq of values if one exits."
+  [form-map ky val]
+  (let [mval (form-map ky)]
+    (cond
+     (coll? mval) (assoc form-map ky (conj mval val))
+     mval (assoc form-map ky (list val mval))
+     :else (assoc form-map ky val))))
+
+(defn- read-simple-input [el col]
+  (merge-form-val col (keyword (.-name el)) (.-value el)))
+
+(defn- read-checked-input [el col]
+  (if (.-checked el)
+    (merge-form-val col (keyword (.-name el)) (.-value el))
+    col))
+
+(defn- read-select-input [el col]
+  (let [nm (keyword  (.-name el))
+        onodes (domina/nodes (.-options el))
+        opts (cljs.core/filter #(.-selected %) onodes)]
+    (merge-form-val col nm (map #(.-value %) opts))))
+
+(defn read-form
+  "returns a map of the form values tied to name of input fields.
+   {:name1 'value1' name2 ('select1' 'select2')}"
+  []
+  (extr-multi-node
+   (fn [node]
+     (let [inputs (.-elements node)]
+       (reduce 
+        #(case (.-nodeName %2)
+           "INPUT" (case (.-type %2)
+                     "text" (read-simple-input %2 %1)
+                     "hidden" (read-simple-input %2 %1)
+                     "password" (read-simple-input %2 %1)
+                     "button" (read-simple-input %2 %1)
+                     "reset" (read-simple-input %2 %1)
+                     "submit" (read-simple-input %2 %1)
+                     "checkbox" (read-checked-input %2 %1)
+                     "radio" (read-checked-input %2 %1)
+                     %1)
+           "TEXTAREA" (read-simple-input %2 %1)
+           "SELECT" (read-select-input %2 %1)
+           "BUTTON" (read-simple-input %2 %1)
+           %1)
+        {}
+        inputs)))))
+
 ;##################################################################
 ; filtering - these funcitons are to make up for choosing
 ; css3 selectors as our selectors, not everything can 
@@ -586,7 +639,7 @@
   (let [cnt (count trans)
         sel? (satisfies? ISelector node)]
     (cond
-     (and sel? (= 1 cnt))  (apply-transform (first trans) (select node))
+     (and sel? (= 1 cnt)) (apply-transform (first trans) (select node))
      (= 1 cnt) (apply-transform (first trans) node)
      :else (let [[node trans] (if sel?
                                 (list js/document (conj trans node))
@@ -643,7 +696,8 @@
   function
   (apply-transform [trans nodes] (doall (map trans (nodes->coll nodes))))
   (apply-transform [trans nodes chain]
-    (let [pnod-col (nodes->coll nodes)] 
-      (doall (map trans pnod-col))
-      (when chain
-        (apply-transform chain nodes)))))
+    (let [pnod-col (nodes->coll nodes)
+          val (doall (map trans pnod-col))]
+      (if chain
+        (apply-transform chain nodes)
+        val))))

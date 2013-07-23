@@ -15,9 +15,13 @@
                                                                                 (ef/get-prop :value))
                         :test4 ["#from-form option"] (ef/filter :selected
                                                                 (ef/get-prop :value)))
+        form-read (ef/from "#from-form" (ef/read-form))
         from-val (ef/from "#ftest1" (ef/get-attr :value))]
-    (ef/at "#test-from-div" (ef/do-> (ef/content (pr-str form-vals))
-                                       (ef/append from-val)))))
+    (ef/at "#test-from-div" (ef/do-> (ef/content (pr-str form-vals)
+                                                 (ef/html [:br])
+                                                 (pr-str form-read)
+                                                 (ef/html [:br]))
+                                     (ef/append from-val)))))
   
 (defn test-get-text []
   (let [from-text (ef/from (ef/select ["#ftext-test"]) (ef/get-text))]
