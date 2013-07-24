@@ -286,12 +286,24 @@ h2. The @from@ form
 The @from@ form is how we data from the dom in enfocus.  It comes in two basic flavors listed below:
 
 This form returns the result of the extractor.
+
 <pre>(from a-node (extractor arg1 ...))
+
+;or with selector
+
+(from selector (extractor arg1 ...))
 </pre>
 and
 
 This form returns a map of the form {:key1 result1 :key2 result2}
+
 <pre>(from a-node
+    :key1 [selector1] (extractor arg1 ...)
+    :key2 [selector2] (extractor arg1 ...))
+
+;or implied js/documnt
+
+(from
     :key1 [selector1] (extractor arg1 ...)
     :key2 [selector2] (extractor arg1 ...))
 </pre>
@@ -310,6 +322,7 @@ An extractor is a funciton that takes a node and returns information about it.
   get-text           (get-text)
   get-prop           (get-prop :value)
   get-data           (get-data :key1)
+  read-form          (read-form)  - returns {:field1 ("val1" "val2") :field2 val}
 </pre>
 
 
