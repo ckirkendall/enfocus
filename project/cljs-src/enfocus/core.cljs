@@ -402,8 +402,7 @@ Utility functions
   "replaces entries like the following ${var1} in attributes and text"
   [vars]
   (letfn [(rep-str [text]
-            (.replace text #"\$\{\s*(\S+)\s*}" #(do (log-debug (pr-str %1 %2 %3))
-                                                  (vars (keyword %2)))))]
+            (string/replace text #"\$\{\s*(\S+)\s*}" #(vars (keyword %2))))]
     (fn rep-node [pnod]
       (when (.-attributes pnod)
         (doseq [idx (range (.-length (.-attributes pnod)))]
