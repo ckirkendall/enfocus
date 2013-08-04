@@ -11,7 +11,7 @@ Another "tutorial":https://github.com/cgrand/enlive/wiki/Table-and-Layout-Tutori
 
 h1. Documentation & Examples
 
-"Documentation Site":http:/ckirkendall.github.com/enfocus-site - for 1.x release 
+"Documentation & Demo Site":http:/ckirkendall.github.com/enfocus-site 
 "Example Website":http://github.com/ckirkendall/The-Great-Todo
 
 
@@ -32,9 +32,6 @@ From any leiningen project file:
 Then make sure you have your lib folder on your classpath.
 
 For the best development experience, use "lein-cljsbuild":https://github.com/emezeske/lein-cljsbuild.  
-
-h3. Where to Start
-Documentation and demos can be accessed "here":http//ckirkendall.github.io/enfocus-site. 
 
 h3. The Basics 
 
