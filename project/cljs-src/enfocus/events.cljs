@@ -1,6 +1,7 @@
 (ns enfocus.events
   (:require [goog.events :as events]
-            [goog.dom :as dom]))
+            [goog.dom :as dom]
+            [enfocus.core :as ef]))
 
 (declare child-of? mouse-enter-leave)
 
@@ -76,7 +77,30 @@
          (if (nil? wrapper) 
            (events/unlisten pnod (name event) func)
            (events/unlistenWithWrapper pnod wrapper func))))))
-  
+
+
+(defn- get-node-chain [top node]
+  (if (or (nil? node) (= node top))
+    ()
+    (conj (get-node-chain top (.-parentNode node)) node)))
+
+(defn- create-event [type cur tar]
+  (let [event (goog.events.Event. type)]
+    (set! (.-currentTarget event) cur)
+    (set! (.-target event) tar)
+    event))
+
+(defn listen-live [event selector func]
+  (fn [node]
+    (ef/at node
+           (listen event
+                   #(doseq [el (get-node-chain node (.-target %))]
+                      (ef/at el
+                             (ef/filter (ef/match? selector)
+                                        (fn [node]
+                                          (func (create-event event el (.-target %)))))))))))
+
+
 ;###################################################
 ; utilies
 ;###################################################

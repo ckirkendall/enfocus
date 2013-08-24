@@ -17,7 +17,7 @@
             [domina.xpath :as xpath])
   (:require-macros [enfocus.macros :as em]
                    [domina.macros :as dm]))
-(declare css-syms css-select select create-sel-str at from)
+(declare css-syms css-select select create-sel-str at from match?)
 
 ;###################################################
 ; Selector Protocol
@@ -583,6 +583,17 @@ Utility functions
 
 (register-filter :selected selected-options)
 (register-filter :checked checked-radio-checkbox)
+
+(defn match? [selector]
+  (fn [node]
+    (cond
+     (aget node "matches") (.matches node selector)
+     (aget node "matchesSelector") (.matchesSelector node selector)
+     (aget node "msMatchesSelector") (.msMatchesSelector node selector)
+     (aget node "mozMatchesSelector") (.mozMatchesSelector node selector)
+     (aget node "webkitMatchesSelector") (.webkitMatchesSelector node selector)
+     :else (some #{node} (nodes->coll (select node))))))
+
 
 ;##################################################################
 ; functions involved in processing the selectors

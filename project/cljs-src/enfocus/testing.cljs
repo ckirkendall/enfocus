@@ -106,16 +106,19 @@
 
 (defn fade-out [event]
   (ef/at (.-currentTarget event) (effects/fade-out 500)))
+
   
 (em/defaction test-grid []    
               ["#test-content"] (ef/content (test-cases))
               ["#test-content tbody tr:nth-of-type(even)"] (ef/add-class "even")
-              ["#test-content tbody tr"] (events/listen 
-                                           :mouseover 
-                                           #(ef/at (.-currentTarget %) (ef/add-class "highlight")))
-              ["#test-content tbody tr"] (events/listen  
-                                           :mouseout 
-                                           #(ef/at (.-currentTarget %) (ef/remove-class "highlight")))
+              ["body"] (events/listen-live 
+                        :mouseover 
+                        "#test-content tbody tr"
+                        #(ef/at (.-currentTarget %) (ef/add-class "highlight")))
+              ["body"] (events/listen-live  
+                        :mouseout
+                        "#test-content tbody tr"
+                        #(ef/at (.-currentTarget %) (ef/remove-class "highlight")))
               ["#test-content2"] (ef/content (template2 {"banana" 5 "pineapple" 10 "apple" 5}))
               ["#heading1"] (ef/set-attr :id "new-heading1") 
               ["#heading2"] (ef/set-attr :id "new-heading2")
