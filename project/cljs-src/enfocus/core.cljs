@@ -1,4 +1,3 @@
-
 (ns enfocus.core
   (:refer-clojure :exclude [filter delay])
   (:require [enfocus.enlive.syntax :as en]
@@ -31,9 +30,7 @@
     "takes a set of nodes and performs a transform on them"))
 
 ;#################################################### 
-
-                                        ;
-Utility functions
+; Utility functions
 ;####################################################
 (def debug true)
 
