@@ -499,18 +499,22 @@
      :else (assoc form-map ky val))))
 
 (defn- read-simple-input [el col]
-  (merge-form-val col (keyword (.-name el)) (.-value el)))
+  (if-not (empty? (.-name el))
+    (merge-form-val col (keyword (.-name el)) (.-value el))
+    col))
 
 (defn- read-checked-input [el col]
-  (if (.-checked el)
+  (if (and (.-checked el) (not (empty? (.-name el))))
     (merge-form-val col (keyword (.-name el)) (.-value el))
     col))
 
 (defn- read-select-input [el col]
-  (let [nm (keyword  (.-name el))
-        onodes (domina/nodes (.-options el))
-        opts (cljs.core/filter #(.-selected %) onodes)]
-    (merge-form-val col nm (map #(.-value %) opts))))
+  (if-not (empty? (.-name el))
+    (let [nm (keyword  (.-name el))
+          onodes (domina/nodes (.-options el))
+          opts (cljs.core/filter #(.-selected %) onodes)]
+      (merge-form-val col nm (map #(.-value %) opts)))
+    col))
 
 (defn read-form
   "returns a map of the form values tied to name of input fields.

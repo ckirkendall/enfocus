@@ -2,7 +2,7 @@
   :description "DOM manipulation tool for clojurescript inspired by Enlive"
   :source-paths ["cljs-src" ".generated/cljs" ".generated/clj"]
   :dependencies [[org.clojure/clojure "1.4.0"]
-                 [domina "1.0.1" :exclusions [org.clojure/clojurescript]]
+                 [domina "1.0.2-SNAPSHOT"]
                  [org.jsoup/jsoup "1.7.2"]
                  ]
   :plugins [[lein-cljsbuild "0.3.0"]
