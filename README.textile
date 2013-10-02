@@ -24,9 +24,9 @@ h1. Quick Start
 h2. Setup
 
 From any leiningen project file:
-<pre>[enfocus &#34;2.0.0-SNAPSHOT&#34;] - experimental use at your own risk
+<pre>[enfocus &#34;2.0.1-SNAPSHOT&#34;] - experimental use at your own risk
 
-[enfocus &#34;1.0.1&#34;] - stable
+[enfocus &#34;2.0.0&#34;] - stable
 </pre>
 
 Then make sure you have your lib folder on your classpath.
@@ -330,17 +330,14 @@ h4. Compile ClojureScript
 
 <pre>
  git clone git://github.com/ckirkendall/enfocus.git
- cd enfocus/project
- lein deps
- lein cljx
- lein cljsbuild once
+ cd enfocus
+ lein compile
 </pre>
 
 h4. Viewing the Test Page
 
 <pre>
- cd enfocus/testing
- lein deps
+ cd enfocus
  lein repl
  =>(use 'ring.adapter.jetty)  
  =>(use 'enfocus.ring)
