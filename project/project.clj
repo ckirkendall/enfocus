@@ -1,7 +1,7 @@
 (defproject enfocus "2.0.0-SNAPSHOT"
   :description "DOM manipulation tool for clojurescript inspired by Enlive"
   :min-lein-version "2.1.3"
-  :source-paths ["src/clj"]
+  :source-paths ["src/clj" "src/cljs"]
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [org.clojure/clojurescript "0.0-1909"]
                  [domina "1.0.2-SNAPSHOT"]
@@ -10,6 +10,7 @@
   :hooks [leiningen.cljsbuild]
   :cljsbuild
   {:crossovers [enfocus.enlive.syntax]
+   :crossover-jar true
    :builds
    {:whitespace
      {:source-paths ["src/cljs"]
