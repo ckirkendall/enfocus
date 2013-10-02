@@ -1,4 +1,4 @@
-(defproject enfocus "2.0.0-SNAPSHOT"
+(defproject enfocus "2.0.1-SNAPSHOT"
   :description "DOM manipulation tool for clojurescript inspired by Enlive"
   :min-lein-version "2.1.3"
   :source-paths ["src/clj" "src/cljs"]
