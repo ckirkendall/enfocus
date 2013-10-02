@@ -8,7 +8,8 @@
                  [org.clojure/clojurescript "0.0-1909"]
                  [domina "1.0.2-SNAPSHOT"]
                  [org.jsoup/jsoup "1.7.2"]
-                 [com.cemerick/clojurescript.test "0.0.4"]]
+                 [com.cemerick/clojurescript.test "0.0.4"]
+                 [ring "1.2.0"]]
   
   :plugins [[lein-cljsbuild "0.3.3"]]
   :hooks [leiningen.cljsbuild]
