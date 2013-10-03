@@ -1,8 +1,12 @@
 (defproject enfocus "2.0.0-SNAPSHOT"
   :description "DOM manipulation tool for clojurescript inspired by Enlive"
+  :url "http://ckirkendall.github.io/enfocus-site"
+  :license {:name "Eclipse Public License - v 1.0"
+            :url "http://www.eclipse.org/legal/epl-v10.html"
+            :distribution :repo}
   :source-paths ["cljs-src" ".generated/cljs" ".generated/clj"]
   :dependencies [[org.clojure/clojure "1.4.0"]
-                 [domina "1.0.2-SNAPSHOT"]
+                 [domina "1.0.2"]
                  [org.jsoup/jsoup "1.7.2"]
                  ]
   :plugins [[lein-cljsbuild "0.3.0"]
