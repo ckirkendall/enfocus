@@ -24,9 +24,11 @@ h1. Quick Start
 h2. Setup
 
 From any leiningen project file:
-<pre>[enfocus &#34;2.0.0-SNAPSHOT&#34;] - experimental use at your own risk
+<pre>[enfocus &#34;2.0.1-SNAPSHOT&#34;] ;experimental use at your own risk
 
-[enfocus &#34;1.0.1&#34;] - stable
+[enfocus &#34;2.0.0-beta3&#34;]    ;final beta for 2.0.0
+
+[enfocus &#34;1.0.1&#34;]          ;previous stable version
 </pre>
 
 Then make sure you have your lib folder on your classpath.
