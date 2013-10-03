@@ -31,8 +31,6 @@ From any leiningen project file:
 [enfocus &#34;1.0.1&#34;]          ;previous stable version
 </pre>
 
-Then make sure you have your lib folder on your classpath.
-
 For the best development experience, use "lein-cljsbuild":https://github.com/emezeske/lein-cljsbuild.  
 
 h3. The Basics 
