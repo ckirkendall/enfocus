@@ -20,8 +20,7 @@
    [{:builds nil,
      :source-paths ["src/cljs"]
      :compiler
-     {:output-dir "../testing/resources/public/cljs",
-      :output-to "../testing/resources/public/cljs/enfocus.js",
-      :optimizations :whitespace,
+     {:output-to "dev-resources/public/js/enfocus.js"
+      :optimizations :whitespace
       :pretty-print true}}]})
 
