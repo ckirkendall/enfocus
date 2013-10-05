@@ -4,29 +4,24 @@
   :license {:name "Eclipse Public License - v 1.0"
             :url "http://www.eclipse.org/legal/epl-v10.html"
             :distribution :repo}
-  :source-paths ["cljs-src" ".generated/cljs" ".generated/clj"]
+  :source-paths ["src/clj"]
   :dependencies [[org.clojure/clojure "1.4.0"]
                  [domina "1.0.2"]
-                 [org.jsoup/jsoup "1.7.2"]
-                 ]
-  :plugins [[lein-cljsbuild "0.3.0"]
-            [com.keminglabs/cljx "0.2.2"]]
-  :cljx {:builds [{:source-paths ["cljx-src"]
-                   :output-path ".generated/clj"
-                   :rules cljx.rules/clj-rules}
+                 [org.jsoup/jsoup "1.7.2"]]
 
-                  {:source-paths ["cljx-src"]
-                   :output-path ".generated/cljs"
-                   :extension "cljs"
-                   :rules cljx.rules/cljs-rules}]}
+  :plugins [[lein-cljsbuild "0.3.0"]]
+  :hooks [leiningen.cljsbuild]
+
   :cljsbuild
-  {:builds
+  {:crossovers [enfocus.enlive.syntax]
+   :crossover-jar true
+
+   :builds
    [{:builds nil,
-     :source-paths ["cljs-src" ".generated/cljs"]
+     :source-paths ["src/cljs"]
      :compiler
      {:output-dir "../testing/resources/public/cljs",
       :output-to "../testing/resources/public/cljs/enfocus.js",
       :optimizations :whitespace,
-      :pretty-print true}}]}
-  :hooks [cljx.hooks])
+      :pretty-print true}}]})
 
