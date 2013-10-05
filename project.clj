@@ -5,6 +5,8 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"
             :distribution :repo}
   :source-paths ["src/clj"]
+  :test-paths ["test/clj"]
+  
   :dependencies [[org.clojure/clojure "1.4.0"]
                  [domina "1.0.2"]
                  [org.jsoup/jsoup "1.7.2"]]
@@ -18,7 +20,7 @@
 
    :builds
    [{:builds nil,
-     :source-paths ["src/cljs"]
+     :source-paths ["src/cljs" "test/cljs"]
      :compiler
      {:output-to "dev-resources/public/js/enfocus.js"
       :optimizations :whitespace
