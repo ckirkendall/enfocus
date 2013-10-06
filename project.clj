@@ -6,7 +6,7 @@
   
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [org.clojure/clojurescript "0.0-1909"]
-                 [domina "1.0.2-SNAPSHOT"]
+                 [domina "1.0.2"]
                  [org.jsoup/jsoup "1.7.2"]
                  [com.cemerick/clojurescript.test "0.0.4"]
                  [ring "1.2.0"]]
@@ -20,21 +20,21 @@
    
    :builds
    {:whitespace
-    {:source-paths ["src/cljs" "test/cljs"] 
+    {:source-paths ["test/clj" "src/cljs" "test/cljs"] 
      :compiler
      {:output-to "resources/public/js/testable_ws.js"
       :optimizations :whitespace
       :pretty-print true}}
     
     :simple
-    {:source-paths ["src/cljs" "test/cljs"]
+    {:source-paths ["test/clj" "src/cljs" "test/cljs"]
      :compiler
      {:output-to "resources/public/js/testable_simple.js"
       :optimizations :simple
       :pretty-print false}}
     
     :advanced
-    {:source-paths ["src/cljs" "test/cljs"]
+    {:source-paths ["test/clj" "src/cljs" "test/cljs"]
      :compiler
      {:output-to "resources/public/js/testable_advanced.js"
       :optimizations :advanced
@@ -42,14 +42,14 @@
    
    :test-commands {"whitespace"
                    ["runners/phantomjs.js" 
-                    "resources/public/js/testable_ws.js"]
+                    "resources/public/test_ws.html"]
                                                
                    "simple"
                    ["runners/phantomjs.js" 
-                    "resources/public/js/testable_simple.js"]
+                    "resources/public/test_simple.html"]
                                                
                    "advanced"
                    ["runners/phantomjs.js" 
-                    "resources/public/js/testable_advanced.js"]}})
+                    "resources/public/test_advanced.html"]}})
 
 
