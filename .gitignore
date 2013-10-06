@@ -1,4 +1,3 @@
-
 pom.xml
 *jar
 .lein-failures
@@ -8,11 +7,7 @@ target
 .metadata
 .project
 .classpath
-*.js
-testing/resources/public/cljs/
+dev-resources/*.js
 *.*#
 .#*
 *.*~
-
-project/.lein-plugins
-project/.generated
