@@ -8,11 +8,7 @@ target
 .metadata
 .project
 .classpath
-*.js
-testing/resources/public/cljs/
+resources/*.js
 *.*#
 .#*
 *.*~
-
-project/.lein-plugins
-project/.generated
