@@ -11,7 +11,8 @@
                  [org.clojure/clojurescript "0.0-1913"]
                  [domina "1.0.2"]
                  [org.jsoup/jsoup "1.7.2"]
-                 ]
+                 [com.cemerick/clojurescript.test "0.0.4"]]
+
   :plugins [[lein-cljsbuild "0.3.3"]]
 
   :hooks [leiningen.cljsbuild]
