@@ -22,8 +22,17 @@
   
   :cljsbuild
   {:crossovers [enfocus.enlive.syntax]
-   
-   :builds {:whitespace
+   :crossover-jar true
+
+   :builds {:production
+            {:source-paths ["src/cljs"]
+             :jar true
+             :compiler
+             {:output-to "dev-resources/public/js/enfocus.js"
+              :optimizations :advanced
+              :pretty-print false}}
+
+            :whitespace
             {:source-paths ["src/cljs" "test/cljs"]
              :compiler
              {:output-to "dev-resources/public/js/whitespace.js"
@@ -50,4 +59,4 @@
                    ["runners/phantomjs.js" "dev-resources/public/js/simple.js"]
                    
                    "advanced"
-                   ["runners/phantomjs.js" "resources/public/js/advanced.js"]}})
+                   ["runners/phantomjs.js" "dev-resources/public/js/advanced.js"]}})
