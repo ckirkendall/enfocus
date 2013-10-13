@@ -1,6 +1,6 @@
-(defproject org.clojars.magomimmo/enfocus "2.0.1-SNAPSHOT"
+(defproject enfocus "2.0.1-SNAPSHOT"
   :description "DOM manipulation tool for clojurescript inspired by Enlive"
-  :url "https://github.com/magomimmo/enfocus/tree/tutorial-20"
+  :url "http://ckirkendall.github.io/enfocus-site"
   :license {:name "Eclipse Public License - v 1.0"
             :url "http://www.eclipse.org/legal/epl-v10.html"
             :distribution :repo}
