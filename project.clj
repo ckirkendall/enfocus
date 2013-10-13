@@ -13,9 +13,10 @@
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [org.clojure/clojurescript "0.0-1913"]
                  [domina "1.0.2"]
-                 [org.jsoup/jsoup "1.7.2"]]
+                 [org.jsoup/jsoup "1.7.2"]
+                 [compojure "1.1.5"]]
   
-  :plugins [[lein-cljsbuild "0.3.3"]]
+  :plugins [[lein-cljsbuild "0.3.4"]]
   
   :hooks [leiningen.cljsbuild]
   
@@ -31,25 +32,26 @@
               :optimizations :whitespace
               :pretty-print true}}}}
 
-  :profiles {:dev {:dependencies [[compojure "1.1.5"]
+  :profiles {:dev {:resources-paths ["dev-resources"]
+                   
+                   :dependencies [[compojure "1.1.5"]
                                   [com.cemerick/piggieback "0.1.0"]]
-
-                   :plugins [[com.cemerick/clojurescript.test "0.1.0"]
-                             [lein-ring "0.8.7"]]
-
-                   :ring {:handler enfocus.core/handler}
-                   :resource-paths ["dev-resources"]
-
+                   
+                   :plugins [[lein-ring "0.8.7"]
+                             [com.cemerick/clojurescript.test "0.1.0"]]
+                   
+                   :ring {:handler enfocus.server/handler}
+                   
                    :cljsbuild 
                    {:builds {:whitespace
-                             {:source-paths ["src/cljs" "test/cljs"]
+                             {:source-paths ["src/cljs" "test/cljs" "src/brepl"]
                               :compiler
                               {:output-to "dev-resources/public/js/whitespace.js"
                                :optimizations :whitespace
                                :pretty-print true}}
-
+                             
                              :simple
-                             {:source-paths ["src/cljs" "test/cljs"]
+                             {:source-paths ["src/cljs" "test/cljs" "src/brepl"]
                               :compiler
                               {:output-to "dev-resources/public/js/simple.js"
                                :optimizations :simple
