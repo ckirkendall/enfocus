@@ -31,8 +31,9 @@
               :optimizations :whitespace
               :pretty-print true}}}}
 
-  :profiles {:dev {:dependencies [[com.cemerick/clojurescript.test "0.0.4"]
-                                  [com.cemerick/piggieback "0.1.0"]]
+  :profiles {:dev {:dependencies [[com.cemerick/piggieback "0.1.0"]]
+
+                   :plugins [[com.cemerick/clojurescript.test "0.1.0"]]
 
                    :cljsbuild 
                    {:builds {:whitespace
@@ -57,13 +58,13 @@
                                :pretty-print false}}}
 
                     :test-commands {"whitespace"
-                                    ["runners/phantomjs.js" "dev-resources/public/js/whitespace.js"]
+                                    ["phantomjs" :runner "dev-resources/public/js/whitespace.js"]
                    
                                     "simple"           
-                                    ["runners/phantomjs.js" "dev-resources/public/js/simple.js"]
+                                    ["phantomjs" :runner "dev-resources/public/js/simple.js"]
                    
                                     "advanced"
-                                    ["runners/phantomjs.js" "dev-resources/public/js/advanced.js"]}}
+                                    ["phantomjs" :runner "dev-resources/public/js/advanced.js"]}}
                                
                    :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
                    :injections [(require '[cljs.repl.browser :as brepl]
