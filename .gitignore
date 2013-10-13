@@ -2,6 +2,9 @@ pom.xml
 *jar
 .lein-failures
 .lein-deps-sum
+.lein-repl-history
+.repl
+out
 target
 .settings
 .metadata
