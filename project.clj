@@ -31,9 +31,14 @@
               :optimizations :whitespace
               :pretty-print true}}}}
 
-  :profiles {:dev {:dependencies [[com.cemerick/piggieback "0.1.0"]]
+  :profiles {:dev {:dependencies [[compojure "1.1.5"]
+                                  [com.cemerick/piggieback "0.1.0"]]
 
-                   :plugins [[com.cemerick/clojurescript.test "0.1.0"]]
+                   :plugins [[com.cemerick/clojurescript.test "0.1.0"]
+                             [lein-ring "0.8.7"]]
+
+                   :ring {:handler enfocus.core/handler}
+                   :resource-paths ["dev-resources"]
 
                    :cljsbuild 
                    {:builds {:whitespace
