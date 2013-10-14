@@ -11,7 +11,7 @@
   :test-paths ["test/clj"]
   
   :dependencies [[org.clojure/clojure "1.5.1"]
-                 [org.clojure/clojurescript "0.0-1835"]
+                 [org.clojure/clojurescript "0.0-1847"]
                  [domina "1.0.2"]
                  [org.jsoup/jsoup "1.7.2"]]
   
@@ -33,13 +33,11 @@
 
   :profiles {:dev {:resources-paths ["dev-resources"]
                    
-                   :dependencies [[compojure "1.1.5"]
+                   :dependencies [[ring "1.2.0"]
+                                  [compojure "1.1.5"]
                                   [com.cemerick/piggieback "0.1.0"]]
                    
-                   :plugins [[lein-ring "0.8.7"]
-                             [com.cemerick/clojurescript.test "0.1.0"]]
-                   
-                   :ring {:handler enfocus.server/handler}
+                   :plugins [[com.cemerick/clojurescript.test "0.1.0"]]
                    
                    :cljsbuild 
                    {:builds {:whitespace
