@@ -355,42 +355,72 @@ An extractor is a funciton that takes a node and returns information about
 ### Viewing the Test Page
 
 ```bash
- cd enfocus
  lein do compile, repl
 ```
 
 ```clj
-(require '[enfocus.server :as http])
-(http/run)
+user=> (require '[enfocus.server :as http])
+nil
+user=> (http/run)
+2013-10-15 12:34:33.082:INFO:oejs.Server:jetty-7.6.8.v20121106
+2013-10-15 12:34:33.138:INFO:oejs.AbstractConnector:Started SelectChannelConnector@0.0.0.0:3000
+#<Server org.eclipse.jetty.server.Server@7aed9585>
 ```
 
 Open your browser to: [http://localhost:3000/][10]
- 
-### bREPLing with Enfocus
+
+### Stop and restart the server
+
+```clj
+user=> (.stop http/server) ; to stop the server
+nil
+user=> (.start http/server) ; to restart the server
+2013-10-15 12:35:25.474:INFO:oejs.Server:jetty-7.6.8.v20121106
+2013-10-15 12:35:25.478:INFO:oejs.AbstractConnector:Started SelectChannelConnector@0.0.0.0:3000
+nil
+```
+
+## bREPLing with Enfocus
+
+You can run the bREPL from the same terminal where you started the
+server, or you can run the bREPL from a new termnal window.
+
+This is only needed if you run the bREPL from a new terminal window
 
 ```bash
 lein do compile, repl
 ```
 
 ```clj
-(require '[enfocus.server :as http])
-(http/run)
-(browser-repl)
+user=> (require '[enfocus.server :as http])
+nil
+user=> (http/run)
+2013-10-15 12:34:33.082:INFO:oejs.Server:jetty-7.6.8.v20121106
+2013-10-15 12:34:33.138:INFO:oejs.AbstractConnector:Started SelectChannelConnector@0.0.0.0:3000
+#<Server org.eclipse.jetty.server.Server@7aed9585>
+```
+
+To run the brepl
+
+```clj
+user=> (browser-repl) ; to run the brepl
+Type `:cljs/quit` to stop the ClojureScript REPL
+nil
+cljs.user=>
 ```
 
 Open your browser to: [http://localhost:3000/][10] and then evaluate
 CLJS expression in the bREPL.
 
 ```clj
-(js/alert "Hello, Enfocus!")
+cljs.user=> (js/alert "Hello, Enfocus!")
 ```
 
 ## License
 
-Copyright (C) 2012 Creighton Kirkendall
+Copyright (C) 2012-2013 Creighton Kirkendall
 
 Distributed under the Eclipse Public License, the same as Clojure.
-
 
 ## Special Thanks!
 
