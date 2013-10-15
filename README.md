@@ -342,7 +342,7 @@ An extractor is a funciton that takes a node and returns information about
 
 ## Contributing
 
-* Download [lieningen][9]
+* Download [leiningen][9]
 
 ### Compile ClojureScript
 
@@ -364,7 +364,7 @@ An extractor is a funciton that takes a node and returns information about
 (http/run)
 ```
 
-Open your browser to: http://localhost:3000/
+Open your browser to: [http://localhost:3000/][10]
  
 ### bREPLing with Enfocus
 
@@ -378,8 +378,8 @@ lein do compile, repl
 (browser-repl)
 ```
 
-Open your browser to: http://localhost:3000/ and the evaluate CLJS
-expression in the bREPL.
+Open your browser to: [http://localhost:3000/][10] and then evaluate
+CLJS expression in the bREPL.
 
 ```clj
 (js/alert "Hello, Enfocus!")
@@ -407,3 +407,4 @@ manipulation.
 [7]: https://github.com/emezeske/lein-cljsbuild
 [8]: http://www.w3schools.com/cssref/css_selectors.asp
 [9]: https://github.com/technomancy/leiningen
+[10]: http://localhost:3000/
