@@ -17,6 +17,6 @@
 
 (defn run
   []
-  (defonce ^:private server
+  (defonce server
     (jetty/run-jetty #'site {:port 3000 :join? false}))
   server)
