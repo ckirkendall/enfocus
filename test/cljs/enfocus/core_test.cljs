@@ -67,6 +67,17 @@
       (is (= "<span id=\"tmp\">testing</span>" res)))))
 
 
+(deftest attributes-test
+  (testing "setting an attribute"
+    (ef/at "#test-div > p" (ef/set-attr :id "tmp"))
+    (let [res (.-innerHTML (by-id "test-div"))]
+      (is (= "<p id=\"tmp\"></p>" res))))
+  (testing "removing an attribute"
+    (ef/at "#test-div > p" (ef/remove-attr :id))
+    (let [res (.-innerHTML (by-id "test-div"))]
+      (is (= "<p></p>")))))
+
+
 
 
 
