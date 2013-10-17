@@ -50,12 +50,24 @@
     (let [res (.-innerHTML (by-id "test-div"))]
       (is (= "<span></span><span></span>" res)))))
 
+
 (deftest html-content-test
   (testing "html-content"
     (ef/at "#test-div" (ef/html-content "<span>testing</span>"))
     (let [res (.-firstChild (by-id "test-div"))]
       (is (= "SPAN" (.-nodeName res)))
       (is (= "testing" (.-textContent res))))))
+
+
+(deftest html-hiccup-test
+  (testing "html(hiccup)"
+    (ef/at "#test-div" (ef/content
+                        (ef/html [:span {:id "tmp"} "testing"])))
+    (let [res (.-innerHTML (by-id "test-div"))]
+      (is (= "<span id=\"tmp\">testing</span>" res)))))
+
+
+
 
 
 
