@@ -1,6 +1,6 @@
 (ns enfocus.report-generator)
 
-(def ^:export dom-report (atom '()))
+(def ^:export dom-report (atom []))
 
 (defn ^:export  generate-summary-report [] 
   (let [frag (.createDocumentFragment js/document)]
