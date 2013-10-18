@@ -182,7 +182,7 @@
       (is (= "12px" res2)))
     (testing "removing a list of styles"
       (ef/at "#test-div" (ef/remove-style :background :width))
-      (let [res (-> (by-id "test-div")
+      (let [res1 (-> (by-id "test-div")
                     (.-style)
                     (.-background))
             res2 (-> (by-id "test-div")
@@ -216,6 +216,19 @@
            "#test-div" (ef/replace-vars {:name "CK" :id "tmp"}))
     (let [res (.-innerHTML (by-id "test-div"))]
       (is (= "<p tmp=\"atmp\">name: CK</p>" res)))))
+
+(deftest delay-test
+  ;because clojurescript test does not handle
+  ;async behavor the testing form has to be
+  ;inside delay statement.
+  (let [cur (.getMilliseconds (js/Date.))]
+    (ef/at "#test-div"
+           (ef/delay 100
+            #(testing "delay function"
+               (let [now (.getMilliseconds (js/Date.))]
+                 (is (> 10 (Math/abs (- (- now cur) 100))))))))))
+
+
 
 
 
