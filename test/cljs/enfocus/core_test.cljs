@@ -156,6 +156,41 @@
       (is (= "<p></p>" res)))))
 
 
+(deftest style-tests
+  (testing "setting a single style"
+    (ef/at "#test-div" (ef/set-style :background "#cfcfcf"))
+    (let [res (-> (by-id "test-div")
+                  (.-style)
+                  (.-background))]
+      (is (= "rgb(207, 207, 207)" res))))
+  (testing "removing a single style"
+    (ef/at "#test-div" (ef/remove-style :background))
+    (let [res (-> (by-id "test-div")
+                  (.-style)
+                  (.-background))]
+      (is (= "" res))))
+  (testing "setting a list styles"
+    (ef/at "#test-div" (ef/set-style :background "#cfcfcf"
+                                     :width "12px"))
+    (let [res1 (-> (by-id "test-div")
+                   (.-style)
+                   (.-background))
+          res2 (-> (by-id "test-div")
+                   (.-style)
+                   (.-width))]
+      (is (= "rgb(207, 207, 207)" res1))
+      (is (= "12px" res2)))
+    (testing "removing a list of styles"
+      (ef/at "#test-div" (ef/remove-style :background :width))
+      (let [res (-> (by-id "test-div")
+                    (.-style)
+                    (.-background))
+            res2 (-> (by-id "test-div")
+                     (.-style)
+                     (.-width))]
+        (is (and (empty? res1) (empty? res2)))))))
+
+
 (deftest focus-blur-test
   (testing "setting the focus on an element"
     (ef/at "#test-div" (ef/content (ef/html [:input {:id "tmp"}]))
@@ -166,9 +201,21 @@
     (is (not= (by-id "tmp") (.-activeElement js/document)))))
 
 
+(deftest set-data-test
+  (testing "setting data elements on a node"
+    (ef/at "#test-div" (ef/set-data :my-data "testing"))
+    (let [res (pr-str (.-__domina_data (by-id "test-div")))]
+      (is (= "{:my-data \"testing\"}" res)))))
 
 
-
+(deftest replace-vars-test
+  (testing "replacing vars in a content"
+    (ef/at "#test-div > p" (ef/do->
+                            (ef/content "name: ${name}")
+                            (ef/set-attr :tmp "a${id}"))
+           "#test-div" (ef/replace-vars {:name "CK" :id "tmp"}))
+    (let [res (.-innerHTML (by-id "test-div"))]
+      (is (= "<p tmp=\"atmp\">name: CK</p>" res)))))
 
 
 
