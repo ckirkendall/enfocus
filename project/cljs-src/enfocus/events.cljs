@@ -93,12 +93,17 @@
 (defn listen-live [event selector func]
   (fn [node]
     (ef/at node
-           (listen event
-                   #(doseq [el (get-node-chain node (.-target %))]
-                      (ef/at el
-                             (ef/filter (ef/match? selector)
-                                        (fn [node]
-                                          (func (create-event event el (.-target %)))))))))))
+     (listen event
+       #(doseq [el (get-node-chain node (.-target %))]
+          (ef/at el
+           (ef/filter (ef/match? selector)
+                      (fn [node]
+                        (let [event-copy (create-event event el (.-target %))]
+                          (func event-copy)
+                          (when (.-defaultPrevented event-copy)
+                            (.preventDefault %))
+                          (when (.-propagationStopped event-copy)
+                            (.stopPropagation %)))))))))))
 
 
 ;###################################################
