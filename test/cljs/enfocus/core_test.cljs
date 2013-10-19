@@ -23,11 +23,25 @@
 (defn elem [typ]
   (.createElement js/document typ))
 
-;;;;;;;;;;;;;;;;;;;;;;;;
+(defn- build-form []
+  (ef/html [:form
+            [:input {:name "f1" :type "text"
+                     :value "testing1"}]
+            [:select {:name "f2"
+                      :multiple "multiple"}
+             [:option {:value "o1" :selected true}]
+             [:option {:value "o2" :selected true}]
+             [:option {:value "o1"}]]
+            [:input {:name "f3" :type "checkbox"
+                     :value "c1" :checked true}]
+            [:input {:name "f3" :type "checkbox"
+                     :value "c2"}]]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
-;; Tests
+;; Standard Trandsform Tests
 ;;
-;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (deftest sample-test
   (testing "this test should pass"
@@ -217,6 +231,131 @@
     (let [res (.-innerHTML (by-id "test-div"))]
       (is (= "<p tmp=\"atmp\">name: CK</p>" res)))))
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; Extractor Tests
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;
+
+(deftest get-attr-test
+  (testing "getting an attribute from a node"
+    (let [res (ef/from "#test-div" (ef/get-attr :id))]
+      (is (= "test-div" res)))))
+
+
+(deftest get-text-test
+  (ef/at "#test-div" (ef/content "testing"))
+  (testing "getting the text from a node"
+    (let [res (ef/from "#test-div" (ef/get-text))]
+      (is (= "testing" res)))))
+
+(deftest get-data-test
+  (ef/at "#test-div" (ef/set-data :my-data "testing"))
+  (testing "getting the data from a node"
+    (let [res (ef/from "#test-div" (ef/get-data :my-data))]
+      (is (= "testing" res)))))
+
+(deftest get-prop
+  (ef/at "#test-div" (ef/set-prop :my-data "testing"))
+  (testing "getting the a property from a node"
+    (let [res (ef/from "#test-div" (ef/get-prop :my-data))]
+      (is (= "testing" res)))))
+
+
+(deftest form-test
+  (ef/at "#test-div" (ef/content (build-form)))
+  (testing "reading a form"
+    (let [res (ef/from "#test-div > form" (ef/read-form))]
+      (is (= {:f1 "testing1" :f2 '("o1" "o2") :f3 "c1"} res)))))
+
+
+(deftest filter-test
+  (ef/at "#test-div" (ef/content (build-form)))
+  (testing "testing the filter transform"
+    (let [res (ef/from "option"
+                       (ef/filter #(.-selected %)
+                                  (ef/get-prop :value)))]
+      (is (= '("o1" "o2") res))))
+  (testing "build in filters :selected"
+    (let [res (ef/from "option"
+                       (ef/filter :selected (ef/get-prop :value)))]
+      (is (= '("o1" "o2") res))))
+  (testing "build in filters :checked"
+    (let [res (ef/from "input[type='checkbox']"
+                       (ef/filter :checked (ef/get-prop :value)))]
+      (is (= "c1" res)))))
+
+  
+;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; at & from form Tests
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+(deftest at-form-test
+  (testing "simple node test"
+    (ef/at (by-id "test-div") (ef/content "testing1"))
+    (let [res (.-innerHTML (by-id "test-div"))]
+      (is (= "testing1" res))))
+  (ef/at "#test-div" (ef/content ""))
+  (testing "js/document single selector"
+    (ef/at js/document "#test-div" (ef/content "testing2"))
+    (let [res (.-innerHTML (by-id "test-div"))]
+      (is (= "testing2" res))))
+  (ef/at "#test-div" (ef/content ""))
+  (testing "js/documnt w/ 3 sub selectors"
+    (ef/at js/document
+           "#test-div" (ef/content (ef/html [:p]))
+           "#test-div > p" (ef/content "testing")
+           "#test-div" (ef/append (ef/html [:span])))
+    (let [res (.-innerHTML (by-id "test-div"))]
+      (is (= "<p>testing</p><span></span>" res))))
+  (ef/at "#test-div" (ef/content ""))
+  (testing "single selector"
+    (ef/at "#test-div" (ef/content "testing3"))
+    (let [res (.-innerHTML (by-id "test-div"))]
+      (is (= "testing3" res))))
+  (ef/at "#test-div" (ef/content ""))
+  (testing "direct 2 sub selectors"
+    (ef/at "#test-div" (ef/content (ef/html [:p]))
+           "#test-div > p" (ef/content "testing"))
+    (let [res (.-innerHTML (by-id "test-div"))]
+      (is (= "<p>testing</p>" res))))
+  (ef/at "#test-div" (ef/content "")) 
+  (testing "single selector 2 sub & custom selector"
+    (ef/at (by-id "test-div")
+           ef/this-node (ef/do->
+                         (ef/content (ef/html [:p]))
+                         (ef/append (ef/html [:span])))
+           "p" (ef/content "testing"))
+    (let [res (.-innerHTML (by-id "test-div"))]
+      (is (= "<p>testing</p><span></span>" res)))))
+
+
+(deftest from-tests
+  (ef/at "#test-div" (ef/content (build-form)))
+  (testing "simple node test"
+    (let [res (ef/from (by-id "test-div") (ef/get-attr :id))]
+      (is (= "test-div" res))))
+  (testing "simple selector test"
+    (let [res (ef/from "#test-div" (ef/get-attr :id))]
+      (is (= "test-div" res))))
+  (testing "node w/ several selectors"
+    (let [res (ef/from (by-id "test-div")
+                       :f1 "input[name='f1']" (ef/get-prop :value)
+                       :f2 "option" (ef/filter :selected
+                                               (ef/get-attr :value)))]
+      (is (= {:f1 "testing1" :f2 '("o1" "o2")} res)))))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; Async Tests
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;
+
 (deftest delay-test
   ;because clojurescript test does not handle
   ;async behavor the testing form has to be
@@ -224,9 +363,11 @@
   (let [cur (.getMilliseconds (js/Date.))]
     (ef/at "#test-div"
            (ef/delay 100
-            #(testing "delay function"
-               (let [now (.getMilliseconds (js/Date.))]
-                 (is (> 10 (Math/abs (- (- now cur) 100))))))))))
+              #(testing "delay function"     
+                 (let [now (.getMilliseconds (js/Date.))]
+                   (println (Math/abs (- (- now cur) 100)))
+                   (is (> 10 (Math/abs (- (- now cur) 100))))))))))
+
 
 
 
