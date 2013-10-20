@@ -425,7 +425,6 @@
     (string? node-spec) (.createTextNode js/document node-spec)
     (vector? node-spec) 
     (let [[tag & [m & ms :as more]] node-spec
-          _ (log-debug (pr-str tag m ms))
           [tag-name & segments] (.split (name tag) #"(?=[#.])")
           id (some (fn [seg]
                      (when (= \# (.charAt seg 0)) (subs seg 1))) segments)

@@ -1,7 +1,7 @@
 <html>
 <head>
 <script language="javascript" charset="utf-8"
-        src="js/testable_advanced.js"></script>
+        src="js/advanced.js"></script>
 <link type="text/css" rel="stylesheet" href="css/test.css"/>
 </head>
 <body>
@@ -11,8 +11,11 @@
      x = x.replace(/\n/g, "");
      console.log(x);
   });
-
-  cemerick.cljs.test.run_all_tests();
-  enfocus.report_generator.generate_summary_report();
+  
+  var results = cemerick.cljs.test.run_all_tests();
+  setTimeout(function () { 
+    enfocus.report_generator.generate_summary_report();
+    console.log(results);
+  }, 500);
 </script>
 </html>
