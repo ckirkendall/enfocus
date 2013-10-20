@@ -269,12 +269,12 @@
     (let [res (ef/from "#test-div > form" (ef/read-form))]
       (is (= {:f1 "testing1" :f2 '("o1" "o2") :f3 "c1"} res)))))
 
-
+  
 (deftest filter-test
   (ef/at "#test-div" (ef/content (build-form)))
   (testing "testing the filter transform"
     (let [res (ef/from "option"
-                       (ef/filter #(.-selected %)
+                       (ef/filter #(aget % "selected")
                                   (ef/get-prop :value)))]
       (is (= '("o1" "o2") res))))
   (testing "build in filters :selected"

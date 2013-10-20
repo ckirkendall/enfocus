@@ -50,7 +50,7 @@
 (defn nodes->coll 
   "coverts a nodelist, node into a collection"
   [nl]
-  (if (= nl js/window)
+  (if (identical? nl js/window)
     [nl]
     (domina/nodes nl)))
 
