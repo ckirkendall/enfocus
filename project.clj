@@ -5,7 +5,7 @@
   :test-paths ["test/clj"]
   
   :dependencies [[org.clojure/clojure "1.5.1"]
-                 [org.clojure/clojurescript "0.0-1909"]
+                 [org.clojure/clojurescript "0.0-1835"]
                  [domina "1.0.2"]
                  [org.jsoup/jsoup "1.7.2"]
                  [com.cemerick/clojurescript.test "0.0.5-SNAPSHOT"]
