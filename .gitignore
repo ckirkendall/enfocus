@@ -3,11 +3,15 @@ pom.xml
 .lein-failures
 .lein-deps-sum
 .lein-repl-history
+.repl
+repl
+out
 target
 .settings
 .metadata
 .project
 .classpath
+dev-resources/public/js/*.js
 *.*#
 .#*
 *.*~
