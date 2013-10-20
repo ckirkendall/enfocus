@@ -8,6 +8,7 @@ target
 .metadata
 .project
 .classpath
+resources/*.js
 *.*#
 .#*
 *.*~
