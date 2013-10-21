@@ -172,10 +172,10 @@
 
 (deftest style-tests
   (testing "setting a single style"
-    (ef/at "#test-div" (ef/set-style :background "#cfcfcf"))
+    (ef/at "#test-div" (ef/set-style :background-color"#cfcfcf"))
     (let [res (-> (by-id "test-div")
                   (.-style)
-                  (.-background))]
+                  (.-backgroundColor))]
       (is (= "rgb(207, 207, 207)" res))))
   (testing "removing a single style"
     (ef/at "#test-div" (ef/remove-style :background))
@@ -184,11 +184,11 @@
                   (.-background))]
       (is (= "" res))))
   (testing "setting a list styles"
-    (ef/at "#test-div" (ef/set-style :background "#cfcfcf"
+    (ef/at "#test-div" (ef/set-style :background-color "#cfcfcf"
                                      :width "12px"))
     (let [res1 (-> (by-id "test-div")
                    (.-style)
-                   (.-background))
+                   (.-backgroundColor))
           res2 (-> (by-id "test-div")
                    (.-style)
                    (.-width))]
@@ -366,7 +366,7 @@
               #(testing "delay function"     
                  (let [now (.getMilliseconds (js/Date.))]
                    (println (Math/abs (- (- now cur) 100)))
-                   (is (> 10 (Math/abs (- (- now cur) 100))))))))))
+                   (is (> 20 (Math/abs (- (- now cur) 100))))))))))
 
 
 
