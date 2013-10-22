@@ -41,36 +41,39 @@
                    
                    :cljsbuild 
                    {:builds {:whitespace
-                             {:source-paths ["test/clj" "src/cljs" "test/cljs" "src/brepl"]
+                             {:source-paths ["src/cljs" "test/cljs" "src/brepl"]
                               :compiler
                               {:output-to "dev-resources/public/js/whitespace.js"
                                :optimizations :whitespace
                                :pretty-print true}}
                              
                              :simple
-                             {:source-paths ["test/clj" "src/cljs" "test/cljs" "src/brepl"]
+                             {:source-paths ["src/cljs" "test/cljs" "src/brepl"]
                               :compiler
                               {:output-to "dev-resources/public/js/simple.js"
                                :optimizations :simple
                                :pretty-print false}}
 
                              :advanced
-                             {:source-paths ["test/clj" "src/cljs" "test/cljs"]
+                             {:source-paths ["src/cljs" "test/cljs"]
                               :compiler
                               {:output-to "dev-resources/public/js/advanced.js"
                                :optimizations :advanced
                                :pretty-print false}}}
                     :test-commands {"whitespace"
-                                    ["runners/phantomjs.js" 
-                                     "dev-resources/public/test_ws.html"]
+                                    ["phantomjs"
+                                     :runner
+                                     "dev-resources/public/js/whitespace.js"]
                                     
                                     "simple"
-                                    ["runners/phantomjs.js" 
-                                     "dev-resources/public/test_simple.html"]
+                                    ["phantomjs"
+                                     :runner
+                                     "dev-resources/public/js/simple.js"]
                                     
                                     "advanced"
-                                    ["runners/phantomjs.js" 
-                                     "dev-resources/public/test_advanced.html"]}}
+                                    ["phantomjs" 
+                                     :runner
+                                     "dev-resources/public/js/advanced.js"]}}
                                
                    :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
                    :injections [(require '[cljs.repl.browser :as brepl]
