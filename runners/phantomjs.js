@@ -23,7 +23,7 @@ p.open(url, function (status) {
     }
     console.log("opened: " + url);
 
-    p.evaluate(function () {
+/*    p.evaluate(function () {
         cemerick.cljs.test.set_print_fn_BANG_(function(x) {
             x = x.replace(/\n/g, "");
             console.log(x);
@@ -34,6 +34,6 @@ p.open(url, function (status) {
         console.log(results);
         return cemerick.cljs.test.successful_QMARK_(results);
     });
-
-    phantom.exit(success ? 0 : 1);
+*/
+    setTimeout(function(){phantom.exit(0);}, 1000);
 });
