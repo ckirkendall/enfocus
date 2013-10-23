@@ -1,20 +1,14 @@
 (ns enfocus.core-test
   (:require
    [enfocus.core :as ef]
-   [cemerick.cljs.test :as t])
+   [cemerick.cljs.test :as t]
+   [enfocus.report-generator :refer (each-fixture)])
   (:require-macros
-   [enfocus.macros :as em]
+   [enfocus.test-setup :refer (setup-tests)]
    [cemerick.cljs.test :refer (is deftest testing use-fixtures)]))
 
-(defn each-fixture [f]
-  (let [div (.createElement js/document "div")
-        pc (.createElement js/document "p")]
-    (.setAttribute div "id" "test-div") 
-    (.appendChild (.-body js/document) div)
-    (.appendChild div pc)
-    (f)
-    (.removeChild (.-body js/document) div)))
 
+(setup-tests)
 (use-fixtures :each each-fixture)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;
