@@ -59,6 +59,28 @@
                               :compiler
                               {:output-to "dev-resources/public/js/advanced.js"
                                :optimizations :advanced
+                               :pretty-print false}}
+
+                             ;; for reporting
+                             :ws
+                             {:source-paths ["test/reporting" "src/cljs"]
+                              :compiler
+                              {:output-to "dev-resources/public/js/rep_ws.js"
+                               :optimizations :whitespace
+                               :pretty-print true}}
+
+                             :smp
+                             {:source-paths ["test/reporting" "src/cljs"]
+                              :compiler
+                              {:output-to "dev-resources/public/js/rep_smp.js"
+                               :optimizations :simple
+                               :pretty-print false}}
+
+                             :adv
+                             {:source-paths ["test/reporting" "src/cljs"]
+                              :compiler
+                              {:output-to "dev-resources/public/js/rep_adv.js"
+                               :optimizations :advanced
                                :pretty-print false}}}
 
                     :test-commands {"slimerjs-ws"
@@ -89,7 +111,20 @@
                                     "phantomjs-advanced"
                                     ["phantomjs"
                                      :runner
-                                     "dev-resources/public/js/advanced.js"]}}
+                                     "dev-resources/public/js/advanced.js"]
+
+                                    ;; for reporting
+                                    "whitespace"
+                                    ["runners/phantomjs.js"
+                                     "dev-resources/public/test_ws.html"]
+
+                                    "simple"
+                                    ["runners/phantomjs.js"
+                                     "dev-resources/public/test_simple.html"]
+
+                                    "advanced"
+                                    ["runners/phantomjs.js"
+                                     "dev-resources/public/test_advanced.html"]}}
 
                    :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
                    :injections [(require '[cljs.repl.browser :as brepl]
