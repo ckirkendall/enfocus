@@ -4,18 +4,52 @@
    [cemerick.cljs.test :as t])
   (:require-macros
    [enfocus.macros :as em]
-   [cemerick.cljs.test :refer (is deftest testing use-fixtures)]))
+   [cemerick.cljs.test :refer (is are deftest testing use-fixtures)]))
 
 (defn each-fixture [f]
   (let [div (.createElement js/document "div")
         pc (.createElement js/document "p")]
-    (.setAttribute div "id" "test-div") 
+    (.setAttribute div "id" "test-div")
     (.appendChild (.-body js/document) div)
     (.appendChild div pc)
     (f)
     (.removeChild (.-body js/document) div)))
 
 (use-fixtures :each each-fixture)
+
+;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; at form
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;
+
+(deftest at-test
+  (testing "at form "
+    (testing "border cases"
+      (testing " two args call"
+        (are [expected actual] (= expected actual)
+             nil (ef/at js/document nil)
+             nil (ef/at "body" nil)
+             nil (ef/at "div" nil)
+             nil (ef/at "p" nil)
+             nil (ef/at "#test-div" nil)
+             nil (ef/at "not existent" nil)
+             nil (ef/at nil nil)))
+      (testing " three args call"
+        (are [expected actual] (= expected actual)
+             nil (ef/at nil nil nil)
+             nil (ef/at js/document nil nil)
+             nil (ef/at "body" nil nil)
+             nil (ef/at "not existent" nil nil)
+             nil (ef/at nil [] nil)
+             nil (ef/at nil ["body"] nil)
+             nil (ef/at js/document [] nil)
+             nil (ef/at js/document ["body"] nil)
+             nil (ef/at js/document ["div"] nil)
+             nil (ef/at js/document ["#test-div"] nil)
+             nil (ef/at js/document ["p"] nil)
+             nil (ef/at "body" nil))))))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -151,7 +185,7 @@
     (ef/at "#test-div > p" (ef/after (ef/html [:span])))
     (let [res (.-innerHTML (by-id "test-div"))]
       (is (= "<span></span><p></p><span></span>" res)))))
- 
+
 
 (deftest substitute-test
   (testing "substituting content"
@@ -275,7 +309,7 @@
     (let [res (ef/from "#test-div > form" (ef/read-form))]
       (is (= {:f1 "testing1" :f2 '("o1" "o2") :f3 "c1"} res)))))
 
-  
+
 (deftest filter-test
   (ef/at "#test-div" (ef/content (build-form)))
   (testing "testing the filter transform"
@@ -292,7 +326,7 @@
                        (ef/filter :checked (ef/get-prop :value)))]
       (is (= "c1" res)))))
 
-  
+
 ;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;; at & from form Tests
@@ -329,7 +363,7 @@
            "#test-div > p" (ef/content "testing"))
     (let [res (.-innerHTML (by-id "test-div"))]
       (is (= "<p>testing</p>" res))))
-  (ef/at "#test-div" (ef/content "")) 
+  (ef/at "#test-div" (ef/content ""))
   (testing "single selector 2 sub & custom selector"
     (ef/at (by-id "test-div")
            ef/this-node (ef/do->
@@ -369,17 +403,7 @@
   (let [cur (.getMilliseconds (js/Date.))]
     (ef/at "#test-div"
            (ef/delay 100
-              #(testing "delay function"     
+              #(testing "delay function"
                  (let [now (.getMilliseconds (js/Date.))]
                    (println (Math/abs (- (- now cur) 100)))
                    (is (> 20 (Math/abs (- (- now cur) 100))))))))))
-
-
-
-
-
-
-
-
-
-
