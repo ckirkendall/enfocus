@@ -5,7 +5,7 @@
 <body>
 </body>
 <script language="javascript" charset="utf-8"
-        src="js/whitespace.js"></script>
+        src="js/rep_ws.js"></script>
 <script>
   cemerick.cljs.test.set_print_fn_BANG_(function(x) {
      x = x.replace(/\n/g, "");
@@ -13,7 +13,7 @@
   });
 
   var results = cemerick.cljs.test.run_all_tests();
-  setTimeout(function () { 
+  setTimeout(function () {
     enfocus.report_generator.generate_summary_report();
     console.log(results);
   }, 500);
