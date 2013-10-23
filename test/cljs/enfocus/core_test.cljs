@@ -94,10 +94,22 @@
     
     (testing "Standard cases"
 
-      (testing "add all the standard cases"
+      (testing "ADD STANDARD CASES"
         (are [expected actual] (= expected actual)
              
              ;; add standard cases
              nil true
              )))))
 
+;;; ********************************************************************** 
+;;;
+;;; ADD BORDER/STANDARD TESTS FOR filter AND match? SYMBOL.
+;;;
+;;; **********************************************************************
+
+
+;;; **********************************************************************
+;;;
+;;; ADD BORDER/STANDARD TESTS FOR THE MOST USED SYMBOLS
+;;;
+;:; **********************************************************************
