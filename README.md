@@ -48,16 +48,16 @@ Every great journey starts with "Hello world!"
 	    [enfocus.effects :as effects])
   (:require-macros [enfocus.macros :as em]))
 
-(defn start [] 
+(defn start []
   (ef/at js/document
     ["body"] (ef/content "Hello world!")))
 
-(set! (.-onload js/window) start) 
+(set! (.-onload js/window) start)
 ```
 
 ## The `at` form
 
-At the core to understanding Enfocus is the @at@ form used in the 
+At the core to understanding Enfocus is the `at` form used in the
 "Hello world!" example above.  It comes in two basic flavors listed below:
 
 A single transform
@@ -86,7 +86,7 @@ and a series of transforms
 In the first case `at` is passed a node, node set or selector and a
 transform.  This form of `at` calls the transform on each element in
 the node set.
- 
+
 A `transform` is nothing more than a function that takes a set of
 arguments and returns a function that takes a set of nodes.  In case
 of the `"Hello World!"` example above, we see the use of `(em/content
@@ -97,7 +97,7 @@ In the second case, we see `at` is optionally passed a node or node
 set and a set of selector/transform pairs. The selectors are scoped by
 the node, node set or js/document, if a node is not passed in, and the
 results of each selector is passed on to its partner transformation.
-  
+
 A `selector` is a string representing a [CSS3 compliant selector][8]
 
 ### Handling Events
@@ -106,19 +106,19 @@ Enfocus has event handling.  Below is a simple example to add an
 @onclick@ event handler to a button.
 
 ```clj
-(em/defaction change [msg] 
+(em/defaction change [msg]
   ["#button1"] (ef/content msg))
 
 (em/defaction setup []
   ["#button1"] (events/listen :click #(change "I have been clicked")))
-	
+
 (set! (.-onload js/window) setup)
 ```
 
 The `defaction` construct is use here instead `defn`.  `defaction`
 creates a function that calls the `at` form like discussed above and
 passes in js/document as the node to be transformed.
- 
+
 ### Effects
 
 Enfocus has the concept of effects.  Effects are nothing more than
@@ -126,14 +126,14 @@ transformations over a period of time. Below is a simple example of a
 resize effect. Notice how the effects can be chained.
 
 ```clj
-(em/defaction resize-div [width] 
-  ["#rz-demo"] (effects/chain 
+(em/defaction resize-div [width]
+  ["#rz-demo"] (effects/chain
                  (effects/resize width :curheight 500 20)
                  (effects/resize 5 :curheight 500 20)))
 
 (em/defaction setup []
   ["#button2"] (events/listen #(resize-div 200)))
-	
+
 (set! (.-onload js/window) setup)
 ```
 
@@ -150,8 +150,8 @@ resource templates/template1.html and grabs the first row.  It then
 fills the content of the row.
 
 ```clj
-(em/defsnippet snippet2 "templates/template1.html" ["tbody > *:first-child"] 
-               [fruit quantity] 
+(em/defsnippet snippet2 "templates/template1.html" ["tbody > *:first-child"]
+               [fruit quantity]
                ["tr > *:first-child"] (ef/content fruit)
                ["tr > *:last-child"] (ef/content (str quantity)))
 ```
@@ -162,8 +162,8 @@ used as the dom.  If the remote resource is a full html document only
 what is inside the body tag is brought into the template.
 
 ```clj
-(em/deftemplate template2 "/templates/template1.html" [fruit-data] 
-                ["#heading1"] (ef/content "fruit")  
+(em/deftemplate template2 "/templates/template1.html" [fruit-data]
+                ["#heading1"] (ef/content "fruit")
                 ["thead tr > *:last-child"] (ef/content "quantity")
                 ["tbody"] (ef/content
                            (map #(snippit2 % (fruit-data %)) (keys fruit-data))))
@@ -174,7 +174,7 @@ you can also create `:compiled` templates, which will be inlined in to
 resulting code at compile time:
 
 ```clj
-(em/deftemplate template2 :compiled "/templates/template1.html" [fruit-data] 
+(em/deftemplate template2 :compiled "/templates/template1.html" [fruit-data]
                 ["#heading1"] (ef/content "fruit")
                 ["thead tr > *:last-child"] (ef/content "quantity")
                 ["tbody"] (ef/content
@@ -187,14 +187,14 @@ snippit function.  Enfocus provides a convient macro that works like
 an onload callback but for AJAX driven snippets and templates.
 
 ```clj
-(em/wait-for-load (render-page)) 
+(em/wait-for-load (render-page))
 ```
 
 An action is a set of transforms that take place on the live dom.
 below is a definition of a an action.
 
 ```clj
-(em/defaction action2 [] 
+(em/defaction action2 []
              [".cool[foo=false]"] (ef/content (template2 {"banana" 5 "pineapple" 10}))
              ["#heading1"] (ef/set-attr :id "new-heading1"))
 ```
@@ -205,7 +205,7 @@ Enfocus also support hiccup style emitters introduced in enlive 1.1.0.
 (defn hiccup-template [arg1]
   (ef/html
     [:h1#hiccup.clazz {:width arg1} "Hiccup Emitters are Cool"]))
-``` 
+```
 
 ## Transformations
 
@@ -214,26 +214,26 @@ collection of node.
 
 ### Enfocus defines several helper functions for transformations:
 
-Supported Enlive Transformations 
+Supported Enlive Transformations
 
 ```clj
-  content            (content "xyz" a-node "abc")             
+  content            (content "xyz" a-node "abc")
   html-content       (html-content "<blink>please no</blink>")
   set-attr           (set-attr :attr1 "val1" :attr2 "val2")
-  remove-attr        (remove-attr :attr1 :attr2) 
+  remove-attr        (remove-attr :attr1 :attr2)
   add-class          (add-class "foo" "bar")
   remove-class       (remove-class "foo" "bar")
-  do->               (do-> transformation1 transformation2) 
+  do->               (do-> transformation1 transformation2)
   append             (append "xyz" a-node "abc")
   prepend            (prepend "xyz" a-node "abc")
   after              (after "xyz" a-node "abc")
   before             (before "xyz" a-node "abc")
   substitute         (substitute "xyz" a-node "abc")
   clone-for          (clone-for [item items] transformation)
-                     or (clone-for [item items] 
+                     or (clone-for [item items]
                           selector1 transformation1
                           selector2 transformation2)
-  wrap               (wrap :div) or (wrap :div {:class "foo"}) 
+  wrap               (wrap :div) or (wrap :div {:class "foo"})
   unwrap             (unwrap)
   replace-vars       (replace-vars {:var1 "value" :var2 "value")
 ```
@@ -266,14 +266,14 @@ New Transformations
                             (move x y ttime)
                             (fade-out ttime)
                             ...)
-  set-data           (set-data key value) 
+  set-data           (set-data key value)
 ```
 
 Currently there is one transformation that is supported by Enlive but
 not Enfocus. (Patches very welcome!!)
 
 ```clj
-  move               (move [:.footnote] [:#footnotes] content) 
+  move               (move [:.footnote] [:#footnotes] content)
                      ;this will be called relocate in enfocus
 ```
 
@@ -287,7 +287,7 @@ Enfocus supports both CSS3 and XPath selectors:
   (:require [enfocus.core :as ef])
   (:require-macros [enfocus.macros :as em]))
 
-(em/defaction action2 [] 
+(em/defaction action2 []
              [".cool[foo=false]"] (ef/content ....)) ;CSS3
              (ef/xpath "//tr[@id='1']/th[2]") (ef/set-attr :id "new-heading1")) ;XPATH
 ```
@@ -436,7 +436,7 @@ manipulation.
 [1]: http://github.com/cgrand/enlive
 [2]: http://github.com/swannodette/enlive-tutorial/
 [3]: https://github.com/cgrand/enlive/wiki/Table-and-Layout-Tutorial,-Part-1:-The-Goal
-[4]: http:/ckirkendall.github.com/enfocus-site 
+[4]: http:/ckirkendall.github.com/enfocus-site
 [5]: http://github.com/ckirkendall/The-Great-Todo
 [6]: http://groups.google.com/group/enfocus
 [7]: https://github.com/emezeske/lein-cljsbuild
