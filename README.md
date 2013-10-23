@@ -344,7 +344,7 @@ An extractor is a funciton that takes a node and returns information about
 
 * Download [leiningen][9]
 
-### Compile ClojureScript
+### Compile Enfocus
 
 ```bash
  git clone git://github.com/ckirkendall/enfocus.git
@@ -352,7 +352,12 @@ An extractor is a funciton that takes a node and returns information about
  lein compile
 ```
 
-### Viewing the Test Page
+### Test Enfocus
+
+```bash
+lein do compile, test
+```
+### Viewing index.html
 
 ```bash
  lein do compile, repl
