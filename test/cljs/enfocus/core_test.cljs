@@ -29,11 +29,11 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;
 
 (deftest at-test
-  (testing "Unit Test for the *at* form"
+  (testing "Unit Test for the *at* form\n"
 
-    (testing "Border Cases"
+    (testing "Border Cases\n"
 
-      (testing "(at selector (transform arg1 ...))"
+      (testing "(at selector (transform arg1 ...))\n"
         (are [expected actual] (= expected actual)
 
              ;; the transformer is nil 
@@ -47,17 +47,18 @@
              ;; the selector is nil too
              nil (ef/at nil nil)))
 
-      (testing "(at a-node (transform arg1 ...))"
+      (testing "(at a-node (transform arg1 ...))\n"
         (are [expected actual] (= expected actual)
              
              ;; the transformer is nil
              js/document (ef/at js/document nil)
-             nil (ef/at js/not-a-node nil) ; Can't find variable: not-a-node
+             "Error" (try 
+                       (ef/at js/not-a-node nil)
+                       (catch js/Error e
+                         "Error")) ; Can't find variable: not-a-node
              ))
       
-      (testing "(at a-node
-                   [selector1] (transform1 arg1 ...)
-                   [selector2] (transform2 arg1 ...))"
+      (testing "(at a-node\n\t[selector1] (transform1 arg1 ...)\n\t[selector2] (transform2 arg1 ...))\n"
         (are [expected actual] (= expected actual)
 
              ;; the node is nil
@@ -69,20 +70,23 @@
              ;; the selector is nil
              nil (ef/at js/document nil (ef/content "which ever content")) ; ISelector not supported
              nil (ef/at js/document nil nil) ; ISelector not supported
-             nil (ef/at js/not-a-node nil (ef/content "which ever content")) ; Can't find variable: not a node
+             "Error" (try (ef/at js/not-a-node nil (ef/content "which ever content"))
+                      (catch js/Error e
+                        "Error")) ; Can't find variable: not a node
 
              ;; the transformer is nil
              nil (ef/at js/document [] nil)
              nil (ef/at js/document ["body"] nil)
              nil (ef/at js/document ["not a selector"] nil) ;should rise an exception?
-             nil (ef/at js/not-a-node ["body"] nil) ; Can't find variable: not a node
+             "Error" (try (ef/at js/not-a-node ["body"] nil)
+                      (catch js/Error e
+                        "Error")) ; Can't find variable: not a node
 
              ;; every arg is nil
              nil (ef/at nil nil nil)    ;ISelector not supported
              ))
       
-      (testing "(at [selector1] (transform1 arg1 ...)
-                    [selector2] (transform2 arg1 ...))"
+      (testing "(at [selector1] (transform1 arg1 ...)\n\t[selector2] (transform2 arg1 ...))\n"
         (are [expected actual] (= expected actual) 
              
              ;; the tranformer is nil
@@ -92,9 +96,9 @@
              nil (ef/at ["not a selector"] nil) ;should rise an exception?
              nil (ef/at [nil] nil))))
     
-    (testing "Standard cases"
+    (testing "Standard Cases\n"
 
-      (testing "ADD STANDARD CASES"
+      (testing "ADD STANDARD CASES\n"
         (are [expected actual] (= expected actual)
              
              ;; add standard cases
@@ -107,19 +111,19 @@
 ;;; **********************************************************************
 
 (deftest filter-test
-  (testing "Unit Test for the *filter* form"
+  (testing "Unit Test for the *filter* form\n"
 
-    (testing "Border Cases"
+    (testing "Border Cases\n"
 
-      (testing "ADD BORDER CASES"
+      (testing "ADD BORDER CASES\n"
         (are [expected actual] (= expected actual)
              
              ;; add border cases
              nil true)))
     
-    (testing "Standard cases"
+    (testing "Standard Cases\n"
       
-      (testing "ADD STANDARD CASES"
+      (testing "ADD STANDARD CASES\n"
         (are [expected actual] (= expected actual)
              
              ;; add standard cases
