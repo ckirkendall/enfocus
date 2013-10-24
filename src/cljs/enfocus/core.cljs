@@ -50,7 +50,7 @@
 (defn nodes->coll 
   "coverts a nodelist, node into a collection"
   [nl]
-  (if (= nl js/window)
+  (if (identical? nl js/window)
     [nl]
     (domina/nodes nl)))
 
@@ -425,7 +425,6 @@
     (string? node-spec) (.createTextNode js/document node-spec)
     (vector? node-spec) 
     (let [[tag & [m & ms :as more]] node-spec
-          _ (log-debug (pr-str tag m ms))
           [tag-name & segments] (.split (name tag) #"(?=[#.])")
           id (some (fn [seg]
                      (when (= \# (.charAt seg 0)) (subs seg 1))) segments)
@@ -701,7 +700,7 @@
   (select [this] (select this js/document ""))
   (select [this root] (select this root ""))
   (select [this root id-mask] (css-select id-mask root [this])))
-  
+
   
 (extend-protocol ITransform
   function
@@ -711,4 +710,7 @@
           val (doall (map trans pnod-col))]
       (if chain
         (apply-transform chain nodes)
-        val))))
+        val)))
+  nil
+  (apply-transform [trans nodes] nodes)
+  (apply-transform [trans nodes chain] nodes))
