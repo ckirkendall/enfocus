@@ -700,7 +700,7 @@
   (select [this] (select this js/document ""))
   (select [this root] (select this root ""))
   (select [this root id-mask] (css-select id-mask root [this])))
-  
+
   
 (extend-protocol ITransform
   function
@@ -710,4 +710,7 @@
           val (doall (map trans pnod-col))]
       (if chain
         (apply-transform chain nodes)
-        val))))
+        val)))
+  nil
+  (apply-transform [trans nodes] nodes)
+  (apply-transform [trans nodes chain] nodes))
