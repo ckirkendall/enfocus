@@ -42,16 +42,16 @@
              nil (ef/at "p" nil)
              nil (ef/at "#test-id" nil)
              nil (ef/at ".test-class" nil)
-             nil (ef/at "not a selector" nil) ;should rise an exception
+             nil (ef/at "not a selector" nil) ;should rise an exception?
 
              ;; the selector is nil too
-             nil (ef/at nil nil)))      ; ITransform not supported
+             nil (ef/at nil nil)))
 
       (testing "(at a-node (transform arg1 ...))"
         (are [expected actual] (= expected actual)
              
              ;; the transformer is nil
-             nil (ef/at js/document nil) ; ITransform not supported
+             js/document (ef/at js/document nil)
              nil (ef/at js/not-a-node nil) ; Can't find variable: not-a-node
              ))
       
@@ -98,8 +98,7 @@
         (are [expected actual] (= expected actual)
              
              ;; add standard cases
-             nil true
-             )))))
+             nil true)))))
 
 ;;; ********************************************************************** 
 ;;;
@@ -107,6 +106,24 @@
 ;;;
 ;;; **********************************************************************
 
+(deftest filter-test
+  (testing "Unit Test for the *filter* form"
+
+    (testing "Border Cases"
+
+      (testing "ADD BORDER CASES"
+        (are [expected actual] (= expected actual)
+             
+             ;; add border cases
+             nil true)))
+    
+    (testing "Standard cases"
+      
+      (testing "ADD STANDARD CASES"
+        (are [expected actual] (= expected actual)
+             
+             ;; add standard cases
+             nil true)))))
 
 ;;; **********************************************************************
 ;;;
