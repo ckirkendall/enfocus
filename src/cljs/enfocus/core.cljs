@@ -631,7 +631,7 @@
 
 (defn i-at [id-mask node & trans]
   (let [cnt (count trans)
-        sel? (satisfies? ISelector node)]
+        sel? (and (not (nil? node)) (satisfies? ISelector node))]
     (if (and (not sel?) (= 1 cnt))
       (apply-transform (first trans) node)
       (let [[node trans] (if sel?
@@ -699,7 +699,11 @@
   js/String
   (select [this] (select this js/document ""))
   (select [this root] (select this root ""))
-  (select [this root id-mask] (css-select id-mask root [this])))
+  (select [this root id-mask] (css-select id-mask root [this]))
+  nil
+  (select [this] '())
+  (select [this root] '())
+  (select [this root id-mask] '()))
 
   
 (extend-protocol ITransform
