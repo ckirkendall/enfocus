@@ -50,10 +50,12 @@ Every great journey starts with "Hello world!"
 
 (defn start []
   (ef/at js/document
-    ["body"] (ef/content "Hello world!")))
+    ["body"] (ef/content "Hello enfocus!")))
 
 (set! (.-onload js/window) start)
 ```
+
+See [hello-enfocus][15] repo.
 
 ## The `at` form
 
@@ -439,3 +441,4 @@ api for dom manipulation.
 [12]: http://www.w3schools.com/xpath/xpath_syntax.asp
 [13]: https://github.com/cemerick/piggieback
 [14]: https://github.com/cgrand
+[15]: https://github.com/magomimmo/hello-enfocus
