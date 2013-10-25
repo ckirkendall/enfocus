@@ -1,4 +1,4 @@
-(defproject enfocus "2.0.1-SNAPSHOT"
+(defproject enfocus "2.1.0-SNAPSHOT"
   :description "DOM manipulation tool for clojurescript inspired by Enlive"
   :url "http://ckirkendall.github.io/enfocus-site"
   :license {:name "Eclipse Public License - v 1.0"
