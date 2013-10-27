@@ -29,7 +29,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;
 
 (deftest at-test
-  (testing "Unit Test for the *at* form\n"
+  (testing "Unit Test for the (at ...) form\n"
 
     (testing "Border Cases\n"
 
@@ -111,7 +111,7 @@
 ;;; **********************************************************************
 
 (deftest filter-test
-  (testing "Unit Test for the *filter* form\n"
+  (testing "Unit Test for the (filter ...) form\n"
 
     (testing "Border Cases\n"
 
