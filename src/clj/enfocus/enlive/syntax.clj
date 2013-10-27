@@ -15,12 +15,13 @@
                         sub (map #(apply str %) (sel-to-str item))]
                      (for [s sub e end]
                          (do (println s e)
-                             (conj e s)))))))
+                             (conj e s))))
+     :default input)))
 
 (defn convert [sel]
   (if (string? sel)
     sel
-    (let [ors (sel-to-str sel)]
+    (if-let [ors (sel-to-str sel)]
       (apply str (interpose " " (apply concat (interpose "," ors)))))))
 
 (defn- attr-pairs [op elms]
