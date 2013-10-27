@@ -8,8 +8,7 @@
   :min-lein-version "2.2.0"
 
   :source-paths ["src/clj"]
-  :test-paths ["test/clj"]
-
+  
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [org.clojure/clojurescript "0.0-1847"]
                  [domina "1.0.2"]
