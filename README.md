@@ -50,10 +50,12 @@ Every great journey starts with "Hello world!"
 
 (defn start []
   (ef/at js/document
-    ["body"] (ef/content "Hello world!")))
+    ["body"] (ef/content "Hello enfocus!")))
 
 (set! (.-onload js/window) start)
 ```
+
+See [hello-enfocus][15] repo.
 
 ## The `at` form
 
@@ -103,7 +105,7 @@ A `selector` is a string representing a [CSS3 compliant selector][8]
 ### Handling Events
 
 Enfocus has event handling.  Below is a simple example to add an
-@onclick@ event handler to a button.
+`onclick` event handler to a button.
 
 ```clj
 (em/defaction change [msg]
@@ -117,7 +119,7 @@ Enfocus has event handling.  Below is a simple example to add an
 
 The `defaction` construct is use here instead `defn`.  `defaction`
 creates a function that calls the `at` form like discussed above and
-passes in js/document as the node to be transformed.
+passes in `js/document` as the node to be transformed.
 
 ### Effects
 
@@ -146,7 +148,7 @@ You define a snippet by providing a remote resource, a selector and
 series of transformations.
 
 The snippet definition below selects a table body from the remote
-resource templates/template1.html and grabs the first row.  It then
+resource `templates/template1.html` and grabs the first row.  It then
 fills the content of the row.
 
 ```clj
@@ -199,7 +201,8 @@ below is a definition of a an action.
              ["#heading1"] (ef/set-attr :id "new-heading1"))
 ```
 
-Enfocus also support hiccup style emitters introduced in enlive 1.1.0.
+Enfocus also support [hiccup][11] style emitters introduced in
+[enlive "1.1.0"][1].
 
 ```clj
 (defn hiccup-template [arg1]
@@ -280,7 +283,7 @@ not Enfocus. (Patches very welcome!!)
 
 ## Selectors
 
-Enfocus supports both CSS3 and XPath selectors:
+Enfocus supports both [CSS3][8] and [XPath][12] selectors:
 
 ```clj
 (ns example
@@ -295,8 +298,8 @@ Enfocus supports both CSS3 and XPath selectors:
 
 ## The `from` form
 
-The `from` form is how we data from the dom in enfocus.  It comes in
-two basic flavors listed below:
+The `from` form is how we get data from the dom in enfocus.  It comes
+in two basic flavors listed below:
 
 This form returns the result of the extractor.
 
@@ -387,23 +390,15 @@ nil
 
 ## bREPLing with Enfocus
 
-You can run the bREPL from the same terminal where you started the
-server, or you can run the bREPL from a new termnal window.
+For bREPLING with `Enfocus` we adopted the [piggieback][13] lib. You
+can run the bREPL from the same terminal where you started the server,
+or you can run the bREPL from a new terminal window.
 
-This is only needed if you run the bREPL from a new terminal window
-
-```bash
-lein do compile, repl
-```
-
-```clj
-user=> (require '[enfocus.server :as http])
-nil
-user=> (http/run)
-2013-10-15 12:34:33.082:INFO:oejs.Server:jetty-7.6.8.v20121106
-2013-10-15 12:34:33.138:INFO:oejs.AbstractConnector:Started SelectChannelConnector@0.0.0.0:3000
-#<Server org.eclipse.jetty.server.Server@7aed9585>
-```
+> The following is needed if you run the bREPL from a new terminal window
+> 
+> ```bash
+> lein repl
+> ```
 
 To run the brepl
 
@@ -429,9 +424,8 @@ Distributed under the Eclipse Public License, the same as Clojure.
 
 ## Special Thanks!
 
-Christophe Grand for creating enlive and building a simple api for dom
-manipulation.
-
+[Christophe Grand][14] for creating [enlive][1] and building a simple
+api for dom manipulation.
 
 [1]: http://github.com/cgrand/enlive
 [2]: http://github.com/swannodette/enlive-tutorial/
@@ -443,3 +437,8 @@ manipulation.
 [8]: http://www.w3schools.com/cssref/css_selectors.asp
 [9]: https://github.com/technomancy/leiningen
 [10]: http://localhost:3000/
+[11]: https://github.com/weavejester/hiccup
+[12]: http://www.w3schools.com/xpath/xpath_syntax.asp
+[13]: https://github.com/cemerick/piggieback
+[14]: https://github.com/cgrand
+[15]: https://github.com/magomimmo/hello-enfocus
