@@ -1,5 +1,5 @@
 {:dev {:resources-paths ["dev-resources"]
-       :test-paths ["test/clj" "target/test/clj"]
+       :test-paths ["test/clj" "target/test/clj" "test/tools"]
 
        :dependencies [[ring "1.2.0"]
                       [compojure "1.1.5"]
@@ -18,45 +18,23 @@
 
        :cljsbuild
        {:builds {:whitespace
-                 {:source-paths ["src/cljs" "test/cljs" "target/test/cljs" "src/brepl"]
+                 {:source-paths ["test/tools" "src/cljs" "test/cljs" "target/test/cljs" "src/brepl"]
                   :compiler
                   {:output-to "dev-resources/public/js/whitespace.js"
                    :optimizations :whitespace
                    :pretty-print true}}
 
                  :simple
-                 {:source-paths ["src/cljs" "test/cljs" "target/test/cljs" "src/brepl"]
+                 {:source-paths ["test/tools" "src/cljs" "test/cljs" "target/test/cljs" "src/brepl"]
                   :compiler
                   {:output-to "dev-resources/public/js/simple.js"
                    :optimizations :simple
                    :pretty-print false}}
 
                  :advanced
-                 {:source-paths ["src/cljs" "test/cljs" "target/test/cljs"]
+                 {:source-paths ["test/tools" "src/cljs" "test/cljs" "target/test/cljs"]
                   :compiler
                   {:output-to "dev-resources/public/js/advanced.js"
-                   :optimizations :advanced
-                   :pretty-print false}}
-
-                 ;; for reporting
-                 :ws
-                 {:source-paths ["test" "src/cljs"]
-                  :compiler
-                  {:output-to "dev-resources/public/js/rep_ws.js"
-                   :optimizations :whitespace
-                   :pretty-print true}}
-
-                 :smp
-                 {:source-paths ["test" "src/cljs"]
-                  :compiler
-                  {:output-to "dev-resources/public/js/rep_smp.js"
-                   :optimizations :simple
-                   :pretty-print false}}
-
-                 :adv
-                 {:source-paths ["test" "src/cljs"]
-                  :compiler
-                  {:output-to "dev-resources/public/js/rep_adv.js"
                    :optimizations :advanced
                    :pretty-print false}}}
 

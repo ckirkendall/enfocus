@@ -1,10 +1,10 @@
-(ns tools.enfocus.reporting.core-test
+(ns enfocus.browser-reporting.core-test
   (:require
    [enfocus.core :as ef]
    [cemerick.cljs.test :as t]
-   [tools.enfocus.reporting.report-generator :refer (each-fixture)])
+   [enfocus.reporting.report-generator :refer (each-fixture)])
   (:require-macros
-   [tools.enfocus.reporting.test-setup :refer (setup-tests)]
+   [enfocus.reporting.test-setup :refer (setup-tests)]
    [cemerick.cljs.test :refer (is deftest testing use-fixtures)]))
 
 

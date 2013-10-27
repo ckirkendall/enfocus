@@ -1,4 +1,4 @@
-(ns tools.enfocus.reporting.test-setup
+(ns enfocus.reporting.test-setup
   (:require [cemerick.cljs.test :refer (with-test-out)]))
 
 (defmacro setup-tests []
@@ -11,7 +11,7 @@
           (when-let [message# (:message m#)] (println message#))
           (println "expected:" (pr-str (:expected m#)))
           (println "  actual:" (pr-str (:actual m#))))
-       (swap! enfocus.report-generator/dom-report
+       (swap! enfocus.reporting.report-generator/dom-report
               #(conj % [(str (cemerick.cljs.test/testing-vars-str m#)
                              " - "
                              (cemerick.cljs.test/testing-contexts-str))
@@ -20,7 +20,7 @@
      (defmethod cemerick.cljs.test/report :pass [m#]
        (with-test-out
           (cemerick.cljs.test/inc-report-counter :pass))
-       (swap! enfocus.report-generator/dom-report
+       (swap! enfocus.reporting.report-generator/dom-report
               #(conj % [(str (cemerick.cljs.test/testing-vars-str m#)
                              " - "
                              (cemerick.cljs.test/testing-contexts-str))
@@ -38,7 +38,7 @@
             (if (instance? js/Error actual#)
               (println (.-stack actual#))
               (prn actual#))))
-       (swap! enfocus.report-generator/dom-report
+       (swap! enfocus.reporting.report-generator/dom-report
               #(conj % [(str (cemerick.cljs.test/testing-vars-str m#)
                              " - "
                              (cemerick.cljs.test/testing-contexts-str))

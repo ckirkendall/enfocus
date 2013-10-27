@@ -1,4 +1,4 @@
-(ns tools.enfocus.reporting.report-generator)
+(ns enfocus.reporting.report-generator)
 
 (def ^:export dom-report (atom []))
 

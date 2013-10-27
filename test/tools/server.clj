@@ -1,4 +1,4 @@
-(ns tools.server
+(ns server
   (:require [compojure.core :refer (GET defroutes)]
             [compojure.route :refer  (resources not-found)]
             [ring.util.response :refer (redirect)]
