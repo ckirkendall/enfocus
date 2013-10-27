@@ -1,4 +1,4 @@
-(ns enfocus.test-setup
+(ns tools.enfocus.reporting.test-setup
   (:require [cemerick.cljs.test :refer (with-test-out)]))
 
 (defmacro setup-tests []
