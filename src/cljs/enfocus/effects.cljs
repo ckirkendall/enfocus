@@ -17,9 +17,9 @@
                       cnt (atom (count pnod-col))
                       partial-cback (fn []
                                       (swap! cnt dec)
-                                      (when (= 0 @cnt) 
+                                      (when (= 0 @cnt)
                                         (when callback (ef/apply-transform callback pnodes))
-                                        (when chain (ef/apply-transform chain pnodes))))] 
+                                        (when chain (ef/apply-transform chain pnodes))))]
                   (doseq [pnod pnod-col] (func pnod partial-cback))))]
     (reify ef/ITransform
       (apply-transform [_ nodes] (trans nodes nil))
@@ -39,33 +39,33 @@
 
 
 
-(defn fade-out 
-  "fade the selected nodes over a set of steps" 
+(defn fade-out
+  "fade the selected nodes over a set of steps"
   ([ttime] (fade-out ttime nil nil))
   ([ttime callback] (fade-out ttime callback nil))
-  ([ttime callback accel]  
+  ([ttime callback accel]
      (chainable-effect
       (fn [pnod pcallback]
         (let [anim (fx-dom/FadeOut. pnod ttime accel)]
-          (when pcallback 
-            (events/listen anim goog.fx.Animation.EventType/END pcallback))
+          (when pcallback
+            (events/listen anim js/goog.fx.Animation.EventType.END pcallback))
           (. anim (play))))
       callback)))
 
-(defn fade-in  
-  "fade the selected nodes over a set of steps" 
+(defn fade-in
+  "fade the selected nodes over a set of steps"
   ([ttime] (fade-in ttime nil nil))
   ([ttime callback] (fade-in ttime callback nil))
   ([ttime callback accel]
      (chainable-effect
       (fn [pnod pcallback]
         (let [anim (fx-dom/FadeIn. pnod ttime accel)]
-          (when pcallback 
-            (events/listen anim goog.fx.Animation.EventType/END pcallback))
+          (when pcallback
+            (events/listen anim js/goog.fx.Animation.EventType.END pcallback))
           (. anim (play))))
       callback)))
 
-(defn resize 
+(defn resize
   "resizes the selected elements to a width and height in px optional time series data"
   ([wth hgt] (resize wth hgt 0 nil nil))
   ([wth hgt ttime] (resize wth hgt ttime nil nil))
@@ -79,11 +79,11 @@
               hgt (if (= :curheight hgt) (.-height csize) hgt)
               end (array wth hgt)
               anim (fx-dom/Resize. pnod start end ttime accel)]
-          (when pcallback 
-            (events/listen anim goog.fx.Animation.EventType/END pcallback))
+          (when pcallback
+            (events/listen anim js/goog.fx.Animation.EventType.END pcallback))
           (. anim (play))))
       callback)))
-  
+
 (defn move
   "moves the selected elements to a x and y in px optional time series data "
   ([xpos ypos] (move xpos ypos 0 nil nil))
@@ -98,11 +98,11 @@
               ypos (if (= :cury ypos) (.-y cpos) ypos)
               end (array xpos ypos)
               anim (fx-dom/Slide. pnod start end ttime accel)]
-          (when pcallback 
-            (events/listen anim goog.fx.Animation.EventType/END pcallback))
+          (when pcallback
+            (events/listen anim js/goog.fx.Animation.EventType.END pcallback))
           (. anim (play))))
       callback)))
-  
+
 (defn scroll
   "scrolls selected elements to a x and y in px optional time series data"
   ([xpos ypos] (scroll xpos ypos 0 nil nil))
@@ -117,7 +117,7 @@
               end (array xpos ypos)
               anim (fx-dom/Scroll. pnod start end ttime accel)]
           (when pcallback
-            (events/listen anim goog.fx.Animation.EventType/END pcallback))
+            (events/listen anim js/goog.fx.Animation.EventType.END pcallback))
           (. anim (play))))
       callback)))
 
