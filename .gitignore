@@ -15,3 +15,5 @@ dev-resources/public/js/*.js
 *.*#
 .#*
 *.*~
+.DS_Store
+dev-resources/.DS_Store
