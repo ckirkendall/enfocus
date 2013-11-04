@@ -24,19 +24,5 @@
                     "" (convert {})
                     "" (convert #{}))))))
 
-(comment (deftest convert-test 
-           (testing "Unit Test for (convert arg)\n"
-     
-             (testing "Edge Cases\n"
-               (testing "(convert a-string)\n"
-                 (are [expected actual] (= expected actual)
-                      nil (convert nil)
-                      "" (convert "")
-                      " " (convert " ")
-                      "body\n" (convert "body\n"))))
 
-             (testing "Regular cases\n"
-               (testing "(convert a-string)\n"
-                 (are [expected actual] (= expected actual)
-                      "body" (convert "body")))))))
 
