@@ -1,5 +1,12 @@
 {:dev {:resources-paths ["dev-resources"]
-       :test-paths ["test/clj" "target/test/clj" "test/tools"]
+       :test-paths ["test/clj" 
+                    "target/test/clj" 
+                    "test/tools"
+                    
+                    ;; from cljs
+                    "test/cljs"
+                    "target/test/cljs"
+                    "src/brepl"]
 
        :dependencies [[ring "1.2.0"]
                       [compojure "1.1.5"]
