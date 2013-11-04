@@ -352,22 +352,27 @@ An extractor is a funciton that takes a node and returns information about
 ```bash
  git clone git://github.com/ckirkendall/enfocus.git
  cd enfocus
- lein compile
+ lein do cljx once, compile
 ```
 
 ### Test Enfocus
 
-```bash
-lein do compile, test
-```
-### Viewing index.html
+After having compiled down `enfocus` as explained above
 
 ```bash
- lein do compile, repl
+lein test
+```
+
+### Viewing index.html
+
+After having compiled down `enfocus` as explained above
+
+```bash
+ lein repl
 ```
 
 ```clj
-user=> (require '[enfocus.server :as http])
+user=> (require '[server :as http])
 nil
 user=> (http/run)
 2013-10-15 12:34:33.082:INFO:oejs.Server:jetty-7.6.8.v20121106
@@ -376,6 +381,8 @@ user=> (http/run)
 ```
 
 Open your browser to: [http://localhost:3000/][10]
+
+The page is empty and it used for bREPLin only. 
 
 ### Stop and restart the server
 
@@ -392,7 +399,8 @@ nil
 
 For bREPLING with `Enfocus` we adopted the [piggieback][13] lib. You
 can run the bREPL from the same terminal where you started the server,
-or you can run the bREPL from a new terminal window.
+or you can run the bREPL from a new terminal window if you already
+started the server from another terminal window.
 
 > The following is needed if you run the bREPL from a new terminal window
 > 
