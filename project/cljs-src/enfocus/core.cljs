@@ -687,28 +687,33 @@
     (nodes [content] [content])
     (single-node [content] content)))
    
-  
 (extend-protocol ISelector
   function
-  (select [this] (select this js/document ""))
-  (select [this root] (select this root ""))
-  (select [this root id-mask] (this root id-mask))
+  (select
+    ([this] (select this js/document ""))
+    ([this root] (select this root ""))
+    ([this root id-mask] (this root id-mask)))
   PersistentVector
-  (select [this] (select this js/document ""))
-  (select [this root] (select this root ""))
-  (select [this root id-mask] (css-select id-mask root this))
-  js/String
-  (select [this] (select this js/document ""))
-  (select [this root] (select this root ""))
-  (select [this root id-mask] (css-select id-mask root [this])))
-  
-  
+  (select
+    ([this] (select this js/document ""))
+    ([this root] (select this root ""))
+    ([this root id-mask] (css-select id-mask root this)))
+  string
+  (select
+    ([this] (select this js/document ""))
+    ([this root] (select this root ""))
+    ([this root id-mask] (css-select id-mask root [this]))))
+
+
 (extend-protocol ITransform
   function
-  (apply-transform [trans nodes] (doall (map trans (nodes->coll nodes))))
-  (apply-transform [trans nodes chain]
-    (let [pnod-col (nodes->coll nodes)
-          val (doall (map trans pnod-col))]
-      (if chain
-        (apply-transform chain nodes)
-        val))))
+  (apply-transform
+    ([trans nodes] (doall (map trans (nodes->coll nodes))))
+    ([trans nodes chain]
+       (let [pnod-col (nodes->coll nodes)
+             val (doall (map trans pnod-col))]
+         (if chain
+           (apply-transform chain nodes)
+           val)))))
+
+
