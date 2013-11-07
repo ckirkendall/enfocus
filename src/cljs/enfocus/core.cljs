@@ -689,17 +689,17 @@
   
 (extend-protocol ISelector
   function
-  (select [this] (select this js/document ""))
-  (select [this root] (select this root ""))
-  (select [this root id-mask] (this root id-mask))
+  (select [this] (select js/this js/document ""))
+  (select [this root] (select js/this root ""))
+  (select [this root id-mask] (js/this root id-mask))
   PersistentVector
-  (select [this] (select this js/document ""))
-  (select [this root] (select this root ""))
-  (select [this root id-mask] (css-select id-mask root this))
+  (select [this] (select js/this js/document ""))
+  (select [this root] (select js/this root ""))
+  (select [this root id-mask] (css-select id-mask root js/this))
   js/String
-  (select [this] (select this js/document ""))
-  (select [this root] (select this root ""))
-  (select [this root id-mask] (css-select id-mask root [this]))
+  (select [this] (select js/this js/document ""))
+  (select [this root] (select js/this root ""))
+  (select [this root id-mask] (css-select id-mask root [js/this]))
   nil
   (select [this] '())
   (select [this root] '())
