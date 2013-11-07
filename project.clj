@@ -7,7 +7,7 @@
 
   :min-lein-version "2.2.0"
 
-  :source-paths ["src/clj"]
+  :source-paths ["src/clj" "src/cljs"]
   
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [org.clojure/clojurescript "0.0-1978"]
@@ -24,7 +24,7 @@
 
    :builds {:deploy
             {:source-paths ["src/cljs"]
-             :jar true
+             ;:jar true ; no needed anymore 
              :compiler
              {:output-to "dev-resources/public/js/deploy.js"
               :optimizations :whitespace
