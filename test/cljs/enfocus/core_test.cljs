@@ -102,7 +102,7 @@
         (are [expected actual] (= expected actual)
              
              ;; add standard cases
-             nil true)))))
+             false true)))))
 
 ;;; ********************************************************************** 
 ;;;
@@ -119,7 +119,7 @@
         (are [expected actual] (= expected actual)
              
              ;; add border cases
-             nil true)))
+             false true)))
     
     (testing "Standard Cases\n"
       
@@ -127,7 +127,7 @@
         (are [expected actual] (= expected actual)
              
              ;; add standard cases
-             nil true)))))
+             false true)))))
 
 ;;; **********************************************************************
 ;;;
