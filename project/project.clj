@@ -5,7 +5,8 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"
             :distribution :repo}
   :source-paths ["cljs-src" ".generated/cljs" ".generated/clj"]
-  :dependencies [[org.clojure/clojure "1.4.0"]
+  :dependencies [[org.clojure/clojure "1.5.1"]
+                 [org.clojure/clojurescript "0.0-1978"]
                  [domina "1.0.2"]
                  [org.jsoup/jsoup "1.7.2"]
                  ]

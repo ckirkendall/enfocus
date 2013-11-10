@@ -166,7 +166,7 @@
                      (let [text (. req (getResponseText))
                            [sym txt] (replace-ids id-mask text)]
                        (swap! tpl-cache assoc dom-key [sym txt] )))]
-      (events/listen req goog.net.EventType/COMPLETE 
+      (events/listen req js/goog.net.EventType.COMPLETE 
                      #(do 
                         (callback req) 
                         (swap! tpl-load-cnt dec)))

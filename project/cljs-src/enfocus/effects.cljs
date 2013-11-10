@@ -48,7 +48,7 @@
       (fn [pnod pcallback]
         (let [anim (fx-dom/FadeOut. pnod ttime accel)]
           (when pcallback 
-            (events/listen anim goog.fx.Animation.EventType/END pcallback))
+            (events/listen anim js/goog.fx.Animation.EventType.END pcallback))
           (. anim (play))))
       callback)))
 
@@ -61,7 +61,7 @@
       (fn [pnod pcallback]
         (let [anim (fx-dom/FadeIn. pnod ttime accel)]
           (when pcallback 
-            (events/listen anim goog.fx.Animation.EventType/END pcallback))
+            (events/listen anim js/goog.fx.Animation.EventType.END pcallback))
           (. anim (play))))
       callback)))
 
@@ -80,7 +80,7 @@
               end (array wth hgt)
               anim (fx-dom/Resize. pnod start end ttime accel)]
           (when pcallback 
-            (events/listen anim goog.fx.Animation.EventType/END pcallback))
+            (events/listen anim js/goog.fx.Animation.EventType.END pcallback))
           (. anim (play))))
       callback)))
   
@@ -99,7 +99,7 @@
               end (array xpos ypos)
               anim (fx-dom/Slide. pnod start end ttime accel)]
           (when pcallback 
-            (events/listen anim goog.fx.Animation.EventType/END pcallback))
+            (events/listen anim js/goog.fx.Animation.EventType.END pcallback))
           (. anim (play))))
       callback)))
   
@@ -117,7 +117,7 @@
               end (array xpos ypos)
               anim (fx-dom/Scroll. pnod start end ttime accel)]
           (when pcallback
-            (events/listen anim goog.fx.Animation.EventType/END pcallback))
+            (events/listen anim js/goog.fx.Animation.EventType.END pcallback))
           (. anim (play))))
       callback)))
 
