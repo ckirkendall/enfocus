@@ -12,7 +12,7 @@
                       [compojure "1.1.6"]
                       [com.cemerick/piggieback "0.1.0"]]
 
-       :plugins [[com.cemerick/clojurescript.test "0.1.0"]
+       :plugins [[com.cemerick/clojurescript.test "0.2.0"]
                  [com.keminglabs/cljx "0.3.0"]]
 
        :cljx {:builds [{:source-paths ["test/cljx"]
