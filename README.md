@@ -31,7 +31,7 @@ From any leiningen project file:
 
 ```clj
 [enfocus "2.1.0-SNAPSHOT"] ;experimental use at your own risk
-[enfocus "2.0.0"]           ;final 2.0.0 release
+[enfocus "2.0.3"]           ;current release
 [enfocus "1.0.1"]          ;previous stable version
 ```
 
