@@ -10,9 +10,10 @@
 
        :dependencies [[ring "1.2.1"]
                       [compojure "1.1.6"]
-                      [com.cemerick/piggieback "0.1.0"]]
+                      [enlive "1.1.4"]]
 
        :plugins [[com.cemerick/clojurescript.test "0.2.0"]
+                 [com.cemerick/austin "0.1.3"]
                  [com.keminglabs/cljx "0.3.0"]]
 
        :cljx {:builds [{:source-paths ["test/cljx"]
@@ -86,11 +87,4 @@
 
                         "advanced"
                         ["runners/phantomjs.js"
-                         "dev-resources/public/test_advanced.html"]}}
-
-       :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
-       :injections [(require '[cljs.repl.browser :as brepl]
-                             '[cemerick.piggieback :as pb])
-                    (defn browser-repl []
-                      (pb/cljs-repl :repl-env
-                                    (brepl/repl-env :port 9000)))]}}
+                         "dev-resources/public/test_advanced.html"]}}}}
