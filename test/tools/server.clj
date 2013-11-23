@@ -1,19 +1,20 @@
 (ns server
-  (:require [compojure.core :refer (GET defroutes)]
-            [compojure.route :refer  (resources not-found)]
-            [ring.util.response :refer (redirect)]
-            [ring.adapter.jetty :as jetty]))
+  (:require [cemerick.austin.repls :refer (browser-connected-repl-js)]
+            [net.cgrand.enlive-html :as enlive]
+            [compojure.core :refer (GET defroutes)]
+            [compojure.route :refer  (resources)]
+            [ring.adapter.jetty :as jetty]
+            [clojure.java.io :as io]))
 
-;; defroutes macro defines a function that chains individual route
-;; functions together. The request map is passed to each function in
-;; turn, until a non-nil response is returned.
+(enlive/deftemplate page
+  (io/resource "public/index.html")
+  []
+  [:body] (enlive/append
+            (enlive/html [:script (browser-connected-repl-js)])))
+
 (defroutes site
-  ; to serve document root address
-  (GET "/" [] (redirect "/index.html"))
-  ; to serve static pages saved in resources/public directory
   (resources "/")
-  ; if page is not found
-  (not-found "Page not found"))
+  (GET "/*" req (page)))
 
 (defn run
   []
