@@ -12,7 +12,7 @@
                       [compojure "1.1.6"]
                       [enlive "1.1.4"]]
 
-       :plugins [[com.cemerick/clojurescript.test "0.2.0"]
+       :plugins [[com.cemerick/clojurescript.test "0.2.1"]
                  [com.cemerick/austin "0.1.3"]
                  [com.keminglabs/cljx "0.3.0"]]
 
@@ -87,4 +87,9 @@
 
                         "advanced"
                         ["runners/phantomjs.js"
-                         "dev-resources/public/test_advanced.html"]}}}}
+                         "dev-resources/public/test_advanced.html"]}}
+       :injections [(require '[server :as http :refer [run]]
+                             'cemerick.austin.repls)
+                    (defn browser-repl []
+                      (cemerick.austin.repls/cljs-repl (reset! cemerick.austin.repls/browser-repl-env
+                                                               (cemerick.austin/repl-env))))]}}
