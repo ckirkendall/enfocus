@@ -250,7 +250,7 @@ New Transformations
   set-style          (set-style :font-size "10px" :background "#fff")
   remove-style       (remove-style :font-size :background)
   listen             (listen :mouseover (fn [event] ...))
-  remove-listener    (remove-listener :mouseover :mouseout)
+  remove-listeners   (remove-listeners :mouseover :mouseout)
   fade-in            (fade-in time)
                      or (fade-in time callback)
                      or (fade-in time callback accelerator)
