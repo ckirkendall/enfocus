@@ -363,13 +363,16 @@ After having compiled down `enfocus` as explained above
 lein test
 ```
 
-### Viewing index.html
+### bREPLing with Enfocus
 
-After having compiled down `enfocus` as explained above
+After having compiled down `enfocus` as explained above issue the
+following `lein` task:
 
 ```bash
  lein repl
 ```
+
+Then run the http server as follows
 
 ```clj
 user=> (require '[server :as http])
@@ -380,49 +383,33 @@ user=> (http/run)
 #<Server org.eclipse.jetty.server.Server@7aed9585>
 ```
 
-Open your browser to: [http://localhost:3000/][10]
-
-The page is empty and it used for bREPLin only. 
-
-### Stop and restart the server
+Now you need to setup the browser-connected REPL and launch it as
+follows:
 
 ```clj
-user=> (.stop http/server) ; to stop the server
-nil
-user=> (.start http/server) ; to restart the server
-2013-10-15 12:35:25.474:INFO:oejs.Server:jetty-7.6.8.v20121106
-2013-10-15 12:35:25.478:INFO:oejs.AbstractConnector:Started SelectChannelConnector@0.0.0.0:3000
-nil
-```
-
-## bREPLing with Enfocus
-
-For bREPLING with `Enfocus` we adopted the [piggieback][13] lib. You
-can run the bREPL from the same terminal where you started the server,
-or you can run the bREPL from a new terminal window if you already
-started the server from another terminal window.
-
-> The following is needed if you run the bREPL from a new terminal window
-> 
-> ```bash
-> lein repl
-> ```
-
-To run the brepl
-
-```clj
-user=> (browser-repl) ; to run the brepl
+user=> (def repl-env (reset! cemerick.austin.repls/browser-repl-env
+                     (cemerick.austin/repl-env)))
+Browser-REPL ready @ http://localhost:49981/1045/repl/start
+#'user/repl-env
+user=> (cemerick.austin.repls/cljs-repl repl-env)
 Type `:cljs/quit` to stop the ClojureScript REPL
 nil
 cljs.user=>
 ```
 
-Open your browser to: [http://localhost:3000/][10] and then evaluate
-CLJS expression in the bREPL.
+Open your browser to: [http://localhost:3000/][10]
+
+The page is empty and it used for bREPLin only. Wait few moments while
+the connection is established and then you can start bREPLing with
+Enfocus.
 
 ```clj
 cljs.user=> (js/alert "Hello, Enfocus!")
 ```
+
+### Final note
+
+All the [Austin][16] use cases should work as expected.
 
 ## License
 
@@ -450,3 +437,4 @@ api for dom manipulation.
 [13]: https://github.com/cemerick/piggieback
 [14]: https://github.com/cgrand
 [15]: https://github.com/magomimmo/hello-enfocus
+[16]: https://github.com/cemerick/austin

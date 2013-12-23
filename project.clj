@@ -14,7 +14,7 @@
                  [domina "1.0.2"]
                  [org.jsoup/jsoup "1.7.2"]]
 
-  :plugins [[lein-cljsbuild "0.3.4"]]
+  :plugins [[lein-cljsbuild "1.0.0"]]
 
   :hooks [leiningen.cljsbuild]
 
