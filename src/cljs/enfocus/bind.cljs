@@ -12,7 +12,7 @@
                             :field nil})
 
 
-(defn mget-in
+(defn- mget-in
   "gets a property in a complex obj or map. This function is similar
    to get-in except that it can get properties of objects and maps
    at any layer in the object, by passing in a seq as the field list
@@ -26,7 +26,7 @@
    (and obj (sequential? field)) (apply aget obj (map name field))
    :else nil))
  
-(defn mset-in
+(defn- mset-in
   "sets a property in a complex obj or map. This function is similar
    to assoc-in except that it can set properties of objs and maps
    at any layer in the object, by passing in a seq as the field list
@@ -41,7 +41,7 @@
                                         (concat (map name field) [val]))
    :else obj))
  
-(defn key-or-props [obj]
+(defn- key-or-props [obj]
   (if (map? obj)
     (keys obj)
     (seq (gobj/getKeys obj))))
@@ -71,6 +71,15 @@
                  (bind-view-watch-fn nid render-func)))))
 
 
+
+(defn save-form-to-atm [atm form field-map]
+  (let [form-vals (ef/from form (ef/read-form))]
+    (swap! atm (fn [cur]
+                 (reduce #(let [ky (if field-map (get field-map %2) %2)
+                                nval (ky form-vals)]
+                            (if nval (mset-in %1 %2 nval) %1))
+                         cur
+                         (or (keys field-map) (key-or-props cur)))))))
 
 
 

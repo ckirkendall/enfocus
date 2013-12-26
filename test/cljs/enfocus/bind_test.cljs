@@ -1,7 +1,8 @@
 (ns enfocus.bind-test
   (:require
-   [enfocus.core :as ef :refer [at from content get-text]]
-   [enfocus.bind :as bind :refer [bind-view mget-in mset-in key-or-props]]
+   [enfocus.core :as ef :refer [at from content get-text html]]
+   [enfocus.bind :as bind :refer [bind-view mget-in mset-in key-or-props
+                                  save-form-to-atm]]
    [cemerick.cljs.test :as t])
   (:require-macros
    [enfocus.macros :as em]
@@ -20,6 +21,7 @@
 
 (use-fixtures :each each-fixture)
 
+(defn by-id [id]  (.getElementById js/document id))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; HELPER FUNC TESTS
@@ -66,3 +68,26 @@
       (testing "updated value set"
         (reset! atm "updated")
         (is (= "updated" (from "#test-id" (get-text))))))))
+
+
+(deftest save-form-to-atm-test
+  (let [form-frag (html [:form {:name "my-form"
+                                    :id "my-form"}
+                             [:input {:name "a" :value "a"}]
+                             [:input {:name "b" :value "b"}]])]
+    (at "#test-id" (content form-frag))
+    (testing "straight form to map mapping"
+      (let [atm (atom {:a "_" :b "_" :c "c"})]
+        (save-form-to-atm atm (by-id "my-form"))
+        (is (= {:a "a" :b "b" :c "c"} @atm))))
+    (testing "field mapping for simple map"
+      (let [atm (atom {:a "_" :b "_" :c "c"})]
+        (save-form-to-atm atm (by-id "my-form") {:a :b :b :a})
+        (is (= {:a "b" :b "a" :c "c"} @atm))))
+    (testing "field mapping for complex map"
+      (let [atm (atom {:a "a" :b {:aa "aa" :bb "bb"} :c "c"})]
+        (save-form-to-atm atm (by-id "my-form") {[:b :aa] :a
+                                                 [:b :bb] :b})
+        (is (= {:a "a" :b {:aa "a" :bb "b"} :c "c"} @atm))))))
+
+
