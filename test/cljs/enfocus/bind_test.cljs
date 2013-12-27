@@ -49,6 +49,30 @@
              3 (mget-in obj [:a :b])
              5 (mget-in obj [:a :d :a]))))))
 
+
+(deftest mset-in-test
+  (testing "standard js-obj object"
+    (let [obj (js-obj "a" (js-obj "c" "_") "b" "_")]
+      (testing "simple field"
+        (are [expected actual] (= expected actual)
+             1 (.-b (mset-in obj "b" 1))
+             2 (.-b (mset-in obj :b 2))))
+      (testing "multi leve acess"
+        (are [expected actual] (= expected actual)
+             1 (.-c (.-a (mset-in obj ["a" "c"] 1)))
+             2 (.-c (.-a (mset-in obj [:a "c"] 2)))
+             3 (.-c (.-a (mset-in obj ["a" :c] 3)))
+             4 (.-c (.-a (mset-in obj [:a :c] 4)))))))
+  (testing "standard clojurescript map"
+    (let [obj {:a {:b "bb" :c "cc" :d {:a "aa"}} :b "b"}]
+      (testing "simple field"
+        (is (= 2 (:b (mset-in obj :b 2)))))
+      (testing "multi leve acess"
+        (are [expected actual] (= expected actual)
+             1 (:b (:a (mset-in obj [:a :b] 1)))
+             2 (:a (:d (:a (mset-in obj [:a :d :a] 2)))))))))
+
+
 (deftest key-or-prop-test
   (testing "getting the keys from an obj or map"
     (is (= [:a :b] (key-or-props {:a 2 :b 3})))
