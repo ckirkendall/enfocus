@@ -104,7 +104,7 @@
           (is (= "a" (.-b @atm)))
           (is (= "c" (.-c @atm)))))
       (testing "field mapping form to complex obj"
-        (let [atm (atom (js-obj "a" "_"
+        (let [atm (atom (js-obj "a" "a"
                                 "b" (js-obj "aa" "aa"  "bb" "bb")
                                 "c" "c"))]
           (save-form-to-atm atm (by-id "my-form") {[:b :aa] :a
