@@ -76,18 +76,43 @@
                              [:input {:name "a" :value "a"}]
                              [:input {:name "b" :value "b"}]])]
     (at "#test-id" (content form-frag))
-    (testing "straight form to map mapping"
-      (let [atm (atom {:a "_" :b "_" :c "c"})]
-        (save-form-to-atm atm (by-id "my-form"))
-        (is (= {:a "a" :b "b" :c "c"} @atm))))
-    (testing "field mapping for simple map"
-      (let [atm (atom {:a "_" :b "_" :c "c"})]
-        (save-form-to-atm atm (by-id "my-form") {:a :b :b :a})
-        (is (= {:a "b" :b "a" :c "c"} @atm))))
-    (testing "field mapping for complex map"
-      (let [atm (atom {:a "a" :b {:aa "aa" :bb "bb"} :c "c"})]
-        (save-form-to-atm atm (by-id "my-form") {[:b :aa] :a
-                                                 [:b :bb] :b})
-        (is (= {:a "a" :b {:aa "a" :bb "b"} :c "c"} @atm))))))
+    (testing "atoms with maps"
+      (testing "straight form to map mapping"
+        (let [atm (atom {:a "_" :b "_" :c "c"})]
+          (save-form-to-atm atm (by-id "my-form"))
+          (is (= {:a "a" :b "b" :c "c"} @atm))))
+      (testing "field mapping for simple map"
+        (let [atm (atom {:a "_" :b "_" :c "c"})]
+          (save-form-to-atm atm (by-id "my-form") {:a :b :b :a})
+          (is (= {:a "b" :b "a" :c "c"} @atm))))
+      (testing "field mapping for complex map"
+        (let [atm (atom {:a "a" :b {:aa "aa" :bb "bb"} :c "c"})]
+          (save-form-to-atm atm (by-id "my-form") {[:b :aa] :a
+                                                   [:b :bb] :b})
+          (is (= {:a "a" :b {:aa "a" :bb "b"} :c "c"} @atm)))))
+    (testing "atoms as js-objs"
+      (testing "straight form to obj mapping"
+        (let [atm (atom (js-obj "a" "_" "b" "_" "c" "c"))]
+          (save-form-to-atm atm (by-id "my-form"))
+          (is (= "a" (.-a @atm)))
+          (is (= "b" (.-b @atm)))
+          (is (= "c" (.-c @atm)))))
+      (testing "field mapping form to simple obj"
+        (let [atm (atom (js-obj "a" "_" "b" "_" "c" "c"))]
+          (save-form-to-atm atm (by-id "my-form") {:a :b :b :a})
+          (is (= "b" (.-a @atm)))
+          (is (= "a" (.-b @atm)))
+          (is (= "c" (.-c @atm)))))
+      (testing "field mapping form to complex obj"
+        (let [atm (atom (js-obj "a" "_"
+                                "b" (js-obj "aa" "aa"  "bb" "bb")
+                                "c" "c"))]
+          (save-form-to-atm atm (by-id "my-form") {[:b :aa] :a
+                                                   [:b :bb] :b})
+          (is (= "a" (.-a @atm)))
+          (is (= "a" (.-aa (.-b @atm))))
+          (is (= "b" (.-bb (.-b @atm))))
+          (is (= "c" (.-c @atm))))))))
+
 
 

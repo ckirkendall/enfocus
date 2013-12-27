@@ -37,8 +37,11 @@
    (map? obj) (assoc obj field val)
    (and obj (keyword? field )) (do (aset obj (name field) val) obj)
    (and obj (string? field)) (do (aset obj field val) obj)
-   (and obj (sequential? field)) (apply aset obj
-                                        (concat (map name field) [val]))
+   (and obj (sequential? field)) (do
+                                   (apply aset obj
+                                          (concat (map name field)
+                                                  [val]))
+                                   obj)
    :else obj))
  
 (defn- key-or-props [obj]
@@ -76,7 +79,7 @@
   (let [form-vals (ef/from form (ef/read-form))]
     (swap! atm (fn [cur]
                  (reduce #(let [ky (if field-map (get field-map %2) %2)
-                                nval (ky form-vals)]
+                                nval ((keyword ky) form-vals)]
                             (if nval (mset-in %1 %2 nval) %1))
                          cur
                          (or (keys field-map) (key-or-props cur)))))))
