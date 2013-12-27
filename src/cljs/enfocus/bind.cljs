@@ -9,7 +9,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (def default-bindings-opts {:type :one-way
                             :event :onblur
-                            :field nil})
+                            :mapping nil
+                            :delay nil})
 
 
 (defn- mget-in
@@ -72,6 +73,47 @@
       (add-watch atm
                  (build-key nid)
                  (bind-view-watch-fn nid render-func)))))
+
+
+(defn- bind-input-view [mapping]
+  (fn [node val]
+    (let [nval (if mapping
+                 (get-unify-prop val mapping)
+                 val)]
+      (when-not (= (.-value node) nval)
+        (aset node "value" nval)))))
+
+
+(defn- bind-input-update-atm [field delay-tracker]
+  (let [delay (when delay-tracker @delay-tracker)
+        update-fn (fn [e]
+                    (let [val (aget e "currentTarget" "value")]
+                      (swap! atm #(if field
+                                    (set-unify-prop % field val)
+                                    val))))]
+    (fn [e]
+      (if delay-tracker
+        (do
+          (reset! delay-tracker (.now js/Date))
+          (js/setTimeout #(when (>= (- (.now js/Date)
+                                       @delay-tracker)
+                                    delay)
+                            (update-fn e) delay)))
+        (update-fn e)))))
+  
+
+(defn bind-input
+  ([atm] (bind-input atm nil))
+  ([atm {:keys [mapping type event delay]}]
+     (let [opts (merge default-binding-opts opt-map)]
+       (fn [node]
+         (at node (bind-view atm (bind-input-view mapping)))
+         (when (= type :two-way)
+           (let [tracker (when delay (atom delay))])
+           (at node
+               (listen event
+                       (bind-input-update-atm mapping tracker))))))))
+
 
 
 
