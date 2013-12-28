@@ -212,15 +212,19 @@
 
 (defn extr-multi-node
   "wrapper function for extractors that maps the extraction to all nodes returned by the selector"
-  [func]
-  (let [trans (fn trans
-                [pnodes]
-                (let [pnod-col (nodes->coll pnodes)
-                      result (map func pnod-col)]
-                  (if (<= (count result) 1) (first result) result)))]
-    (reify ITransform
-      (apply-transform [_ nodes] (trans nodes nil))
-      (apply-transform [_ nodes chain] (trans nodes chain)))))
+  ([func] (extr-multi-node func nil))
+  ([func filt]
+     (let [trans (fn trans
+                   [pnodes]
+                   (let [pnod-col (nodes->coll pnodes)
+                         result (map func pnod-col)
+                         result (if filt
+                                  (cljs.core/filter filt result)
+                                  result)]
+                     (if (<= (count result) 1) (first result) result)))]
+       (reify ITransform
+         (apply-transform [_ nodes] (trans nodes nil))
+         (apply-transform [_ nodes chain] (trans nodes chain))))))
 
 (defn multi-node-chain
   "Allows standard domina functions to be chainable"
@@ -516,56 +520,44 @@
    the value exists and create a seq of values if one exits."
   [form-map ky val]
   (let [mval (form-map ky)]
-    (cond
-     (coll? mval) (assoc form-map ky (conj mval val))
-     mval (assoc form-map ky  #{val mval})
-     :else (assoc form-map ky val))))
+    (if val
+      (cond
+       (coll? mval) (assoc form-map ky (conj mval val))
+       mval (assoc form-map ky  #{val mval})
+       :else (assoc form-map ky val))
+      form-map)))
 
-(defn- read-simple-input [el col]
-  (if-not (empty? (.-name el))
-    (merge-form-val col (keyword (.-name el)) (.-value el))
-    col))
 
-(defn- read-checked-input [el col]
-  (if (and (.-checked el) (not (empty? (.-name el))))
-    (merge-form-val col (keyword (.-name el)) (.-value el))
-    col))
+(defn read-form-input
+  "returns the value of a given form input (text,select,checkbox,etc...)    If more than  one value exists it will return a set of values."
+  []
+  (extr-multi-node
+   (fn [node]  
+     (let [vals (js->clj (form/getValue node))]
+       (if (and (not (string? vals))
+                (coll? vals))
+         (if (= 1 (count vals))
+           (first vals)
+           (into #{} vals))
+         vals)))
+   #(do %)))
 
-(defn- read-select-input [el col]
-  (if-not (empty? (.-name el))
-    (let [nm (keyword  (.-name el))
-          onodes (domina/nodes (.-options el))
-          opts (cljs.core/filter #(.-selected %) onodes)]
-      (if (= (count opts) 1)
-        (merge-form-val col nm (.-value (first opts)))
-        (merge-form-val col nm (into #{} (map #(.-value %) opts)))))
-    col))
+
 
 (defn read-form
   "returns a map of the form values tied to name of input fields.
-   {:name1 'value1' name2 ('select1' 'select2')}"
+   {:name1 'value1' name2 #{'select1' 'select2'}}"
   []
   (extr-multi-node
    (fn [node]
      (let [inputs (.-elements node)]
        (reduce
-        #(case (.-nodeName %2)
-           "INPUT" (case (.-type %2)
-                     "text" (read-simple-input %2 %1)
-                     "hidden" (read-simple-input %2 %1)
-                     "password" (read-simple-input %2 %1)
-                     "button" (read-simple-input %2 %1)
-                     "reset" (read-simple-input %2 %1)
-                     "submit" (read-simple-input %2 %1)
-                     "checkbox" (read-checked-input %2 %1)
-                     "radio" (read-checked-input %2 %1)
-                     %1)
-           "TEXTAREA" (read-simple-input %2 %1)
-           "SELECT" (read-select-input %2 %1)
-           "BUTTON" (read-simple-input %2 %1)
+        #(if-not (empty? (.-name %2))
+           (merge-form-val %1
+                           (keyword (.-name %2))
+                           (apply-transform (read-form-input) %2))
            %1)
-        {}
-        inputs)))))
+        {} inputs)))))
 
 ;##################################################################
 ; filtering - these funcitons are to make up for choosing

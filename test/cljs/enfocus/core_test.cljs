@@ -442,12 +442,27 @@
     (let [res (ef/from "#test-id" (ef/get-prop :my-data))]
       (is (= "testing" res)))))
 
+(deftest read-form-input-test
+  (ef/at "#test-id" (ef/content (build-form)))
+  (testing "reading from a select input"
+    (let [res (ef/from "select" (ef/read-form-input))]
+      (is (= #{"o1" "o2"} res))))
+  (testing "reading from a text input"
+    (let [res (ef/from "input[type='text']"
+                       (ef/read-form-input))]
+      (is (= "testing1" res))))
+  (testing "reading from a checkbox input"
+    (let [res (ef/from "input[type='checkbox']"
+                       (ef/read-form-input))]
+      (is (= "c1" res)))))
+
 
 (deftest read-form-test
   (ef/at "#test-id" (ef/content (build-form)))
   (testing "reading a form"
     (let [res (ef/from "#test-id > form" (ef/read-form))]
       (is (= {:f1 "testing1" :f2 #{"o1" "o2"} :f3 "c1"} res)))))
+
 
   
 (deftest filter-test
