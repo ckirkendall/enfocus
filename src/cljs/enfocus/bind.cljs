@@ -1,6 +1,7 @@
 (ns enfocus.bind
   (:require
    [enfocus.core :as ef :refer [from at set-attr get-attr]]
+   [enfocus.events :as ev :refer [listen]]
    [goog.object :as gobj]))
 
 
@@ -78,18 +79,18 @@
 (defn- bind-input-view [mapping]
   (fn [node val]
     (let [nval (if mapping
-                 (get-unify-prop val mapping)
+                 (mget-in val mapping)
                  val)]
       (when-not (= (.-value node) nval)
         (aset node "value" nval)))))
 
 
-(defn- bind-input-update-atm [field delay-tracker]
+(defn- bind-input-update-atm [atm field delay-tracker]
   (let [delay (when delay-tracker @delay-tracker)
         update-fn (fn [e]
                     (let [val (aget e "currentTarget" "value")]
                       (swap! atm #(if field
-                                    (set-unify-prop % field val)
+                                    (mset-in % field val)
                                     val))))]
     (fn [e]
       (if delay-tracker
@@ -104,27 +105,31 @@
 
 (defn bind-input
   ([atm] (bind-input atm nil))
-  ([atm {:keys [mapping type event delay]}]
-     (let [opts (merge default-binding-opts opt-map)]
+  ([atm opt-map]
+     (let [{:keys [mapping type event delay]}
+             (merge default-bindings-opts opt-map)]
        (fn [node]
          (at node (bind-view atm (bind-input-view mapping)))
          (when (= type :two-way)
-           (let [tracker (when delay (atom delay))])
-           (at node
-               (listen event
-                       (bind-input-update-atm mapping tracker))))))))
+           (let [tracker (when delay (atom delay))]
+             (at node
+                 (listen event
+                         (bind-input-update-atm atm mapping tracker)))))))))
 
 
 
 
-(defn save-form-to-atm [atm form field-map]
-  (let [form-vals (ef/from form (ef/read-form))]
-    (swap! atm (fn [cur]
-                 (reduce #(let [ky (if field-map (get field-map %2) %2)
-                                nval ((keyword ky) form-vals)]
-                            (if nval (mset-in %1 %2 nval) %1))
-                         cur
-                         (or (keys field-map) (key-or-props cur)))))))
+(defn save-form-to-atm
+  ([atm form] (save-form-to-atm atm form nil))
+  ([atm form field-map]
+     (let [form-vals (ef/from form (ef/read-form))]
+       (swap! atm
+              (fn [cur]
+                (reduce #(let [ky (if field-map (get field-map %2) %2)
+                               nval ((keyword ky) form-vals)]
+                           (if nval (mset-in %1 %2 nval) %1))
+                        cur
+                        (or (keys field-map) (key-or-props cur))))))))
 
 
 
