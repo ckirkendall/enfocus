@@ -55,14 +55,14 @@
     (let [obj (js-obj "a" (js-obj "c" "_") "b" "_")]
       (testing "simple field"
         (are [expected actual] (= expected actual)
-             1 (.-b (mset-in obj "b" 1))
-             2 (.-b (mset-in obj :b 2))))
+             1 (aget (mset-in obj "b" 1) "b")
+             2 (aget (mset-in obj :b 2) "b")))
       (testing "multi leve acess"
         (are [expected actual] (= expected actual)
-             1 (.-c (.-a (mset-in obj ["a" "c"] 1)))
-             2 (.-c (.-a (mset-in obj [:a "c"] 2)))
-             3 (.-c (.-a (mset-in obj ["a" :c] 3)))
-             4 (.-c (.-a (mset-in obj [:a :c] 4)))))))
+             1 (aget (mset-in obj ["a" "c"] 1) "a" "c")
+             2 (aget (mset-in obj ["a" :c] 2) "a" "c")
+             3 (aget (mset-in obj [:a "c"] 3) "a" "c")
+             4 (aget (mset-in obj [:a :c] 4) "a" "c")))))
   (testing "standard clojurescript map"
     (let [obj {:a {:b "bb" :c "cc" :d {:a "aa"}} :b "b"}]
       (testing "simple field"
@@ -118,25 +118,25 @@
       (testing "straight form to obj mapping"
         (let [atm (atom (js-obj "a" "_" "b" "_" "c" "c"))]
           (save-form-to-atm atm (by-id "my-form"))
-          (is (= "a" (.-a @atm)))
-          (is (= "b" (.-b @atm)))
-          (is (= "c" (.-c @atm)))))
+          (is (= "a" (aget @atm "a")))
+          (is (= "b" (aget @atm "b")))
+          (is (= "c" (aget  @atm "c")))))
       (testing "field mapping form to simple obj"
         (let [atm (atom (js-obj "a" "_" "b" "_" "c" "c"))]
           (save-form-to-atm atm (by-id "my-form") {:a :b :b :a})
-          (is (= "b" (.-a @atm)))
-          (is (= "a" (.-b @atm)))
-          (is (= "c" (.-c @atm)))))
+          (is (= "b" (aget @atm "a")))
+          (is (= "a" (aget @atm "b")))
+          (is (= "c" (aget @atm "c")))))
       (testing "field mapping form to complex obj"
         (let [atm (atom (js-obj "a" "a"
                                 "b" (js-obj "aa" "aa"  "bb" "bb")
                                 "c" "c"))]
           (save-form-to-atm atm (by-id "my-form") {[:b :aa] :a
                                                    [:b :bb] :b})
-          (is (= "a" (.-a @atm)))
-          (is (= "a" (.-aa (.-b @atm))))
-          (is (= "b" (.-bb (.-b @atm))))
-          (is (= "c" (.-c @atm))))))))
+          (is (= "a" (aget @atm "a")))
+          (is (= "a" (aget @atm "b" "aa")))
+          (is (= "b" (aget @atm "b" "bb")))
+          (is (= "c" (aget @atm "c"))))))))
 
 
 
