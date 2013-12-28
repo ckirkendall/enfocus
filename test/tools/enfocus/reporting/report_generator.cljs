@@ -11,12 +11,17 @@
         (.appendChild frag div)))
     (.appendChild (.-body js/document) frag)))
 
-(defn each-fixture [func]
+
+(defn each-fixture [f]
+  ;; initialize the environment
   (let [div (.createElement js/document "div")
         pc (.createElement js/document "p")]
-    (.setAttribute div "id" "test-div") 
-    (.appendChild (.-body js/document) div)
+    (.setAttribute div "id" "test-id")
+    (.setAttribute div "class" "test-class")
+    (.setAttribute pc "class" "test-class")
     (.appendChild div pc)
-    (func)
+    (.appendChild (.-body js/document) div)
+    ;; execute the unit test
+    (f)
+    ;; clear the environment 
     (.removeChild (.-body js/document) div)))
-
