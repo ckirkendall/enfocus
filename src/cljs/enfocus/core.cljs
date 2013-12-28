@@ -10,6 +10,7 @@
             [goog.dom.ViewportSizeMonitor :as vsmonitor]
             [goog.async.Delay :as gdelay]
             [goog.Timer :as timer]
+            [goog.dom.forms :as form]
             [clojure.string :as string]
             [domina :as domina]
             [domina.css :as dcss]
@@ -412,6 +413,29 @@
          (rep-node cnode))))))
 
 
+(defn- exists-in? [col-or-val val]
+  (if (coll? col-or-val)
+    (some #{val} col-or-val)
+    (= col-or-val val)))
+
+(defn set-form
+  "sets the values of a form based on a map
+  (set-form {:val1 'val' :val2 'val'})"
+  [value-map]
+  (fn [form-node]
+    (when (= (.-nodeName form-node) "FORM")
+      (doseq [idx (range (.-length form-node))]
+        (let [el (aget (.-elements form-node) idx)
+              ky (keyword (.-name el))
+              val (ky value-map)]
+          (when (contains? value-map ky)
+            (let [val (if val val "")])
+            (if (or (= (.-type el) "checkbox")
+                          (= (.-type el) "radio")) 
+              (set! (.-checked el) (exists-in? val (.-value el)))
+              (form/setValue el (clj->js val)))))))))
+
+
 
 ;##################################################################
 ; hiccup style emitter
@@ -494,7 +518,7 @@
   (let [mval (form-map ky)]
     (cond
      (coll? mval) (assoc form-map ky (conj mval val))
-     mval (assoc form-map ky (list val mval))
+     mval (assoc form-map ky  #{val mval})
      :else (assoc form-map ky val))))
 
 (defn- read-simple-input [el col]
@@ -512,7 +536,9 @@
     (let [nm (keyword  (.-name el))
           onodes (domina/nodes (.-options el))
           opts (cljs.core/filter #(.-selected %) onodes)]
-      (merge-form-val col nm (map #(.-value %) opts)))
+      (if (= (count opts) 1)
+        (merge-form-val col nm (.-value (first opts)))
+        (merge-form-val col nm (into #{} (map #(.-value %) opts)))))
     col))
 
 (defn read-form

@@ -33,7 +33,7 @@
                       :multiple "multiple"}
              [:option {:value "o1" :selected true}]
              [:option {:value "o2" :selected true}]
-             [:option {:value "o1"}]]
+             [:option {:value "o3"}]]
             [:input {:name "f3" :type "checkbox"
                      :value "c1" :checked true}]
             [:input {:name "f3" :type "checkbox"
@@ -381,6 +381,37 @@
       (is (= "<p tmp=\"atmp\">name: CK</p>" res)))))
 
 
+(deftest set-form-test
+  (ef/at "#test-id" (ef/content (build-form)))
+  (testing "setting form values using a map"
+    (testing "setting single text input value"
+      (ef/at "#test-id > form" (ef/set-form {:f1 "v1"}))
+      (let [vals (ef/from "#test-id > form" (ef/read-form))]
+        (is (= {:f1 "v1" :f2 #{"o1" "o2"} :f3 "c1"} vals))))
+    (testing "setting multi value select input"
+      (ef/at "#test-id > form" (ef/set-form {:f2 ["o1" "o3"]}))
+      (let [vals (ef/from "#test-id > form" (ef/read-form))]
+        (is (= {:f1 "v1" :f2 #{"o1" "o3"} :f3 "c1"} vals))))
+    (testing "setting multi value check-box input"
+      (ef/at "#test-id > form" (ef/set-form {:f3 ["c2" "c1"]}))
+      (let [vals (ef/from "#test-id > form" (ef/read-form))]
+        (is (= {:f1 "v1" :f2 #{"o1" "o3"} :f3 #{"c1" "c2"}} vals))))
+    (testing "setting single value select input"
+      (ef/at "#test-id > form" (ef/set-form {:f2 "o1"}))
+      (let [vals (ef/from "#test-id > form" (ef/read-form))]
+        (is (= {:f1 "v1" :f2 "o1" :f3 #{"c1" "c2"}} vals))))
+    (testing "setting single value check-box input"
+      (ef/at "#test-id > form" (ef/set-form {:f3 "c2"}))
+      (let [vals (ef/from "#test-id > form" (ef/read-form))]
+        (is (= {:f1 "v1" :f2 "o1" :f3 "c2"} vals))))
+    (testing "setting single value check-box input"
+      (ef/at "#test-id > form" (ef/set-form {:f1 "n1"
+                                             :f2 ["o2" "o1"]
+                                             :f3 ["c1"]}))
+      (let [vals (ef/from "#test-id > form" (ef/read-form))]
+        (is (= {:f1 "n1" :f2 #{"o1" "o2"} :f3 "c1"} vals))))))
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;; Extractor Tests
@@ -412,11 +443,11 @@
       (is (= "testing" res)))))
 
 
-(deftest form-test
+(deftest read-form-test
   (ef/at "#test-id" (ef/content (build-form)))
   (testing "reading a form"
     (let [res (ef/from "#test-id > form" (ef/read-form))]
-      (is (= {:f1 "testing1" :f2 '("o1" "o2") :f3 "c1"} res)))))
+      (is (= {:f1 "testing1" :f2 #{"o1" "o2"} :f3 "c1"} res)))))
 
   
 (deftest filter-test
