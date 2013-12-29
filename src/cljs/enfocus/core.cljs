@@ -436,6 +436,17 @@
     (some #{val} col-or-val)
     (= col-or-val val)))
 
+(defn set-form-input
+  "sets the value of a form input (text,select,checkbox,etc...)
+  format (at node (set-form-input value))"
+  [val]
+  (fn [el]
+    (if (or (= (.-type el) "checkbox")
+            (= (.-type el) "radio")) 
+      (set! (.-checked el) (exists-in? val (.-value el)))
+      (form/setValue el (clj->js val)))))
+
+
 (defn set-form
   "sets the values of a form based on a map
   (set-form {:val1 'val' :val2 'val'})"
@@ -447,11 +458,8 @@
               ky (keyword (.-name el))
               val (ky value-map)]
           (when (contains? value-map ky)
-            (let [val (if val val "")])
-            (if (or (= (.-type el) "checkbox")
-                          (= (.-type el) "radio")) 
-              (set! (.-checked el) (exists-in? val (.-value el)))
-              (form/setValue el (clj->js val)))))))))
+            (let [val (if val val "")]
+              ((set-form-input val) el))))))))
 
 
 

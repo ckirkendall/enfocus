@@ -381,6 +381,23 @@
       (is (= "<p tmp=\"atmp\">name: CK</p>" res)))))
 
 
+(deftest set-form-input-test
+  (ef/at "#test-id" (ef/content (build-form)))
+  (testing "setting a select input"
+    (ef/at "select" (ef/set-form-input ["o2" "o3"]))
+    (let [res (ef/from "select" (ef/read-form-input))]
+      (is (= #{"o2" "o3"} res))))
+  (testing "setting a text input"
+    (ef/at "input[type='text']" (ef/set-form-input "test"))
+    (let [res (ef/from "input[type='text']"
+                       (ef/read-form-input))]
+      (is (= "test" res))))
+  (testing "setting a checkbox input"
+    (ef/at "input[type='checkbox']" (ef/set-form-input "c2"))
+    (let [res (ef/from "input[type='checkbox']"
+                       (ef/read-form-input))]
+      (is (= "c2" res)))))
+
 (deftest set-form-test
   (ef/at "#test-id" (ef/content (build-form)))
   (testing "setting form values using a map"
@@ -451,7 +468,7 @@
     (let [res (ef/from "input[type='text']"
                        (ef/read-form-input))]
       (is (= "testing1" res))))
-  (testing "reading from a checkbox input"
+  (testing "reading from a checkbox input"t
     (let [res (ef/from "input[type='checkbox']"
                        (ef/read-form-input))]
       (is (= "c1" res)))))
