@@ -215,16 +215,22 @@
   ([func] (extr-multi-node func nil))
   ([func filt]
      (let [trans (fn trans
-                   [pnodes]
+                   [pnodes chain]
                    (let [pnod-col (nodes->coll pnodes)
                          result (map func pnod-col)
                          result (if filt
                                   (cljs.core/filter filt result)
                                   result)]
                      (if (<= (count result) 1) (first result) result)))]
-       (reify ITransform
+       
+       (reify
+         ITransform
          (apply-transform [_ nodes] (trans nodes nil))
-         (apply-transform [_ nodes chain] (trans nodes chain))))))
+         (apply-transform [_ nodes chain] (trans nodes chain))
+         IFn
+         (-invoke [_ nodes] (trans nodes nil))
+         (-invoke [_ nodes chain] (trans nodes chain))))))
+
 
 (defn multi-node-chain
   "Allows standard domina functions to be chainable"
@@ -232,17 +238,25 @@
      (let [trans (fn [nodes chain]
                    (let [val (func nodes)]
                    (if chain (apply-transform chain nodes) val)))]
-       (reify ITransform
+       (reify
+         ITransform
          (apply-transform [_ nodes] (trans nodes nil))
-         (apply-transform [_ nodes chain] (trans nodes chain)))))
+         (apply-transform [_ nodes chain] (trans nodes chain))
+         IFn
+         (-invoke [_ nodes] (trans nodes nil))
+         (-invoke [_ nodes chain] (trans nodes chain)))))
   ([values func]
      (let [trans (fn [nodes chain]
                    (let [vnodes (mapcat #(domina/nodes %) values)
                          val (func nodes vnodes)]
                    (if chain (apply-transform chain nodes) val)))]
-       (reify ITransform
+       (reify
+         ITransform
          (apply-transform [_ nodes] (trans nodes nil))
-         (apply-transform [_ nodes chain] (trans nodes chain))))))
+         (apply-transform [_ nodes chain] (trans nodes chain))
+         IFn
+         (-invoke [_ nodes] (trans nodes nil))
+         (-invoke [_ nodes chain] (trans nodes chain))))))
 
 
 ;;TODO need to figure out how to make sure this stay just as
@@ -555,7 +569,7 @@
         #(if-not (empty? (.-name %2))
            (merge-form-val %1
                            (keyword (.-name %2))
-                           (apply-transform (read-form-input) %2))
+                           ((read-form-input) %2))
            %1)
         {} inputs)))))
 
