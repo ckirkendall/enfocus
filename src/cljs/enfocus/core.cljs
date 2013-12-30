@@ -549,6 +549,8 @@
   (let [mval (form-map ky)]
     (if val
       (cond
+       (and (coll? mval)
+            (coll? val)) (assoc form-map ky (into mval val))
        (coll? mval) (assoc form-map ky (conj mval val))
        mval (assoc form-map ky  #{val mval})
        :else (assoc form-map ky val))
@@ -571,7 +573,9 @@
                               nod-col)]
                   (cond
                    (empty? result) nil
-                   (= 1 (count result)) (first result)
+                   (and (= 1 (count result))
+                        (not (#{"checkbox" "select-multiple"}
+                              (.-type (first nod-col))))) (first result)
                    :else result)))]
     (reify
       ITransform

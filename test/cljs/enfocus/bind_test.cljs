@@ -2,9 +2,9 @@
   (:require
    [enfocus.core :as ef :refer [at from content get-text html
                                 set-form-input read-form-input do->
-                                set-prop]]
+                                set-prop read-form set-form set-attr]]
    [enfocus.bind :as bind :refer [bind-view mget-in mset-in key-or-props
-                                  save-form-to-atm bind-input]]
+                                  save-form-to-atm bind-input bind-form]]
    [domina.events :as de  :refer [dispatch!]]
    [cemerick.cljs.test :as t])
   (:require-macros
@@ -105,7 +105,7 @@
                      [:input {:name "c" :type "checkbox" :value "c1"}]
                      [:input {:name "c" :type "checkbox" :value "c2"}]
                      [:input {:name "c" :type "checkbox" :value "c3"}]
-                     [:select {:name "d" :multiple "multiple"}
+                     [:select {:name "d"}
                       [:option {:value "d1"}]
                       [:option {:value "d2"}]
                       [:option {:value "d3"}]
@@ -135,9 +135,9 @@
       (testing "binding a simple value to a checkbox field :to-way"
         (let [atm (atom "c1")]
           (at "input[name='c']" (bind-input atm {:event :change}))
-          (is (= "c1" (from "input[name='c']" (read-form-input))))
-          (reset! atm "c3")
-          (is (= "c3" (from "input[name='c']" (read-form-input))))
+          (is (= #{"c1"} (from "input[name='c']" (read-form-input))))
+          (reset! atm #{"c3"})
+          (is (= #{"c3"} (from "input[name='c']" (read-form-input))))
           (reset! atm #{"c1" "c2"})
           (is (= #{"c1" "c2"} (from "input[name='c']"
                                     (read-form-input))))
@@ -151,7 +151,7 @@
           (is (= "d1" (from "select" (read-form-input))))
           (reset! atm "d2")
           (is (= "d2" (from "select" (read-form-input))))
-          (at "select" (set-prop :type "select-multiple"))
+          (at "select" (set-attr :multiple "multiple"))
           (reset! atm #{"d3" "d4"})
           (is (= #{"d3" "d4"} (from "select" (read-form-input))))
           (at "select" (do-> (set-form-input ["d2" "d1"])
@@ -207,3 +207,32 @@
 
 
 
+(deftest bind-form-test
+  (let [input-frag (html
+                    [:form {:id "my-form" :name "my-form"}
+                     [:input {:type "text" :name "a" :value "_"}]
+                     [:textarea {:name "b"} "_"]
+                     [:input {:name "c" :type "checkbox" :value "c1"}]
+                     [:input {:name "c" :type "checkbox" :value "c2"}]
+                     [:input {:name "c" :type "checkbox" :value "c3"}]
+                     [:select {:name "d" :multiple "multiple"}
+                      [:option {:value "d1"}]
+                      [:option {:value "d2"}]
+                      [:option {:value "d3"}]
+                      [:option {:value "d4"}]]])]
+    (at "#test-id" (content input-frag))
+    (testing "binding a form to a simple map"
+      (let [atm (atom {:a "a" :b "b" :c #{"c1" "c2"} :d #{"d3" "d4"}})]
+        (testing "initial bind"
+          (at "form" (bind-form atm))
+          (is (= @atm (from "form" (read-form)))))
+        (testing "updating atom"
+          (swap! atm #(assoc % :a "aa" :b "bb" :c #{"c3"} :d #{"d1" "d2"}))
+          (is (= @atm (from "form" (read-form)))))
+        (testing "updating form"
+          (let [val-map {:a "a_" :b "b_" :c #{"c1" "c3"} :d #{"d3" "d4"}}]
+            (at "form" (do-> (set-form val-map)
+                             #(dispatch! % :submit
+                                         {:currentTarget %})))
+            (is (= @atm val-map))
+            (is (= @atm (from "form" (read-form))))))))))

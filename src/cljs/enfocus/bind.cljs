@@ -3,8 +3,9 @@
    [enfocus.core :as ef :refer [from at set-attr get-attr
                                 read-form-input set-form-input
                                 ITransform apply-transform
-                                nodes->coll]]
+                                nodes->coll set-form]]
    [enfocus.events :as ev :refer [listen]]
+   [clojure.set :as set :refer [map-invert]]
    [goog.object :as gobj]))
 
 
@@ -78,7 +79,7 @@
                  (bind-view-watch-fn nid render-func)))))
 
 
-(defn- bind-input-to-view [mapping]
+(defn- bind-input-render-fn [mapping]
   (fn [node val]
     (let [nval (if mapping
                  (mget-in val mapping)
@@ -115,7 +116,8 @@
                    (let [nod-col (nodes->coll nodes)]
                      (when (= binding-type :two-way)
                        (at nodes
-                           (bind-view atm (bind-input-to-view mapping))))
+                           (bind-view atm
+                                      (bind-input-render-fn mapping))))
                      (let [tracker (when (pos? delay) (atom delay))]
                        (at nodes
                            (listen event
@@ -137,7 +139,7 @@
 
 
 
-(defn save-form-to-atm
+(defn- save-form-to-atm
   ([atm form] (save-form-to-atm atm form nil))
   ([atm form field-map]
      (let [form-vals (ef/from form (ef/read-form))]
@@ -149,6 +151,36 @@
                         cur
                         (or (keys field-map) (key-or-props cur))))))))
 
+
+(defn- create-val-map [in-map mappings]
+  (if (not (empty? mappings))
+    (reduce #(assoc %1 %2 (mget-in in-map (get mappings %2)))
+            {}
+            (keys mappings))
+    in-map))
+
+
+(defn bind-form
+  ([atm] (bind-form atm nil))
+  ([atm opt-map]
+     (let [{:keys [mapping binding-type]}
+           (merge default-bindings-opts opt-map)
+           inv-mapping (map-invert mapping)]
+       (fn [form-node]
+         (when (= binding-type :two-way)
+           (at form-node
+               (bind-view atm
+                          (fn [node val]
+                            (let [val-map (create-val-map val
+                                                          inv-mapping)]
+                              (at node (set-form val-map)))))))
+         (at form-node
+             (listen :submit
+                     (fn [e]
+                       (.preventDefault e)
+                       (save-form-to-atm atm
+                                         (.-currentTarget e)
+                                         mapping))))))))
 
 
 

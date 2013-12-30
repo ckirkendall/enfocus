@@ -396,7 +396,7 @@
     (ef/at "input[type='checkbox']" (ef/set-form-input "c2"))
     (let [res (ef/from "input[type='checkbox']"
                        (ef/read-form-input))]
-      (is (= "c2" res)))))
+      (is (= #{"c2"} res)))))
 
 (deftest set-form-test
   (ef/at "#test-id" (ef/content (build-form)))
@@ -404,11 +404,11 @@
     (testing "setting single text input value"
       (ef/at "#test-id > form" (ef/set-form {:f1 "v1"}))
       (let [vals (ef/from "#test-id > form" (ef/read-form))]
-        (is (= {:f1 "v1" :f2 #{"o1" "o2"} :f3 "c1"} vals))))
+        (is (= {:f1 "v1" :f2 #{"o1" "o2"} :f3 #{"c1"}} vals))))
     (testing "setting multi value select input"
       (ef/at "#test-id > form" (ef/set-form {:f2 ["o1" "o3"]}))
       (let [vals (ef/from "#test-id > form" (ef/read-form))]
-        (is (= {:f1 "v1" :f2 #{"o1" "o3"} :f3 "c1"} vals))))
+        (is (= {:f1 "v1" :f2 #{"o1" "o3"} :f3 #{"c1"}} vals))))
     (testing "setting multi value check-box input"
       (ef/at "#test-id > form" (ef/set-form {:f3 ["c2" "c1"]}))
       (let [vals (ef/from "#test-id > form" (ef/read-form))]
@@ -416,17 +416,17 @@
     (testing "setting single value select input"
       (ef/at "#test-id > form" (ef/set-form {:f2 "o1"}))
       (let [vals (ef/from "#test-id > form" (ef/read-form))]
-        (is (= {:f1 "v1" :f2 "o1" :f3 #{"c1" "c2"}} vals))))
+        (is (= {:f1 "v1" :f2 #{"o1"} :f3 #{"c1" "c2"}} vals))))
     (testing "setting single value check-box input"
       (ef/at "#test-id > form" (ef/set-form {:f3 "c2"}))
       (let [vals (ef/from "#test-id > form" (ef/read-form))]
-        (is (= {:f1 "v1" :f2 "o1" :f3 "c2"} vals))))
+        (is (= {:f1 "v1" :f2 #{"o1"} :f3 #{"c2"}} vals))))
     (testing "setting single value check-box input"
       (ef/at "#test-id > form" (ef/set-form {:f1 "n1"
                                              :f2 ["o2" "o1"]
                                              :f3 ["c1"]}))
       (let [vals (ef/from "#test-id > form" (ef/read-form))]
-        (is (= {:f1 "n1" :f2 #{"o1" "o2"} :f3 "c1"} vals))))))
+        (is (= {:f1 "n1" :f2 #{"o1" "o2"} :f3 #{"c1"}} vals))))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;
@@ -472,7 +472,7 @@
   (testing "reading from a checkbox input"t
     (let [res (ef/from "input[type='checkbox']"
                        (ef/read-form-input))]
-      (is (= "c1" res))))
+      (is (= #{"c1"} res))))
   (testing "reading from a textarea input"t
     (let [res (ef/from "textarea"
                        (ef/read-form-input))]
@@ -483,7 +483,7 @@
   (ef/at "#test-id" (ef/content (build-form)))
   (testing "reading a form"
     (let [res (ef/from "#test-id > form" (ef/read-form))]
-      (is (= {:f1 "testing1" :f2 #{"o1" "o2"} :f3 "c1"} res)))))
+      (is (= {:f1 "testing1" :f2 #{"o1" "o2"} :f3 #{"c1"}} res)))))
 
 
   
