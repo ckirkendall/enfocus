@@ -460,7 +460,8 @@
       (is (= "testing" res)))))
 
 (deftest read-form-input-test
-  (ef/at "#test-id" (ef/content (build-form)))
+  (ef/at "#test-id" (ef/content (build-form))
+         "select"   (ef/after (ef/html [:textarea {:name "t"} "t1"])))
   (testing "reading from a select input"
     (let [res (ef/from "select" (ef/read-form-input))]
       (is (= #{"o1" "o2"} res))))
@@ -471,7 +472,11 @@
   (testing "reading from a checkbox input"t
     (let [res (ef/from "input[type='checkbox']"
                        (ef/read-form-input))]
-      (is (= "c1" res)))))
+      (is (= "c1" res))))
+  (testing "reading from a textarea input"t
+    (let [res (ef/from "textarea"
+                       (ef/read-form-input))]
+      (is (= "t1" res)))))
 
 
 (deftest read-form-test

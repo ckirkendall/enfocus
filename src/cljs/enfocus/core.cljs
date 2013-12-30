@@ -211,7 +211,8 @@
 ;####################################################
 
 (defn extr-multi-node
-  "wrapper function for extractors that maps the extraction to all nodes returned by the selector"
+  "wrapper function for extractors that maps the extraction to
+   all nodes returned by the selector"
   ([func] (extr-multi-node func nil))
   ([func filt]
      (let [trans (fn trans
@@ -444,7 +445,11 @@
     (if (or (= (.-type el) "checkbox")
             (= (.-type el) "radio")) 
       (set! (.-checked el) (exists-in? val (.-value el)))
-      (form/setValue el (clj->js val)))))
+      (let [nval (if (and (coll? val)
+                          (not (string? val)))
+                   (vec val)
+                   (if (= (.-type el) "select-multiple") [val] val))]
+        (form/setValue el (clj->js nval))))))
 
 
 (defn set-form
@@ -553,16 +558,28 @@
 (defn read-form-input
   "returns the value of a given form input (text,select,checkbox,etc...)    If more than  one value exists it will return a set of values."
   []
-  (extr-multi-node
-   (fn [node]  
-     (let [vals (js->clj (form/getValue node))]
-       (if (and (not (string? vals))
-                (coll? vals))
-         (if (= 1 (count vals))
-           (first vals)
-           (into #{} vals))
-         vals)))
-   #(do %)))
+  (let [trans (fn [nodes chain]
+                (let [nod-col (nodes->coll nodes)
+                      result (reduce 
+                              #(let [vals (js->clj (form/getValue %2))]
+                                 (if (and 
+                                      (not (string? vals))
+                                      (coll? vals))
+                                   (into %1 vals)
+                                   (if vals (conj %1 vals) %1)))
+                              #{}
+                              nod-col)]
+                  (cond
+                   (empty? result) nil
+                   (= 1 (count result)) (first result)
+                   :else result)))]
+    (reify
+      ITransform
+      (apply-transform [_ nodes] (trans nodes nil))
+      (apply-transform [_ nodes chain] (trans nodes chain))
+      IFn
+      (-invoke [_ nodes] (trans nodes nil))
+      (-invoke [_ nodes chain] (trans nodes chain)))))
 
 
 

@@ -1,8 +1,11 @@
 (ns enfocus.bind-test
   (:require
-   [enfocus.core :as ef :refer [at from content get-text html]]
+   [enfocus.core :as ef :refer [at from content get-text html
+                                set-form-input read-form-input do->
+                                set-prop]]
    [enfocus.bind :as bind :refer [bind-view mget-in mset-in key-or-props
-                                  save-form-to-atm]]
+                                  save-form-to-atm bind-input]]
+   [domina.events :as de  :refer [dispatch!]]
    [cemerick.cljs.test :as t])
   (:require-macros
    [enfocus.macros :as em]
@@ -92,6 +95,70 @@
       (testing "updated value set"
         (reset! atm "updated")
         (is (= "updated" (from "#test-id" (get-text))))))))
+
+
+(deftest bind-input-test
+  (let [input-frag (html
+                    [:div
+                     [:input {:type "text" :name "a" :value "_"}]
+                     [:textarea {:name "b"} "_"]
+                     [:input {:name "c" :type "checkbox" :value "c1"}]
+                     [:input {:name "c" :type "checkbox" :value "c2"}]
+                     [:input {:name "c" :type "checkbox" :value "c3"}]
+                     [:select {:name "d" :multiple "multiple"}
+                      [:option {:value "d1"}]
+                      [:option {:value "d2"}]
+                      [:option {:value "d3"}]
+                      [:option {:value "d4"}]]])]
+    (at "#test-id" (content input-frag))
+    (testing "binding the value of atm to a form input field"
+      (testing "binding a simple value to a text field :to-way"
+        (let [atm (atom "a")]
+          (at "input[name='a']" (bind-input atm {:event :change}))
+          (is (= "a" (from "input[name='a']" (read-form-input))))
+          (reset! atm "b")
+          (is (= "b" (from "input[name='a']" (read-form-input))))
+          (at "input[name='a']" (do-> (set-form-input "c")
+                                      #(dispatch! % :change
+                                                  {:currentTarget %})))
+          (is (= "c" @atm))))
+      (testing "binding a simple value to a textarea field :to-way"
+        (let [atm (atom "a")]
+          (at "textarea" (bind-input atm {:event :change}))
+          (is (= "a" (from "textarea" (read-form-input))))
+          (reset! atm "b")
+          (is (= "b" (from "textarea" (read-form-input))))
+          (at "textarea" (do-> (set-form-input "c")
+                                      #(dispatch! % :change
+                                                  {:currentTarget %})))
+          (is (= "c" @atm))))
+      (testing "binding a simple value to a checkbox field :to-way"
+        (let [atm (atom "c1")]
+          (at "input[name='c']" (bind-input atm {:event :change}))
+          (is (= "c1" (from "input[name='c']" (read-form-input))))
+          (reset! atm "c3")
+          (is (= "c3" (from "input[name='c']" (read-form-input))))
+          (reset! atm #{"c1" "c2"})
+          (is (= #{"c1" "c2"} (from "input[name='c']"
+                                    (read-form-input))))
+          (at "input[name='c']" (do-> (set-form-input ["c2" "c3"])
+                                      #(dispatch! % :change
+                                                  {:currentTarget %})))
+          (is (= #{"c2" "c3"} @atm))))
+      (testing "binding a simple value to a select field :to-way"
+        (let [atm (atom "d1")]
+          (at "select" (bind-input atm {:event :change}))
+          (is (= "d1" (from "select" (read-form-input))))
+          (reset! atm "d2")
+          (is (= "d2" (from "select" (read-form-input))))
+          (at "select" (set-prop :type "select-multiple"))
+          (reset! atm #{"d3" "d4"})
+          (is (= #{"d3" "d4"} (from "select" (read-form-input))))
+          (at "select" (do-> (set-form-input ["d2" "d1"])
+                             #(dispatch! % :change
+                                         {:currentTarget %})))
+          (is (= #{"d2" "d1"} @atm)))))))
+
 
 
 (deftest save-form-to-atm-test

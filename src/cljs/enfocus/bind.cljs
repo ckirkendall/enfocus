@@ -1,6 +1,9 @@
 (ns enfocus.bind
   (:require
-   [enfocus.core :as ef :refer [from at set-attr get-attr]]
+   [enfocus.core :as ef :refer [from at set-attr get-attr
+                                read-form-input set-form-input
+                                ITransform apply-transform
+                                nodes->coll]]
    [enfocus.events :as ev :refer [listen]]
    [goog.object :as gobj]))
 
@@ -8,8 +11,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;  HELPER FUNCTIONS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(def default-bindings-opts {:type :one-way
-                            :event :onblur
+(def default-bindings-opts {:binding-type :two-way ;:from,:two-way
+                            :event :blur
                             :mapping nil
                             :delay nil})
 
@@ -64,7 +67,6 @@
         (remove-watch ref (build-key id))))))
  
  
- 
 (defn bind-view [atm render-func]
   (fn [node]
     (let [id (from node (get-attr :id))
@@ -76,19 +78,20 @@
                  (bind-view-watch-fn nid render-func)))))
 
 
-(defn- bind-input-view [mapping]
+(defn- bind-input-to-view [mapping]
   (fn [node val]
     (let [nval (if mapping
                  (mget-in val mapping)
                  val)]
-      (when-not (= (.-value node) nval)
-        (aset node "value" nval)))))
+      (when-not (= (from node (read-form-input)) nval)
+        (at node (set-form-input nval))))))
 
 
-(defn- bind-input-update-atm [atm field delay-tracker]
+(defn- bind-input-update-atm [atm node-group field delay-tracker]
   (let [delay (when delay-tracker @delay-tracker)
         update-fn (fn [e]
-                    (let [val (aget e "currentTarget" "value")]
+                    (let [val (from node-group
+                                    (read-form-input))]
                       (swap! atm #(if field
                                     (mset-in % field val)
                                     val))))]
@@ -106,15 +109,30 @@
 (defn bind-input
   ([atm] (bind-input atm nil))
   ([atm opt-map]
-     (let [{:keys [mapping type event delay]}
-             (merge default-bindings-opts opt-map)]
-       (fn [node]
-         (at node (bind-view atm (bind-input-view mapping)))
-         (when (= type :two-way)
-           (let [tracker (when delay (atom delay))]
-             (at node
-                 (listen event
-                         (bind-input-update-atm atm mapping tracker)))))))))
+     (let [{:keys [mapping binding-type event delay]}
+           (merge default-bindings-opts opt-map)
+           trans (fn [nodes chain]
+                   (let [nod-col (nodes->coll nodes)]
+                     (when (= binding-type :two-way)
+                       (at nodes
+                           (bind-view atm (bind-input-to-view mapping))))
+                     (let [tracker (when (pos? delay) (atom delay))]
+                       (at nodes
+                           (listen event
+                                   (bind-input-update-atm atm
+                                                          nod-col
+                                                          mapping
+                                                          tracker)))))
+                   (if chain (apply-transform chain nodes)))]
+       
+       (reify
+         ITransform
+         (apply-transform [_ nodes] (trans nodes nil))
+         (apply-transform [_ nodes chain] (trans nodes chain))
+         IFn
+         (-invoke [_ nodes] (trans nodes nil))
+         (-invoke [_ nodes chain] (trans nodes chain)))
+       )))
 
 
 
@@ -130,6 +148,7 @@
                            (if nval (mset-in %1 %2 nval) %1))
                         cur
                         (or (keys field-map) (key-or-props cur))))))))
+
 
 
 
