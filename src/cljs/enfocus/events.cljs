@@ -1,7 +1,8 @@
 (ns enfocus.events
   (:require [goog.events :as events]
             [goog.dom :as dom]
-            [enfocus.core :as ef]))
+            [enfocus.core :as ef]
+            [goog.object :as obj]))
 
 (declare child-of? mouse-enter-leave)
 
@@ -84,10 +85,9 @@
     ()
     (conj (get-node-chain top (.-parentNode node)) node)))
 
-(defn- create-event [type cur tar]
-  (let [event (goog.events.Event. type)]
+(defn- create-event [cur cur-event]
+  (let [event (obj/clone cur-event)]
     (set! (.-currentTarget event) cur)
-    (set! (.-target event) tar)
     event))
 
 (defn listen-live [event selector func]
@@ -96,14 +96,14 @@
      (listen event
        #(doseq [el (get-node-chain node (.-target %))]
           (ef/at el
-           (ef/filter (ef/match? selector)
-                      (fn [node]
-                        (let [event-copy (create-event event el (.-target %))]
-                          (func event-copy)
-                          (when (.-defaultPrevented event-copy)
-                            (.preventDefault %))
-                          (when (.-propagationStopped event-copy)
-                            (.stopPropagation %)))))))))))
+                 (ef/filter (ef/match? selector)
+                            (fn [node]
+                              (let [event-copy (create-event el %)]
+                                (func event-copy)
+                                (when (.-defaultPrevented event-copy)
+                                  (.preventDefault %))
+                                (when (.-propagationStopped event-copy)
+                                  (.stopPropagation %)))))))))))
 
 
 ;###################################################
