@@ -375,29 +375,23 @@ following `lein` task:
 Then run the http server as follows
 
 ```clj
-user=> (require '[server :as http])
-nil
-user=> (http/run)
+user=> (run)
 2013-10-15 12:34:33.082:INFO:oejs.Server:jetty-7.6.8.v20121106
 2013-10-15 12:34:33.138:INFO:oejs.AbstractConnector:Started SelectChannelConnector@0.0.0.0:3000
 #<Server org.eclipse.jetty.server.Server@7aed9585>
 ```
 
-Now you need to setup the browser-connected REPL and launch it as
-follows:
+Next launch the browser-connected REPL as follows:
 
 ```clj
-user=> (def repl-env (reset! cemerick.austin.repls/browser-repl-env
-                     (cemerick.austin/repl-env)))
-Browser-REPL ready @ http://localhost:49981/1045/repl/start
-#'user/repl-env
-user=> (cemerick.austin.repls/cljs-repl repl-env)
+user=> (browser-repl)
+Browser-REPL ready @ http://localhost:55211/4347/repl/start
 Type `:cljs/quit` to stop the ClojureScript REPL
 nil
 cljs.user=>
 ```
 
-Open your browser to: [http://localhost:3000/][10]
+Finally, visit the [http://localhost:3000/][10] URI
 
 The page is empty and it used for bREPLin only. Wait few moments while
 the connection is established and then you can start bREPLing with
