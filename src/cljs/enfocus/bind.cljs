@@ -14,8 +14,17 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (def default-bindings-opts {:binding-type :two-way ;:from,:two-way
                             :event :blur
+                            ;; mappings are used to map the form values
+                            ;; into our state object.  It also offers
+                            ;; the ability to convert from a value
+                            ;; to an object.
+                            ;; {:field1 [:ky1 :ky2 :k3]
+                            ;;  :field2 {:path [:ky1 :k4]
+                            ;;           :to-obj (fn [val] ...)
+                            ;;           :from-obj (fn [val] ...)}
                             :mapping nil
                             :delay nil})
+
 
 
 (defn- mget-in
@@ -145,7 +154,10 @@
      (let [form-vals (ef/from form (ef/read-form))]
        (swap! atm
               (fn [cur]
-                (reduce #(let [ky (if field-map (get field-map %2) %2)
+                (ef/log-debug (str "FIELD_MAP:" (pr-str field-map)))
+                (reduce #(let [ky (if (empty? field-map)
+                                    %2
+                                    (get field-map %2))
                                nval ((keyword ky) form-vals)]
                            (if nval (mset-in %1 %2 nval) %1))
                         cur
@@ -172,7 +184,7 @@
                (bind-view atm
                           (fn [node val]
                             (let [val-map (create-val-map val
-                                                          inv-mapping)]
+                                                          mapping)]
                               (at node (set-form val-map)))))))
          (at form-node
              (listen :submit
@@ -180,7 +192,9 @@
                        (.preventDefault e)
                        (save-form-to-atm atm
                                          (.-currentTarget e)
-                                         mapping))))))))
+                                         inv-mapping))))))))
+
+
 
 
 

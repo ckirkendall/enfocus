@@ -235,4 +235,35 @@
                              #(dispatch! % :submit
                                          {:currentTarget %})))
             (is (= @atm val-map))
-            (is (= @atm (from "form" (read-form))))))))))
+            (is (= @atm (from "form" (read-form))))))))
+    (at "#test-id" (content input-frag))
+    (testing "binding a form to a complex map "
+      (let [atm (atom {:a "a"
+                       :b  {:bb "b" :c #{"c1" "c2"}}
+                       :d #{"d3" "d4"}})]
+        (testing "initial bind"
+          (at "form" (bind-form atm {:mapping {:a [:a]
+                                               :b [:b :bb]
+                                               :c [:b :c]
+                                               :d [:d]}}))
+          (is (= {:a "a"
+                  :b "b"
+                  :c #{"c1" "c2"}
+                  :d #{"d3" "d4"}} (from "form" (read-form)))))
+        (testing "updating atom"
+          (swap! atm #(-> %
+                          (assoc-in [:b :bb] "bb")
+                          (assoc-in [:b :c] #{"c1" "c3"})
+                          (assoc :a "aa" :d #{"d1" "d2"})))
+          (is (= {:a "aa"
+                  :b "bb"
+                  :c #{"c1" "c3"}
+                  :d #{"d1" "d2"}} (from "form" (read-form)))))
+        (testing "updating form"
+          (let [val-map {:a "a_" :b "b_" :c #{"c1" "c3"} :d #{"d3" "d4"}}]
+            (at "form" (do-> (set-form val-map)
+                             #(dispatch! % :submit
+                                         {:currentTarget %})))
+            (is (= @atm {:a "a_"
+                         :b  {:bb "b_" :c #{"c1" "c3"}}
+                         :d #{"d3" "d4"}}))))))))
