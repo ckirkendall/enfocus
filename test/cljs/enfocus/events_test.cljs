@@ -3,7 +3,7 @@
    [enfocus.core :as ef :refer [at from content get-text html
                                 set-form-input read-form-input do->
                                 set-prop read-form set-form set-attr]]
-   [enfocus.events :as ev :refer [listen listen-live]]
+   [enfocus.events :as ev :refer [listen listen-live remove-listeners]]
    [domina.events :as de  :refer [dispatch! dispatch-browser!]]
    [cemerick.cljs.test :as t])
   (:require-macros
@@ -75,3 +75,17 @@
                                              :id "test-inp"}])))
       (at "#test-inp" simulate-key-event)
       (is (= 0 @atm)))))
+
+
+(deftest remove-listeners-test
+  (testing "removing all listeners of given type"
+    (let [atm (atom "fail")]
+      (at "#test-id" (content (html [:button {:id "test-btn"}]))
+          "#test-btn" (listen :click #(swap! atm (fn [val]
+                                                   (if (= val "success")
+                                                     "fail"
+                                                     "success")))))
+      (at "#test-btn" simulate-click-event
+          "#test-btn" (remove-listeners :click)
+          "#test-btn" simulate-click-event)
+      (is (= "success" @atm)))))
