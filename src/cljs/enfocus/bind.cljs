@@ -69,23 +69,33 @@
 (defn- build-key [id]
   (str "__EVB:" id))
 
-(defn bind-view-watch-fn [id render-func]
+(defn bind-view-watch-fn [id render-func mapping]
   (fn [ctx ref oval nval]
     (let [node (.getElementById js/document id)]
       (if node
-        (render-func node nval)
+        (let [[omval nmval] (if mapping
+                              [(mget-in oval mapping)
+                               (mget-in nval mapping)]
+                              [oval nval])]
+          (when-not  (== omval nmval)
+            (render-func node nmval)))
         (remove-watch ref (build-key id))))))
  
  
-(defn bind-view [atm render-func]
-  (fn [node]
-    (let [id (from node (get-attr :id))
-          nid (if (empty? id) (gensym "_EVB_") id)]
-      (when-not (= id nid) (at node (set-attr :id nid)))
-      (render-func node @atm)
-      (add-watch atm
-                 (build-key nid)
-                 (bind-view-watch-fn nid render-func)))))
+(defn bind-view
+  ([atm render-func] (bind-view atm render-func nil))
+  ([atm render-func mapping]
+     (fn [node]
+       (let [id (from node (get-attr :id))
+             nid (if (empty? id) (gensym "_EVB_") id)
+             val (if mapping (mget-in @atm mapping) @atm)]
+         (when-not (= id nid) (at node (set-attr :id nid)))
+         (render-func node val)
+         (add-watch atm
+                    (build-key nid)
+                    (bind-view-watch-fn nid
+                                        render-func
+                                        mapping))))))
 
 
 (defn- bind-input-render-fn [mapping]
@@ -154,7 +164,6 @@
      (let [form-vals (ef/from form (ef/read-form))]
        (swap! atm
               (fn [cur]
-                (ef/log-debug (str "FIELD_MAP:" (pr-str field-map)))
                 (reduce #(let [ky (if (empty? field-map)
                                     %2
                                     (get field-map %2))
