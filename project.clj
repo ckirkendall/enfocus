@@ -10,7 +10,7 @@
   :source-paths ["src/clj" "src/cljs"]
   
   :dependencies [[org.clojure/clojure "1.5.1"]
-                 [org.clojure/clojurescript "0.0-2080"]
+                 [org.clojure/clojurescript "0.0-2138"]
                  [domina "1.0.2"]
                  [org.jsoup/jsoup "1.7.2"]]
 
