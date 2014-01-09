@@ -94,7 +94,26 @@
         (is (= "initial" (from "#test-id" (get-text)))))
       (testing "updated value set"
         (reset! atm "updated")
-        (is (= "updated" (from "#test-id" (get-text))))))))
+        (is (= "updated" (from "#test-id" (get-text))))))
+    (testing "complex map with mapping"
+      (let [atm (atom {:a {:b {:bb 1}} :c 2})
+            count (atom 0)]
+        (at "#test-id" (content (html [:input {:value "_"}]))
+            "input" (bind-view atm
+                               #(do
+                                  (at %1 (set-form-input (:bb %2)))
+                                  (swap! count inc))
+                               [:a :b]))
+        ;initial population of view
+        (is (= @count 1)) 
+        (is (= "1" (from "input" (read-form-input))))
+        ;update atom non mapped val
+        (swap! atm assoc :c 3)
+        (is (= @count 1))
+        ;update atom mapped val
+        (swap! atm assoc-in [:a :b] {:bb 2})
+        (is (= @count 2))
+        (is (= "2" (from "input" (read-form-input))))))))
 
 
 (deftest bind-input-test
