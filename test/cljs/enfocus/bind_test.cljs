@@ -113,6 +113,25 @@
         ;update atom mapped val
         (swap! atm assoc-in [:a :b] {:bb 2})
         (is (= @count 2))
+        (is (= "2" (from "input" (read-form-input))))))
+    (testing "complex obj with mapping"
+      (let [atm (atom #js {:a #js {:b #js {:bb 1}} :c 2})
+            count (atom 0)]
+        (at "#test-id" (content (html [:input {:value "_"}]))
+            "input" (bind-view atm
+                               #(do
+                                  (at %1 (set-form-input (aget %2 "bb")))
+                                  (swap! count inc))
+                               [:a :b]))
+        ;;initial population of view 
+        (is (= @count 1)) 
+        (is (= "1" (from "input" (read-form-input))))
+        ;;update atom non mapped val
+        (swap! atm #(do (aset % "c" 3) %))
+        (is (= @count 2)) ;should increment for obj
+        ;;update atom mapped val
+        (swap! atm #(do (aset % "a" "b" #js {:bb 2}) %))
+        (is (= @count 3))
         (is (= "2" (from "input" (read-form-input))))))))
 
 

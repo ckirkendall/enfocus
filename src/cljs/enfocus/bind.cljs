@@ -77,7 +77,11 @@
                               [(mget-in oval mapping)
                                (mget-in nval mapping)]
                               [oval nval])]
-          (when-not  (== omval nmval)
+          (when-not  (and (#{cljs.core/PersistantHashSet
+                             cljs.core/PersistentArrayMap
+                             cljs.core/PersistantVector
+                             cljs.core/List} (type nmval))
+                          (identical? omval nmval))
             (render-func node nmval)))
         (remove-watch ref (build-key id))))))
  
