@@ -215,8 +215,3 @@
                        (save-form-to-atm atm
                                          (.-currentTarget e)
                                          inv-mapping))))))))
-
-
-
-
-

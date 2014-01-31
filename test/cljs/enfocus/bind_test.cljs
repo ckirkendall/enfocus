@@ -46,8 +46,7 @@
       (testing "from-obj function"
         (are [expected actual] (= expected actual)
              "3" (mget-in obj {:path [:a :c]
-                               :from-obj str})
-             )))
+                               :from-obj str})))))
   (testing "standard clojurescript map"
     (let [obj {:a {:b 3 :c 4 :d {:a 5}} :b 2}]
       (testing "simple field"
