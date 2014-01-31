@@ -31,33 +31,42 @@
   "gets a property in a complex obj or map. This function is similar
    to get-in except that it can get properties of objects and maps
    at any layer in the object, by passing in a seq as the field list
-   [l1 l2 l3]."
+   [l1 l2 l3]. Also you can pass a map like:
+    {:path     [l1 l2 l3]
+     :from-obj (fn [val] ...)}"
   [obj field]
-  (cond
-   (and (map? obj) (sequential? field)) (get-in obj field val)
-   (map? obj) (obj field)
-   (and obj (keyword? field )) (aget obj (name field))
-   (and obj (string? field)) (aget obj field)
-   (and obj (sequential? field)) (apply aget obj (map name field))
-   :else nil))
- 
+  (let [from-obj (or (get field :from-obj) identity)
+        field    (or (get field :path) field)]
+    (from-obj
+     (cond
+      (and (map? obj) (sequential? field)) (get-in obj field val)
+      (map? obj) (obj field)
+      (and obj (keyword? field )) (aget obj (name field))
+      (and obj (string? field)) (aget obj field)
+      (and obj (sequential? field)) (apply aget obj (map name field))
+      :else nil))))
+
 (defn- mset-in
   "sets a property in a complex obj or map. This function is similar
    to assoc-in except that it can set properties of objs and maps
    at any layer in the object, by passing in a seq as the field list
-   [l1 l2 l3]."
+   [l1 l2 l3]. Also you can pass a map like:
+    {:path     [l1 l2 l3]
+     :to-obj   (fn [val] ...)}"
   [obj field val]
-  (cond
-   (and (map? obj) (sequential? field)) (assoc-in obj field val)
-   (map? obj) (assoc obj field val)
-   (and obj (keyword? field )) (do (aset obj (name field) val) obj)
-   (and obj (string? field)) (do (aset obj field val) obj)
-   (and obj (sequential? field)) (do
-                                   (apply aset obj
-                                          (concat (map name field)
-                                                  [val]))
-                                   obj)
-   :else obj))
+  (let [val    ((or (get field :to-obj) identity) val)
+        field  (or (get field :path) field)]
+    (cond
+      (and (map? obj) (sequential? field)) (assoc-in obj field val)
+      (map? obj) (assoc obj field val)
+      (and obj (keyword? field )) (do (aset obj (name field) val) obj)
+      (and obj (string? field)) (do (aset obj field val) obj)
+      (and obj (sequential? field)) (do
+                                      (apply aset obj
+                                             (concat (map name field)
+                                                     [val]))
+                                      obj)
+      :else obj)))
  
 (defn- key-or-props [obj]
   (if (map? obj)
