@@ -30,61 +30,6 @@
 ;; HELPER FUNC TESTS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(deftest mget-in-test
-  (testing "standard js-obj object"
-    (let [obj (js-obj "a" (js-obj "c" 3) "b" 4)]
-      (testing "simple field"
-        (are [expected actual] (= expected actual)
-             4 (mget-in obj "b")
-             4 (mget-in obj :b)))
-      (testing "multi level access"
-        (are [expected actual] (= expected actual)
-             3 (mget-in obj ["a" "c"])
-             3 (mget-in obj [:a :c])
-             3 (mget-in obj [:a "c"])
-             3 (mget-in obj ["a" :c])))
-      (testing "from-obj function"
-        (are [expected actual] (= expected actual)
-             "3" (mget-in obj {:path [:a :c]
-                               :from-obj str})))))
-  (testing "standard clojurescript map"
-    (let [obj {:a {:b 3 :c 4 :d {:a 5}} :b 2}]
-      (testing "simple field"
-        (is (= 2 (mget-in obj :b))))
-      (testing "multi level access"
-        (are [expected actual] (= expected actual)
-             3 (mget-in obj [:a :b])
-             5 (mget-in obj [:a :d :a]))))))
-
-
-(deftest mset-in-test
-  (testing "standard js-obj object"
-    (let [obj (js-obj "a" (js-obj "c" "_") "b" "_")]
-      (testing "simple field"
-        (are [expected actual] (= expected actual)
-             1 (aget (mset-in obj "b" 1) "b")
-             2 (aget (mset-in obj :b 2) "b")))
-      (testing "multi level access"
-        (are [expected actual] (= expected actual)
-             1 (aget (mset-in obj ["a" "c"] 1) "a" "c")
-             2 (aget (mset-in obj ["a" :c] 2) "a" "c")
-             3 (aget (mset-in obj [:a "c"] 3) "a" "c")
-             4 (aget (mset-in obj [:a :c] 4) "a" "c")))))
-  (testing "standard clojurescript map"
-    (let [obj {:a {:b "bb" :c "cc" :d {:a "aa"}} :b "b"}]
-      (testing "simple field"
-        (is (= 2 (:b (mset-in obj :b 2)))))
-      (testing "multi level access"
-        (are [expected actual] (= expected actual)
-             1 (:b (:a (mset-in obj [:a :b] 1)))
-             2 (:a (:d (:a (mset-in obj [:a :d :a] 2))))))
-      (testing "to-obj function"
-        (are [expected actual] (= expected actual)
-             "1" (:b (:a (mset-in obj {:path [:a :b]
-                                       :to-obj str}
-                                       1)))))
-      )))
-
 
 (deftest key-or-prop-test
   (testing "getting the keys from an obj or map"

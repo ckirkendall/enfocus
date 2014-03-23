@@ -11,6 +11,7 @@
   
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [org.clojure/clojurescript "0.0-2138"]
+                 [segments "0.1.0"]
                  [domina "1.0.2"]
                  [org.jsoup/jsoup "1.7.2"]]
 
