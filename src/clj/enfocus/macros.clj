@@ -123,7 +123,7 @@
        (doseq [~sym ~lst]
          (do 
            (enfocus.core/at div#  (enfocus.core/append (. pnod# (~(symbol "cloneNode") true))))
-           (enfocus.core/at (goog.dom/getLastElementChild div#) ~@forms)))
+           (enfocus.core/at (enfocus.core/last-element-child div#) ~@forms)))
        (enfocus.core/log-debug div#)
        (enfocus.core/at 
         pnod# 
