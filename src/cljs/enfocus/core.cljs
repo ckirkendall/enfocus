@@ -98,7 +98,7 @@
 
 ;####################################################
 ; The following functions are used to manage the
-; emote dom features for templates and snippets
+; remote dom features for templates and snippets
 ;####################################################
 
 (def tpl-load-cnt
@@ -135,6 +135,10 @@
     (dom/append frag child)
     (dom/removeNode div)
     frag))
+
+(defn last-element-child [node]
+  "last child node that is an element"
+  (dom/getLastElementChild node))
 
 
 (defn replace-ids
