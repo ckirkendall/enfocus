@@ -599,12 +599,12 @@
    (fn [node]
      (let [inputs (.-elements node)]
        (reduce
-        #(if-not (empty? (.-name %2))
+        #(if-not (empty? (.-name (.item inputs %2)))
            (merge-form-val %1
-                           (keyword (.-name %2))
-                           ((read-form-input) %2))
+                           (keyword (.-name (.item inputs %2)))
+                           ((read-form-input) (.item inputs %2)))
            %1)
-        {} inputs)))))
+        {} (range (.-length inputs))))))) 
 
 ;##################################################################
 ; filtering - these funcitons are to make up for choosing
