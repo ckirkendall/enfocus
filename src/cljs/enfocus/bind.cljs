@@ -5,7 +5,7 @@
                                 ITransform apply-transform
                                 nodes->coll set-form]]
    [enfocus.events :as ev :refer [listen]]
-   [segments :as seg :refer [Segment -fetch -putback fetch putback]]
+   [fresnel.lenses :as seg :refer [Lens -fetch -putback fetch putback]]
    [clojure.set :as set :refer [map-invert]]
    [goog.object :as gobj]))
 
@@ -27,7 +27,7 @@
                             :delay nil})
 
 (extend-type Keyword
-    Segment
+    Lens
     (-fetch [seg value] 
       (if (satisfies? ILookup value)
         (get value seg)
@@ -38,7 +38,7 @@
         (do (aset value (name seg) subval) value))))
 
 (extend-type string
-    Segment
+    Lens
     (-fetch [seg value]
       (if (satisfies? ILookup value)
         (-lookup value seg)
@@ -48,15 +48,6 @@
         (assoc value seg subval)
         (do (aset value seg subval) value))))
 
-(defn fetch-in [obj path]
-  (reduce #(-fetch %2 %1) obj path))
-
-
-(defn putback-in [obj [seg & path] value]
-  (when (and obj seg)
-    (if (empty? path)
-      (-putback seg obj value)
-      (-putback seg obj (putback-in (-fetch seg obj) path value)))))
 
 
 (defn- key-or-props [obj]
@@ -73,8 +64,8 @@
     (let [node (.getElementById js/document id)]
       (if node
         (let [[omval nmval] (if mapping
-                              [(fetch-in oval mapping)
-                               (fetch-in nval mapping)]
+                              [(fetch oval mapping)
+                               (fetch nval mapping)]
                               [oval nval])]
           (when-not  (and (or (coll? nval)
                               (number? nval)
@@ -90,7 +81,7 @@
      (fn [node]
        (let [id (from node (get-attr :id))
              nid (if (empty? id) (gensym "_EVB_") id)
-             val (if mapping (fetch-in @atm mapping) @atm)]
+             val (if mapping (fetch @atm mapping) @atm)]
          (when-not (= id nid) (at node (set-attr :id nid)))
          (render-func node val)
          (add-watch atm
@@ -103,7 +94,7 @@
 (defn- bind-input-render-fn [mapping]
   (fn [node val]
     (let [nval (if mapping
-                 (mget-in val mapping)
+                 (fetch val mapping)
                  val)]
       (when-not (= (from node (read-form-input)) nval)
         (at node (set-form-input nval))))))
@@ -115,7 +106,7 @@
                     (let [val (from node-group
                                     (read-form-input))]
                       (swap! atm #(cond
-                                   (vector? field) (putback-in % field val)
+                                   (vector? field) (putback % field val)
                                    field (-putback field % val)
                                    :else val))))]
     (fn [e]
@@ -172,7 +163,7 @@
                                     (get field-map %2))
                                nval ((keyword ky) form-vals)]
                            (cond
-                            (vector? %2) (putback-in %1 %2 nval)
+                            (vector? %2) (putback %1 %2 nval)
                             nval (-putback %2 %1 nval)
                             :else %1))
                         cur
@@ -181,7 +172,7 @@
 
 (defn- create-val-map [in-map mappings]
   (if (not (empty? mappings))
-    (reduce #(assoc %1 %2 (fetch-in in-map (get mappings %2)))
+    (reduce #(assoc %1 %2 (fetch in-map (get mappings %2)))
             {}
             (keys mappings))
     in-map))
