@@ -109,7 +109,7 @@
   ([xpos ypos ttime] (scroll xpos ypos ttime nil nil))
   ([xpos ypos ttime callback] (scroll xpos ypos ttime callback nil))
   ([xpos ypos ttime callback accel]
-     (ef/chainable-effect
+     (chainable-effect
       (fn [pnod pcallback]
         (let [start (array (.-scrollLeft pnod) (.-scrollTop pnod))
               xpos (if (= :curx xpos) (.-scrollLeft pnod) xpos)
