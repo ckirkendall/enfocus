@@ -4,11 +4,14 @@
                                 set-form-input read-form-input do->
                                 set-prop read-form set-form set-attr]]
    [enfocus.bind :as bind :refer [bind-view mget-in mset-in key-or-props
-                                  save-form-to-atm bind-input bind-form]]
+                                  save-form-to-atm bind-input bind-form
+                                  mapping-to-lens]]
    [domina.events :as de  :refer [dispatch!]]
+   [fresnel.lenses :as seg :refer [Lens -fetch -putback fetch putback]]
    [cemerick.cljs.test :as t])
   (:require-macros
    [enfocus.macros :as em]
+   [fresnel.lenses :as lens :refer [deflens]]
    [cemerick.cljs.test :refer (is are deftest testing use-fixtures)]))
 
 (defn each-fixture [f]
@@ -167,12 +170,12 @@
           (is (= {:a "a" :b "b" :c "c"} @atm))))
       (testing "field mapping for simple map"
         (let [atm (atom {:a "_" :b "_" :c "c"})]
-          (save-form-to-atm atm (by-id "my-form") {:a :b :b :a})
+          (save-form-to-atm atm (by-id "my-form") (mapping-to-lens {:a :b :b :a}))
           (is (= {:a "b" :b "a" :c "c"} @atm))))
       (testing "field mapping for complex map"
         (let [atm (atom {:a "a" :b {:aa "aa" :bb "bb"} :c "c"})]
-          (save-form-to-atm atm (by-id "my-form") {[:b :aa] :a
-                                                   [:b :bb] :b})
+          (save-form-to-atm atm (by-id "my-form") (mapping-to-lens {:a [:b :aa]
+                                                                    :b [:b :bb]}))
           (is (= {:a "a" :b {:aa "a" :bb "b"} :c "c"} @atm)))))
     (testing "atoms as js-objs"
       (testing "straight form to obj mapping"
@@ -183,7 +186,7 @@
           (is (= "c" (aget  @atm "c")))))
       (testing "field mapping form to simple obj"
         (let [atm (atom (js-obj "a" "_" "b" "_" "c" "c"))]
-          (save-form-to-atm atm (by-id "my-form") {:a :b :b :a})
+          (save-form-to-atm atm (by-id "my-form") (mapping-to-lens {:a :b :b :a}))
           (is (= "b" (aget @atm "a")))
           (is (= "a" (aget @atm "b")))
           (is (= "c" (aget @atm "c")))))
@@ -191,14 +194,20 @@
         (let [atm (atom (js-obj "a" "a"
                                 "b" (js-obj "aa" "aa"  "bb" "bb")
                                 "c" "c"))]
-          (save-form-to-atm atm (by-id "my-form") {[:b :aa] :a
-                                                   [:b :bb] :b})
+          (save-form-to-atm atm (by-id "my-form") (mapping-to-lens {:a [:b :aa]
+                                                                    :b [:b :bb]}))
+          (.log js/console (pr-str "ATOM:" @atm)) 
           (is (= "a" (aget @atm "a")))
           (is (= "a" (aget @atm "b" "aa")))
           (is (= "b" (aget @atm "b" "bb")))
           (is (= "c" (aget @atm "c"))))))))
 
 
+(deflens form-lens1 [old-val sub-val]
+  :fetch
+  (do )
+  :putback
+      (reduce (fn [v [k s]] (putback v ))))
 
 (deftest bind-form-test
   (let [input-frag (html
@@ -235,10 +244,10 @@
                        :b  {:bb "b" :c #{"c1" "c2"}}
                        :d #{"d3" "d4"}})]
         (testing "initial bind"
-          (at "form" (bind-form atm {:mapping {:a [:a]
-                                               :b [:b :bb]
-                                               :c [:b :c]
-                                               :d [:d]}}))
+          (at "form" (bind-form atm {:lens (mapping-to-lens {:a [:a]
+                                                             :b [:b :bb]
+                                                             :c [:b :c]
+                                                             :d [:d]})}))
           (is (= {:a "a"
                   :b "b"
                   :c #{"c1" "c2"}

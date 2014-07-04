@@ -15,15 +15,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (def default-bindings-opts {:binding-type :two-way ;:from,:two-way
                             :event :blur
-                            ;; mappings are used to map the form values
-                            ;; into our state object.  It also offers
-                            ;; the ability to convert from a value
-                            ;; to an object.
-                            ;; {:field1 [:ky1 :ky2 :k3]
-                            ;;  :field2 {:path [:ky1 :k4]
-                            ;;           :to-obj (fn [val] ...)
-                            ;;           :from-obj (fn [val] ...)}
-                            :mapping nil
+                            ;;lenses are fresnel composable lenses
+                            :lens nil
                             :delay nil})
 
 (extend-type Keyword
@@ -77,18 +70,18 @@
  
 (defn bind-view
   ([atm render-func] (bind-view atm render-func nil))
-  ([atm render-func mapping]
+  ([atm render-func lens]
      (fn [node]
        (let [id (from node (get-attr :id))
              nid (if (empty? id) (gensym "_EVB_") id)
-             val (if mapping (fetch @atm mapping) @atm)]
+             val (if lens (fetch @atm lens) @atm)]
          (when-not (= id nid) (at node (set-attr :id nid)))
          (render-func node val)
          (add-watch atm
                     (build-key nid)
                     (bind-view-watch-fn nid
                                         render-func
-                                        mapping))))))
+                                        lens))))))
 
 
 (defn- bind-input-render-fn [mapping]
@@ -123,8 +116,9 @@
 (defn bind-input
   ([atm] (bind-input atm nil))
   ([atm opt-map]
-     (let [{:keys [mapping binding-type event delay]}
+     (let [{:keys [lens mapping binding-type event delay]}
            (merge default-bindings-opts opt-map)
+           mapping (or lens mapping)
            trans (fn [nodes chain]
                    (let [nod-col (nodes->coll nodes)]
                      (when (= binding-type :two-way)
@@ -154,48 +148,45 @@
 
 (defn- save-form-to-atm
   ([atm form] (save-form-to-atm atm form nil))
-  ([atm form field-map]
+  ([atm form lens]
      (let [form-vals (ef/from form (ef/read-form))]
        (swap! atm
-              (fn [cur]
-                (reduce #(let [ky (if (empty? field-map)
-                                    %2
-                                    (get field-map %2))
-                               nval ((keyword ky) form-vals)]
-                           (cond
-                            (vector? %2) (putback %1 %2 nval)
-                            nval (-putback %2 %1 nval)
-                            :else %1))
-                        cur
-                        (or (keys field-map) (key-or-props cur))))))))
+              (fn [cur] (if lens
+                         (putback cur lens form-vals)
+                         (if (associative? cur)
+                           (merge cur form-vals)
+                           (reduce (fn [i [k v]] (aset i (name k) v) i) cur form-vals))))))))
 
 
-(defn- create-val-map [in-map mappings]
-  (if (not (empty? mappings))
-    (reduce #(assoc %1 %2 (fetch in-map (get mappings %2)))
-            {}
-            (keys mappings))
-    in-map))
+(defn mapping-to-lens [mapping]
+  (when mapping
+    (reify Lens
+      (-fetch [_ val]
+        (into {} (map (fn [[k l]] [k (fetch val l)]) mapping)))  
+      (-putback [_ val sub-val]
+        (reduce (fn [v [k l]] (putback v l (sub-val k))) val mapping)))))
+
 
 
 (defn bind-form
   ([atm] (bind-form atm nil))
   ([atm opt-map]
-     (let [{:keys [mapping binding-type]}
+     (let [{:keys [lens mapping binding-type]}
            (merge default-bindings-opts opt-map)
+           lens (or lens (mapping-to-lens mapping))
            inv-mapping (map-invert mapping)]
        (fn [form-node]
          (when (= binding-type :two-way)
            (at form-node
                (bind-view atm
                           (fn [node val]
-                            (let [val-map (create-val-map val
-                                                          mapping)]
-                              (at node (set-form val-map)))))))
+                            (let [val-map :not-needed]
+                              (at node (set-form val))))
+                          lens)))
          (at form-node
              (listen :submit
                      (fn [e]
                        (.preventDefault e)
                        (save-form-to-atm atm
                                          (.-currentTarget e)
-                                         inv-mapping))))))))
+                                         lens))))))))
