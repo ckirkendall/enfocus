@@ -469,11 +469,11 @@
     (let [res (ef/from "input[type='text']"
                        (ef/read-form-input))]
       (is (= "testing1" res))))
-  (testing "reading from a checkbox input"t
+  (testing "reading from a checkbox input"
     (let [res (ef/from "input[type='checkbox']"
                        (ef/read-form-input))]
       (is (= #{"c1"} res))))
-  (testing "reading from a textarea input"t
+  (testing "reading from a textarea input"
     (let [res (ef/from "textarea"
                        (ef/read-form-input))]
       (is (= "t1" res)))))

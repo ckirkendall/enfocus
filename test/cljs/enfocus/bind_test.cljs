@@ -3,9 +3,8 @@
    [enfocus.core :as ef :refer [at from content get-text html
                                 set-form-input read-form-input do->
                                 set-prop read-form set-form set-attr]]
-   [enfocus.bind :as bind :refer [bind-view mget-in mset-in key-or-props
-                                  save-form-to-atm bind-input bind-form
-                                  mapping-to-lens]]
+   [enfocus.bind :as bind :refer [bind-view key-or-props save-form-to-atm
+                                  bind-input bind-form mapping-to-lens]]
    [domina.events :as de  :refer [dispatch!]]
    [fresnel.lenses :as seg :refer [Lens -fetch -putback fetch putback]]
    [cemerick.cljs.test :as t])
@@ -196,18 +195,12 @@
                                 "c" "c"))]
           (save-form-to-atm atm (by-id "my-form") (mapping-to-lens {:a [:b :aa]
                                                                     :b [:b :bb]}))
-          (.log js/console (pr-str "ATOM:" @atm)) 
           (is (= "a" (aget @atm "a")))
           (is (= "a" (aget @atm "b" "aa")))
           (is (= "b" (aget @atm "b" "bb")))
           (is (= "c" (aget @atm "c"))))))))
 
 
-(deflens form-lens1 [old-val sub-val]
-  :fetch
-  (do )
-  :putback
-      (reduce (fn [v [k s]] (putback v ))))
 
 (deftest bind-form-test
   (let [input-frag (html

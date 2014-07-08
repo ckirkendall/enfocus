@@ -1,5 +1,6 @@
 (defproject enfocus "2.1.0-SNAPSHOT"
   :description "DOM manipulation tool for clojurescript inspired by Enlive"
+  :author "Creighton Kirkendall"
   :url "http://ckirkendall.github.io/enfocus-site"
   :license {:name "Eclipse Public License - v 1.0"
             :url "http://www.eclipse.org/legal/epl-v10.html"
@@ -9,13 +10,13 @@
 
   :source-paths ["src/clj" "src/cljs"]
   
-  :dependencies [[org.clojure/clojure "1.5.1"]
-                 [org.clojure/clojurescript "0.0-2138"]
+  :dependencies [[org.clojure/clojure "1.6.0"]
+                 [org.clojure/clojurescript "0.0-2234"]
                  [fresnel "0.2.2"]
                  [domina "1.0.2"]
                  [org.jsoup/jsoup "1.7.2"]]
 
-  :plugins [[lein-cljsbuild "1.0.0"]]
+  :plugins [[lein-cljsbuild "1.0.4-SNAPSHOT"]]
 
   :hooks [leiningen.cljsbuild]
 
