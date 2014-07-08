@@ -29,9 +29,7 @@ Another [tutorial][3] by Brian Marick.
 
 From any leiningen project file:
 
-```clj
 [![Clojars Project](http://clojars.org/enfocus/latest-version.svg)](http://clojars.org/enfocus)
-```
 
 For the best development experience, use [lein-cljsbuild][7]
 
