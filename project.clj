@@ -1,4 +1,4 @@
-(defproject enfocus "2.1.0-SNAPSHOT"
+(defproject enfocus "2.1.1-SNAPSHOT"
   :description "DOM manipulation tool for clojurescript inspired by Enlive"
   :author "Creighton Kirkendall"
   :url "http://ckirkendall.github.io/enfocus-site"
