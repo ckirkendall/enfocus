@@ -1,4 +1,4 @@
-(defproject enfocus "2.1.1-SNAPSHOT"
+(defproject enfocus "2.1.2-SNAPSHOT"
   :description "DOM manipulation tool for clojurescript inspired by Enlive"
   :author "Creighton Kirkendall"
   :url "http://ckirkendall.github.io/enfocus-site"
@@ -13,7 +13,7 @@
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [org.clojure/clojurescript "0.0-2234"]
                  [fresnel "0.2.2"]
-                 [domina "1.0.2"]
+                 [domina "1.0.3"]
                  [org.jsoup/jsoup "1.7.2"]]
 
   :plugins [[lein-cljsbuild "1.0.4-SNAPSHOT"]]
