@@ -227,7 +227,7 @@
                                   (cljs.core/filter filt result)
                                   result)]
                      (if (<= (count result) 1) (first result) result)))]
-       
+
        (reify
          ITransform
          (apply-transform [_ nodes] (trans nodes nil))
@@ -272,6 +272,18 @@
   (multi-node-chain values #(do
                           (domina/destroy-children! %1)
                           (domina/append! %1 %2))))
+
+(defn- escape-html
+  [text]
+  (let [pre (.createElement js/document "pre")
+        text-node (.createTextNode js/document text)]
+    (.appendChild pre text-node)
+    (.-innerHTML pre)))
+
+(defn text-content
+  "Replaces the content of the element escaping html."
+  [text]
+  (content (escape-html text)))
 
 (defn html-content
   "Replaces the content of the element with the dom structure represented by the html string passed"
@@ -447,7 +459,7 @@
   [val]
   (fn [el]
     (if (or (= (.-type el) "checkbox")
-            (= (.-type el) "radio")) 
+            (= (.-type el) "radio"))
       (set! (.-checked el) (exists-in? val (.-value el)))
       (let [nval (if (and (coll? val)
                           (not (string? val)))
@@ -566,9 +578,9 @@
   []
   (let [trans (fn [nodes chain]
                 (let [nod-col (nodes->coll nodes)
-                      result (reduce 
+                      result (reduce
                               #(let [vals (js->clj (form/getValue %2))]
-                                 (if (and 
+                                 (if (and
                                       (not (string? vals))
                                       (coll? vals))
                                    (into %1 vals)
@@ -604,7 +616,7 @@
                            (keyword (.-name (.item inputs %2)))
                            ((read-form-input) (.item inputs %2)))
            %1)
-        {} (range (.-length inputs))))))) 
+        {} (range (.-length inputs)))))))
 
 ;##################################################################
 ; filtering - these funcitons are to make up for choosing
