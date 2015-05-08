@@ -273,17 +273,14 @@
                           (domina/destroy-children! %1)
                           (domina/append! %1 %2))))
 
-(defn- escape-html
-  [text]
-  (let [pre (.createElement js/document "pre")
-        text-node (.createTextNode js/document text)]
-    (.appendChild pre text-node)
-    (.-innerHTML pre)))
-
 (defn text-content
   "Replaces the content of the element escaping html."
   [text]
-  (content (escape-html text)))
+  (content (string/escape text {\< "&lt;",
+                                \> "&gt;",
+                                \& "&amp;",
+                                \' "&apos;",
+                                \" "&quot;"})))
 
 (defn html-content
   "Replaces the content of the element with the dom structure represented by the html string passed"

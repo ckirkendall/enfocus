@@ -198,10 +198,18 @@
 
 
 (deftest text-content-test
-  (testing "text-content"
-    (ef/at "#test-id" (ef/text-content "<b>testing</b>"))
+  (testing "text-content not matching html"
+    (ef/at "#test-id" (ef/text-content "<>&'\""))
     (let [res (.-textContent (by-id "test-id"))]
-      (is (= "<b>testing</b>" res)))))
+      (is (= "<>&'\"" res))))
+  (testing "text-content with tags"
+    (ef/at "#test-id" (ef/text-content "<b>test</b>"))
+    (let [res (.-textContent (by-id "test-id"))]
+      (is (= "<b>test</b>" res))))
+  (testing "text-content with entities"
+    (ef/at "#test-id" (ef/text-content "&lt;&gt;"))
+    (let [res (.-textContent (by-id "test-id"))]
+      (is (= "&lt;&gt;" res)))))
 
 
 (deftest html-content-test
