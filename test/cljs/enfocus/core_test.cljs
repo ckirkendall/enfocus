@@ -54,7 +54,7 @@
       (testing "(at selector (transform arg1 ...))\n"
         (are [expected actual] (= expected actual)
 
-             ;; the transformer is nil 
+             ;; the transformer is nil
              nil (ef/at "body" nil)
              nil (ef/at "div" nil)
              nil (ef/at "p" nil)
@@ -67,12 +67,12 @@
         (are [expected actual] (= expected actual)
              ;; the transformer is nil
              js/document (ef/at js/document nil)
-             "Error" (try 
+             "Error" (try
                        (ef/at js/not-a-node nil)
                        (catch js/Error e
                          "Error")) ; Can't find variable: not-a-node
              ))
-      
+
       (testing "(at a-node\n\t[selector1] (transform1 arg1 ...)\n\t[selector2] (transform2 arg1 ...))\n"
         (are [expected actual] (= expected actual)
 
@@ -80,10 +80,10 @@
              nil (ef/at nil [] nil)
              nil (ef/at nil ["body"] nil)
              nil (ef/at nil [] (ef/content "which ever content"))
-             
+
              ;; the selector is nil
-             nil (ef/at js/document nil (ef/content "which ever content")) 
-             nil (ef/at js/document nil nil) 
+             nil (ef/at js/document nil (ef/content "which ever content"))
+             nil (ef/at js/document nil nil)
              "Error" (try (ef/at js/not-a-node nil (ef/content "which ever content"))
                       (catch js/Error e
                         "Error")) ; Can't find variable: not a node
@@ -98,23 +98,23 @@
 
              ;; every arg is nil
              nil (ef/at nil nil nil)))
-      
+
       (testing "(at [selector1] (transform1 arg1 ...)\n\t[selector2] (transform2 arg1 ...))\n"
-        (are [expected actual] (= expected actual) 
-             
+        (are [expected actual] (= expected actual)
+
              ;; the tranformer is nil
              nil (ef/at ["body"] nil)
              nil (ef/at ["div"] nil)
              nil (ef/at [""] nil)
              nil (ef/at ["not a selector"] nil) ;should rise an exception?
              nil (ef/at [nil] nil))))
-    
+
     (testing "Standard Cases\n"
       (testing "simple node test"
         (ef/at (by-id "test-id") (ef/content "testing1"))
         (let [res (.-innerHTML (by-id "test-id"))]
           (is (= "testing1" res))))
-      
+
       (ef/at "#test-id" (ef/content ""))
       (testing "js/document single selector"
         (ef/at js/document "#test-id" (ef/content "testing2"))
@@ -143,7 +143,7 @@
         (let [res (.-innerHTML (by-id "test-id"))]
           (is (= "<p>testing</p>" res))))
 
-      (ef/at "#test-id" (ef/content "")) 
+      (ef/at "#test-id" (ef/content ""))
       (testing "single selector 2 sub & custom selector"
         (ef/at (by-id "test-id")
                ef/this-node (ef/do->
@@ -195,6 +195,21 @@
     (ef/at "#test-id" (ef/content [(elem "span") (elem "span")]))
     (let [res (.-innerHTML (by-id "test-id"))]
       (is (= "<span></span><span></span>" res)))))
+
+
+(deftest text-content-test
+  (testing "text-content not matching html"
+    (ef/at "#test-id" (ef/text-content "<>&'\""))
+    (let [res (.-textContent (by-id "test-id"))]
+      (is (= "<>&'\"" res))))
+  (testing "text-content with tags"
+    (ef/at "#test-id" (ef/text-content "<b>test</b>"))
+    (let [res (.-textContent (by-id "test-id"))]
+      (is (= "<b>test</b>" res))))
+  (testing "text-content with entities"
+    (ef/at "#test-id" (ef/text-content "&lt;&gt;"))
+    (let [res (.-textContent (by-id "test-id"))]
+      (is (= "&lt;&gt;" res)))))
 
 
 (deftest html-content-test
@@ -288,7 +303,7 @@
     (ef/at "#test-id > p" (ef/after (ef/html [:span])))
     (let [res (.-innerHTML (by-id "test-id"))]
       (is (= "<span></span><p></p><span></span>" res)))))
- 
+
 
 (deftest substitute-test
   (testing "substituting content"
@@ -486,7 +501,7 @@
       (is (= {:f1 "testing1" :f2 #{"o1" "o2"} :f3 #{"c1"}} res)))))
 
 
-  
+
 (deftest filter-test
   (ef/at "#test-id" (ef/content (build-form)))
   (testing "testing the filter transform"
@@ -518,7 +533,7 @@
   (let [cur (.getMilliseconds (js/Date.))]
     (ef/at "#test-id"
            (ef/delay 100
-              #(testing "delay function"     
+              #(testing "delay function"
                  (let [now (.getMilliseconds (js/Date.))]
                    (println (Math/abs (- (- now cur) 100)))
                    (is (> 20 (Math/abs (- (- now cur) 100))))))))))
