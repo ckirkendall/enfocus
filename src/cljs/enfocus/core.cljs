@@ -515,7 +515,9 @@
           content (flatten (map html (if (map? m) ms more)))
           node (.createElement js/document tag-name)]
       (doseq [[key val] attrs]
-        (.setAttribute node (name key) val))
+        (if (= 0 (.indexOf (name key) "on"))
+          (aset node (name key) val) ;;set event handlers
+          (.setAttribute node (name key) val)))
       (when content (domina/append! node content)))
     (sequential? node-spec) (flatten (map html node-spec))
     :else (.createTextNode js/document (str node-spec))))

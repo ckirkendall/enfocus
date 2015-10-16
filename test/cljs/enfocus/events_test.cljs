@@ -83,3 +83,14 @@
           "#test-btn" (remove-listeners :click)
           "#test-btn" simulate-click-event)
       (is (= "success" @atm)))))
+
+
+(deftest html-event-handlers-test
+  (testing "html function allows binding of event handlers"
+    (let [atm (atom "fail")]
+      (at "#test-id"
+              (content
+               (html [:button {:id "test-btn"
+                               :onclick #(reset! atm "success")}])))
+      (at "#test-btn" simulate-click-event)
+      (is (= "success" @atm)))))
