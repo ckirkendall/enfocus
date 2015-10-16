@@ -428,11 +428,19 @@
   (fn [pnod] (setTimeout #(apply at pnod funcs) ttime)))
 
 
+(defn- str-var-replace
+  "this function replaces #{var1} with values in vars map. It has
+   two arities because of an incompatable change in clojurescript 1.7.145"
+  [vars]
+  (fn
+    ([[_ m]] (get vars (keyword m)))
+    ([_ m & extra] (get vars (keyword m)))))
+
 (defn replace-vars
   "replaces entries like the following ${var1} in attributes and text"
   [vars]
   (letfn [(rep-str [text]
-            (string/replace text #"\$\{\s*(\S+)\s*}" #(vars (keyword %2))))]
+            (string/replace text #"\$\{\s*(\S+)\s*}" (str-var-replace vars)))]
     (fn rep-node [pnod]
       (when (.-attributes pnod)
         (doseq [idx (range (.-length (.-attributes pnod)))]

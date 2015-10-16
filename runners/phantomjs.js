@@ -2,14 +2,15 @@
 
 // reusable phantomjs script for running clojurescript.test tests
 // see http://github.com/cemerick/clojurescript.test for more info
+system = require('system');
 
-if (phantom.args.length != 1) {
+if (system.args.length != 1) {
     console.log('Expected a target URL parameter.');
     phantom.exit(1);
 }
 
 var p = require('webpage').create();
-var url = phantom.args[0];
+var url = system.args[0];
 
 //var p = require('webpage').create();
 //p.injectJs(require('system').args[1]);

@@ -18,7 +18,7 @@
     (.appendChild (.-body js/document) div)
     ;; execute the unit test
     (f)
-    ;; clear the environment 
+    ;; clear the environment
     (.removeChild (.-body js/document) div)))
 
 (use-fixtures :each each-fixture)
@@ -27,17 +27,11 @@
 
 
 (defn simulate-key-event [target]
-  (let [ev (.createEvent js/document "KeyboardEvents")]
-    (.initKeyboardEvent ev "keydown", true, true,
-                        (.-defaultView js/document), 'a', 'a')
+  (let [ev (js/Event. "keydown", #js {"bubbles" true "cancelable" false})]
     (.dispatchEvent target ev)))
 
 
-(defn simulate-click-event [target]
-  (let [ev (.createEvent js/document "MouseEvents")]
-    (.initMouseEvent ev "click", true, true,
-                        (.-defaultView js/document))
-    (.dispatchEvent target ev)))
+(defn simulate-click-event [target] (.click target))
 
 (deftest listen-test
   (at "#test-id" (content (html [:span
