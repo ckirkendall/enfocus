@@ -19,6 +19,8 @@ Another [tutorial][3] by Brian Marick.
 
 [Example Website][5]
 
+[Example Chat App] [17]
+
 # Where do I get support?
 
 [On the group][6]
@@ -428,3 +430,4 @@ api for dom manipulation.
 [14]: https://github.com/cgrand
 [15]: https://github.com/magomimmo/hello-enfocus
 [16]: https://github.com/cemerick/austin
+[17]: https://github.com/ckirkendall/chatter-box
