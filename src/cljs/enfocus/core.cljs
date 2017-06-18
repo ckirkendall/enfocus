@@ -2,7 +2,6 @@
   (:refer-clojure :exclude [filter delay])
   (:require [enfocus.enlive.syntax :as en]
             [goog.net.XhrIo :as xhr]
-            [goog.dom.query :as query]
             [goog.style :as style]
             [goog.events :as events]
             [goog.dom :as dom]
@@ -544,7 +543,7 @@
   []
   (extr-multi-node
     (fn[pnod]
-      (dom/getTextContent pnod))))
+      (.-textContent pnod))))
 
 (defn get-data
   "returns the data on a selected node for a given key. If bubble is set will look at parent"
