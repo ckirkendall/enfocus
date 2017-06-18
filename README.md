@@ -332,7 +332,7 @@ about.
 An extractor is a funciton that takes a node and returns information about
 
 ```clj
-  get-attr           (get-attr :attr1 :attr2)
+  get-attr           (get-attr :attr1)
   get-text           (get-text)
   get-prop           (get-prop :value)
   get-data           (get-data :key1)
